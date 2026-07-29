@@ -1,15 +1,16 @@
 import { SiteData } from '../context/SiteContext'
 
 const STORAGE_ENDPOINT_KEY = 'sree_water_custom_cloud_url'
-const DEFAULT_CLOUD_OBJECT_ID = 'ff8081819f7e10ae019fafaa191a469e'
-const DEFAULT_REST_API_BASE = 'https://api.restful-api.dev/objects'
 
 export function getActiveCloudUrl(): string {
   const customUrl = localStorage.getItem(STORAGE_ENDPOINT_KEY)
   if (customUrl && customUrl.trim().length > 0) {
     return customUrl.trim()
   }
-  return `${DEFAULT_REST_API_BASE}/${DEFAULT_CLOUD_OBJECT_ID}`
+  if (typeof window !== 'undefined' && window.location?.origin) {
+    return `${window.location.origin}/api/site-data`
+  }
+  return '/api/site-data'
 }
 
 export function setActiveCloudUrl(url: string) {
@@ -18,38 +19,6 @@ export function setActiveCloudUrl(url: string) {
   } else {
     localStorage.removeItem(STORAGE_ENDPOINT_KEY)
   }
-}
-
-// Helper to sanitize payload and strip huge uncompressed base64 images (>150KB) so API never rejects with 500 error
-function sanitizeDataForCloud(data: SiteData): SiteData {
-  const cloned: SiteData = JSON.parse(JSON.stringify(data))
-
-  const cleanImg = (val?: string) => {
-    if (val && val.length > 150000 && val.startsWith('data:image')) {
-      return ''
-    }
-    return val || ''
-  }
-
-  cloned.logoUrl = cleanImg(cloned.logoUrl)
-  cloned.heroImageUrl = cleanImg(cloned.heroImageUrl)
-  cloned.founderImgUrl = cleanImg(cloned.founderImgUrl)
-
-  if (Array.isArray(cloned.services)) {
-    cloned.services = cloned.services.map((s) => ({
-      ...s,
-      imageUrl: cleanImg(s.imageUrl),
-    }))
-  }
-
-  if (Array.isArray(cloned.galleryItems)) {
-    cloned.galleryItems = cloned.galleryItems.map((g) => ({
-      ...g,
-      imageUrl: cleanImg(g.imageUrl),
-    }))
-  }
-
-  return cloned
 }
 
 export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
@@ -69,7 +38,7 @@ export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
 
     const result = await response.json()
     const data = result?.data || result
-    if (data && typeof data === 'object') {
+    if (data && typeof data === 'object' && Object.keys(data).length > 0) {
       return data as Partial<SiteData>
     }
   } catch (error) {
@@ -81,15 +50,14 @@ export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
 export async function saveRemoteSiteData(data: SiteData): Promise<boolean> {
   try {
     const url = getActiveCloudUrl()
-    const sanitized = sanitizeDataForCloud(data)
 
     const bodyPayload = JSON.stringify({
       name: 'Sree Water Solutions Website Live Data',
-      data: sanitized,
+      data: data,
     })
 
     const response = await fetch(url, {
-      method: 'PUT',
+      method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -100,7 +68,7 @@ export async function saveRemoteSiteData(data: SiteData): Promise<boolean> {
     if (response.ok) {
       return true
     } else {
-      console.warn(`[CloudSync] PUT failed with status: ${response.status}`)
+      console.warn(`[CloudSync] POST failed with status: ${response.status}`)
       return false
     }
   } catch (error) {
