@@ -34,6 +34,9 @@ export default function AdminPortal() {
   const [savedSuccess, setSavedSuccess] = useState(false)
   const [customCloudUrlInput, setCustomCloudUrlInput] = useState(getActiveCloudUrl())
 
+  useEffect(() => {
+    setFormData({ ...siteData })
+  }, [siteData])
 
   // Service Edit State
   const [isEditingService, setIsEditingService] = useState(false)
@@ -70,15 +73,47 @@ export default function AdminPortal() {
 
   if (!isAdminOpen) return null
 
-  // HELPER: Convert computer file to Base64 Data URL
-  const convertFileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
+  // HELPER: Convert computer file to compressed Base64 Data URL
+  const convertFileToBase64 = (file: File, maxWidth = 800, maxHeight = 800): Promise<string> => {
+    return new Promise((resolve) => {
       const reader = new FileReader()
-      reader.onload = () => resolve(reader.result as string)
-      reader.onerror = (error) => reject(error)
+      reader.onload = (event) => {
+        const img = new Image()
+        img.onload = () => {
+          const canvas = document.createElement('canvas')
+          let width = img.width
+          let height = img.height
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height = Math.round((height * maxWidth) / width)
+              width = maxWidth
+            }
+          } else {
+            if (height > maxHeight) {
+              width = Math.round((width * maxHeight) / height)
+              height = maxHeight
+            }
+          }
+
+          canvas.width = width
+          canvas.height = height
+          const ctx = canvas.getContext('2d')
+          if (ctx) {
+            ctx.drawImage(img, 0, 0, width, height)
+            resolve(canvas.toDataURL('image/jpeg', 0.7))
+          } else {
+            resolve((event.target?.result as string) || '')
+          }
+        }
+        img.onerror = () => resolve((event.target?.result as string) || '')
+        img.src = (event.target?.result as string) || ''
+      }
+      reader.onerror = () => resolve('')
       reader.readAsDataURL(file)
     })
   }
+
 
   // LOGIN AUTHENTICATION HANDLER
   const handleLoginSubmit = (e: React.FormEvent) => {

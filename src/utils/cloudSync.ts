@@ -20,6 +20,38 @@ export function setActiveCloudUrl(url: string) {
   }
 }
 
+// Helper to sanitize payload and strip huge uncompressed base64 images (>150KB) so API never rejects with 500 error
+function sanitizeDataForCloud(data: SiteData): SiteData {
+  const cloned: SiteData = JSON.parse(JSON.stringify(data))
+
+  const cleanImg = (val?: string) => {
+    if (val && val.length > 150000 && val.startsWith('data:image')) {
+      return ''
+    }
+    return val || ''
+  }
+
+  cloned.logoUrl = cleanImg(cloned.logoUrl)
+  cloned.heroImageUrl = cleanImg(cloned.heroImageUrl)
+  cloned.founderImgUrl = cleanImg(cloned.founderImgUrl)
+
+  if (Array.isArray(cloned.services)) {
+    cloned.services = cloned.services.map((s) => ({
+      ...s,
+      imageUrl: cleanImg(s.imageUrl),
+    }))
+  }
+
+  if (Array.isArray(cloned.galleryItems)) {
+    cloned.galleryItems = cloned.galleryItems.map((g) => ({
+      ...g,
+      imageUrl: cleanImg(g.imageUrl),
+    }))
+  }
+
+  return cloned
+}
+
 export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
   try {
     const url = getActiveCloudUrl()
@@ -36,7 +68,6 @@ export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
     }
 
     const result = await response.json()
-    // restful-api.dev wraps custom properties inside result.data
     const data = result?.data || result
     if (data && typeof data === 'object') {
       return data as Partial<SiteData>
@@ -50,9 +81,11 @@ export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
 export async function saveRemoteSiteData(data: SiteData): Promise<boolean> {
   try {
     const url = getActiveCloudUrl()
+    const sanitized = sanitizeDataForCloud(data)
+
     const bodyPayload = JSON.stringify({
       name: 'Sree Water Solutions Website Live Data',
-      data: data,
+      data: sanitized,
     })
 
     const response = await fetch(url, {
