@@ -1,0 +1,77 @@
+import { SiteData } from '../context/SiteContext'
+
+const STORAGE_ENDPOINT_KEY = 'sree_water_custom_cloud_url'
+const DEFAULT_CLOUD_OBJECT_ID = 'ff8081819f7e10ae019fafaa191a469e'
+const DEFAULT_REST_API_BASE = 'https://api.restful-api.dev/objects'
+
+export function getActiveCloudUrl(): string {
+  const customUrl = localStorage.getItem(STORAGE_ENDPOINT_KEY)
+  if (customUrl && customUrl.trim().length > 0) {
+    return customUrl.trim()
+  }
+  return `${DEFAULT_REST_API_BASE}/${DEFAULT_CLOUD_OBJECT_ID}`
+}
+
+export function setActiveCloudUrl(url: string) {
+  if (url && url.trim().length > 0) {
+    localStorage.setItem(STORAGE_ENDPOINT_KEY, url.trim())
+  } else {
+    localStorage.removeItem(STORAGE_ENDPOINT_KEY)
+  }
+}
+
+export async function fetchRemoteSiteData(): Promise<Partial<SiteData> | null> {
+  try {
+    const url = getActiveCloudUrl()
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      console.warn(`[CloudSync] GET failed with status: ${response.status}`)
+      return null
+    }
+
+    const result = await response.json()
+    // restful-api.dev wraps custom properties inside result.data
+    const data = result?.data || result
+    if (data && typeof data === 'object') {
+      return data as Partial<SiteData>
+    }
+  } catch (error) {
+    console.error('[CloudSync] Error fetching remote site data:', error)
+  }
+  return null
+}
+
+export async function saveRemoteSiteData(data: SiteData): Promise<boolean> {
+  try {
+    const url = getActiveCloudUrl()
+    const bodyPayload = JSON.stringify({
+      name: 'Sree Water Solutions Website Live Data',
+      data: data,
+    })
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+      },
+      body: bodyPayload,
+    })
+
+    if (response.ok) {
+      return true
+    } else {
+      console.warn(`[CloudSync] PUT failed with status: ${response.status}`)
+      return false
+    }
+  } catch (error) {
+    console.error('[CloudSync] Error saving remote site data:', error)
+    return false
+  }
+}

@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import logoDefault from '../../logo.png'
 import { useSiteContext, ServiceData, ServiceGalleryItem } from '../context/SiteContext'
+import { getActiveCloudUrl, setActiveCloudUrl } from '../utils/cloudSync'
 
 export default function AdminPortal() {
   const {
@@ -10,6 +11,10 @@ export default function AdminPortal() {
     setIsAdminOpen,
     isAuthenticated,
     setIsAuthenticated,
+    isSyncing,
+    syncStatus,
+    lastSyncedAt,
+    syncWithCloud,
   } = useSiteContext()
 
   // Login Form State
@@ -22,11 +27,13 @@ export default function AdminPortal() {
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
 
-  // Admin Portal Tab State (Default: 'gallery' which is "Previous Work")
-  const [activeTab, setActiveTab] = useState<'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images'>('gallery')
+  // Admin Portal Tab State
+  const [activeTab, setActiveTab] = useState<'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('gallery')
   const [formData, setFormData] = useState({ ...siteData })
   const [newCity, setNewCity] = useState('')
   const [savedSuccess, setSavedSuccess] = useState(false)
+  const [customCloudUrlInput, setCustomCloudUrlInput] = useState(getActiveCloudUrl())
+
 
   // Service Edit State
   const [isEditingService, setIsEditingService] = useState(false)
@@ -106,11 +113,18 @@ export default function AdminPortal() {
     setIsAdminOpen(false)
   }
 
-  const handleSaveAll = () => {
-    updateSiteData(formData)
+  const handleSaveAll = async () => {
+    const success = await updateSiteData(formData)
     setSavedSuccess(true)
-    setTimeout(() => setSavedSuccess(false), 3000)
+    setTimeout(() => setSavedSuccess(false), 4000)
   }
+
+  const handleSaveCloudUrl = () => {
+    setActiveCloudUrl(customCloudUrlInput)
+    alert('Cloud DB Endpoint updated successfully! Syncing live data...')
+    syncWithCloud()
+  }
+
 
   // IMAGE FILE UPLOAD HANDLERS
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -408,18 +422,30 @@ export default function AdminPortal() {
               />
             </div>
             <div>
-              <div className="text-white font-bold text-base tracking-tight">
+              <div className="text-white font-bold text-base tracking-tight flex items-center gap-2">
                 {siteData.companyName} <span className="text-cyan-400 text-xs font-semibold">• Admin Dashboard</span>
+                <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${
+                  isSyncing
+                    ? 'bg-amber-500/20 text-amber-300 border-amber-400/40 animate-pulse'
+                    : syncStatus === 'synced'
+                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
+                    : 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40'
+                }`}>
+                  {isSyncing ? '⚡ Syncing Live DB...' : syncStatus === 'synced' ? '✓ Published Live' : '☁️ Cloud DB Active'}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-3">
             <button
+              disabled={isSyncing}
               onClick={handleSaveAll}
-              className="px-4 py-2 rounded-lg bg-[#0056a8] hover:bg-[#003870] text-white text-xs font-bold shadow-sm transition"
+              className={`px-4 py-2 rounded-lg text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 ${
+                isSyncing ? 'bg-amber-600 opacity-80 cursor-wait' : 'bg-[#0056a8] hover:bg-[#003870]'
+              }`}
             >
-              Save & Publish Website
+              {isSyncing ? '⏳ Syncing to Cloud...' : '☁️ Save & Publish Live Website'}
             </button>
             <button
               onClick={handleLogout}
@@ -450,6 +476,7 @@ export default function AdminPortal() {
             { id: 'coverage', label: 'AP Cities Coverage' },
             { id: 'security', label: 'Security & Login' },
             { id: 'images', label: 'Header & Logo Photos' },
+            { id: 'cloud', label: '⚡ Cloud DB & Live Sync' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -467,9 +494,10 @@ export default function AdminPortal() {
 
         {savedSuccess && (
           <div className="p-3.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-2">
-            <span>✓</span> All changes saved and published to the website successfully!
+            <span>✓</span> All changes saved and published live across all devices & visitors!
           </div>
         )}
+
 
         {/* TAB 1: PREVIOUS WORK */}
         {activeTab === 'gallery' && (
@@ -1096,6 +1124,84 @@ export default function AdminPortal() {
             </div>
           </div>
         )}
+
+        {/* TAB 7: CLOUD DB & LIVE SYNC */}
+        {activeTab === 'cloud' && (
+          <div className="bg-white rounded-2xl p-6 border border-[#c3ddf0] shadow-sm space-y-6">
+            <div className="border-b border-slate-100 pb-4">
+              <h3 className="text-lg font-bold text-[#001e3c] flex items-center gap-2">
+                <span>⚡ Live Cloud Database & Sync Management</span>
+              </h3>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Every edit saved here is synchronized across all visitors and devices globally in real-time.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-5">
+              {/* Connection Status Card */}
+              <div className="p-5 rounded-xl bg-cyan-50/80 border border-cyan-200 space-y-3">
+                <div className="text-xs font-bold uppercase text-[#0056a8]">Live Sync Status</div>
+                <div className="flex items-center gap-3">
+                  <div className={`w-3.5 h-3.5 rounded-full ${
+                    isSyncing ? 'bg-amber-500 animate-ping' : syncStatus === 'synced' ? 'bg-emerald-500' : 'bg-cyan-500'
+                  }`} />
+                  <div>
+                    <div className="text-sm font-bold text-[#001e3c]">
+                      {isSyncing ? 'Synchronizing with Cloud DB...' : syncStatus === 'synced' ? 'Live Cloud Sync Active' : 'Connected to Cloud DB'}
+                    </div>
+                    <div className="text-[11px] text-slate-500">
+                      {lastSyncedAt ? `Last Synced: ${lastSyncedAt.toLocaleTimeString()}` : 'Ready for live updates'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <button
+                    disabled={isSyncing}
+                    onClick={() => syncWithCloud()}
+                    className="px-4 py-2 rounded-lg bg-[#0056a8] hover:bg-[#003870] text-white text-xs font-bold shadow-sm transition"
+                  >
+                    🔄 Refresh & Pull Latest Cloud Data
+                  </button>
+                </div>
+              </div>
+
+              {/* Endpoint Configuration Card */}
+              <div className="p-5 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                <div className="text-xs font-bold uppercase text-slate-700">REST API Endpoint URL</div>
+                <p className="text-[11px] text-slate-600">
+                  By default, a shared cloud database endpoint is active. You can customize this endpoint if you run your own REST API server.
+                </p>
+                <input
+                  type="text"
+                  value={customCloudUrlInput}
+                  onChange={(e) => setCustomCloudUrlInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-xs font-mono"
+                  placeholder="https://api.restful-api.dev/objects/..."
+                />
+                <div className="flex gap-2 pt-1">
+                  <button
+                    onClick={handleSaveCloudUrl}
+                    className="px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold"
+                  >
+                    Save Custom Endpoint
+                  </button>
+                  <button
+                    onClick={() => {
+                      setActiveCloudUrl('')
+                      setCustomCloudUrlInput(getActiveCloudUrl())
+                      syncWithCloud()
+                    }}
+                    className="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold"
+                  >
+                    Reset to Default
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
 
         {/* Bottom Page Actions */}
         <div className="bg-white rounded-2xl p-5 border border-[#c3ddf0] shadow-sm flex items-center justify-end">

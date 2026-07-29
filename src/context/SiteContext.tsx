@@ -176,14 +176,20 @@ const defaultSiteData: SiteData = {
   ],
 }
 
+import { fetchRemoteSiteData, saveRemoteSiteData } from '../utils/cloudSync'
+
 interface SiteContextType {
   siteData: SiteData
-  updateSiteData: (newData: Partial<SiteData>) => void
+  updateSiteData: (newData: Partial<SiteData>) => Promise<boolean>
   resetToDefaults: () => void
   isAdminOpen: boolean
   setIsAdminOpen: (open: boolean) => void
   isAuthenticated: boolean
   setIsAuthenticated: (auth: boolean) => void
+  isSyncing: boolean
+  syncStatus: 'idle' | 'syncing' | 'synced' | 'error'
+  lastSyncedAt: Date | null
+  syncWithCloud: () => Promise<void>
 }
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
@@ -206,6 +212,42 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
     return sessionStorage.getItem('sree_admin_session') === 'true'
   })
+  const [isSyncing, setIsSyncing] = useState(false)
+  const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'synced' | 'error'>('idle')
+  const [lastSyncedAt, setLastSyncedAt] = useState<Date | null>(null)
+
+  // Fetch live site data from Cloud REST DB on app mount
+  const syncWithCloud = async () => {
+    setIsSyncing(true)
+    setSyncStatus('syncing')
+    try {
+      const remoteData = await fetchRemoteSiteData()
+      if (remoteData && Object.keys(remoteData).length > 0) {
+        setSiteData((prev) => {
+          const merged = { ...defaultSiteData, ...prev, ...remoteData }
+          try {
+            localStorage.setItem('sree_water_site_data', JSON.stringify(merged))
+          } catch (err) {
+            console.error(err)
+          }
+          return merged
+        })
+        setSyncStatus('synced')
+        setLastSyncedAt(new Date())
+      } else {
+        setSyncStatus('idle')
+      }
+    } catch (err) {
+      console.error('Failed to sync with cloud database:', err)
+      setSyncStatus('error')
+    } finally {
+      setIsSyncing(false)
+    }
+  }
+
+  useEffect(() => {
+    syncWithCloud()
+  }, [])
 
   useEffect(() => {
     try {
@@ -223,8 +265,27 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [isAuthenticated])
 
-  const updateSiteData = (newData: Partial<SiteData>) => {
-    setSiteData((prev) => ({ ...prev, ...newData }))
+  const updateSiteData = async (newData: Partial<SiteData>): Promise<boolean> => {
+    const updated = { ...siteData, ...newData }
+    setSiteData(updated)
+    setIsSyncing(true)
+    setSyncStatus('syncing')
+
+    try {
+      localStorage.setItem('sree_water_site_data', JSON.stringify(updated))
+    } catch (e) {
+      console.error(e)
+    }
+
+    const success = await saveRemoteSiteData(updated)
+    if (success) {
+      setSyncStatus('synced')
+      setLastSyncedAt(new Date())
+    } else {
+      setSyncStatus('error')
+    }
+    setIsSyncing(false)
+    return success
   }
 
   const resetToDefaults = () => {
@@ -243,6 +304,10 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAdminOpen,
         isAuthenticated,
         setIsAuthenticated,
+        isSyncing,
+        syncStatus,
+        lastSyncedAt,
+        syncWithCloud,
       }}
     >
       {children}
@@ -255,13 +320,18 @@ export const useSiteContext = () => {
   if (!context) {
     return {
       siteData: defaultSiteData,
-      updateSiteData: () => {},
+      updateSiteData: async () => false,
       resetToDefaults: () => {},
       isAdminOpen: false,
       setIsAdminOpen: () => {},
       isAuthenticated: false,
       setIsAuthenticated: () => {},
+      isSyncing: false,
+      syncStatus: 'idle' as const,
+      lastSyncedAt: null,
+      syncWithCloud: async () => {},
     }
   }
   return context
 }
+
