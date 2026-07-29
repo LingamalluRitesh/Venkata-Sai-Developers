@@ -1,0 +1,63 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme inline {
+  --color-background: #f0f8ff;
+  --color-foreground: #001e3c;
+  --color-card: #ffffff;
+  --color-card-foreground: #001e3c;
+  --color-primary: #0056a8;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #e8f4fd;
+  --color-secondary-foreground: #001e3c;
+  --color-muted: #d1e8f5;
+  --color-muted-foreground: #4a6d8c;
+  --color-accent: #00b4d8;
+  --color-accent-foreground: #ffffff;
+  --color-border: #c3ddf0;
+  --color-ring: #0056a8;
+  --radius: 0.75rem;
+  --font-sans: 'Plus Jakarta Sans', 'Outfit', sans-serif;
+  --font-serif: 'Lora', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f0f8ff;
+  color: #001e3c;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f0f8ff;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #00b4d8, #0056a8);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #003870;
+}
+
+/* Glassmorphism utility for light mode */
+.glass-card-light {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid #c3ddf0;
+  box-shadow: 0 4px 24px rgba(0, 56, 112, 0.06);
+}
