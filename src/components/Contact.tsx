@@ -26,7 +26,7 @@ export default function Contact() {
       `*Service Required:* ${encodeURIComponent(formData.serviceType || 'General Purifier Inquiry')}%0A` +
       `*Message:* ${encodeURIComponent(formData.message || 'I need water purifier service / quote.')}`
 
-    // Automatically open WhatsApp to company number (+91 7032848359)
+    // Automatically open WhatsApp to company number (+91 9666827570)
     window.open(`https://wa.me/${cleanPhone}?text=${whatsappMsg}`, '_blank')
   }
 

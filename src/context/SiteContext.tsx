@@ -45,8 +45,8 @@ export interface SiteData {
 const defaultSiteData: SiteData = {
   companyName: "Sree Water Solutions",
   companySubtitle: "Purification & Services",
-  phoneNumber: "+91 7032848359",
-  email: "info@sreewatersoln.com",
+  phoneNumber: "+91 9666827570",
+  email: "sreewatersolutions@gmail.com",
   address: "Andhra Pradesh, India — HQ",
   workingHours: "24/7 — Open All 7 Days (365 Days Working)",
   tagline: "#1 Water Purification Service in Andhra Pradesh • 24/7 Support",
@@ -182,7 +182,7 @@ interface SiteContextType {
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'sree_water_site_data_v2'
+const STORAGE_KEY = 'sree_water_site_data_v3'
 
 export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [siteData, setSiteData] = useState<SiteData>(() => {
