@@ -41,6 +41,8 @@ export default function AdminPortal() {
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'unpaid' | 'deposit' | 'paid'>('all')
   const [cityFilter, setCityFilter] = useState<string>('all')
   const [serviceFilter, setServiceFilter] = useState<string>('all')
+  const [dateFilter, setDateFilter] = useState<string>('')
+  const [dateRangePreset, setDateRangePreset] = useState<'all' | 'today' | 'yesterday' | 'this_month'>('all')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name' | 'quote'>('newest')
 
   // Quote Generator Modal State
@@ -834,7 +836,32 @@ export default function AdminPortal() {
             // 5. Service Filter
             const matchService = serviceFilter === 'all' || inq.serviceType === serviceFilter
 
-            return matchQuery && matchStatus && matchPayment && matchCity && matchService
+            // 6. Date Filter
+            let matchDate = true
+            if (dateFilter) {
+              const [y, m, d] = dateFilter.split('-')
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+              const monthStr = months[parseInt(m, 10) - 1]
+              const targetStr = `${monthStr} ${parseInt(d, 10)}, ${y}`
+              matchDate = (inq.createdAt || '').includes(targetStr) || (inq.createdAt || '').includes(dateFilter)
+            } else if (dateRangePreset !== 'all') {
+              const now = new Date()
+              const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+              if (dateRangePreset === 'today') {
+                const todayStr = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()}`
+                matchDate = (inq.createdAt || '').includes(todayStr)
+              } else if (dateRangePreset === 'yesterday') {
+                const yest = new Date(now)
+                yest.setDate(yest.getDate() - 1)
+                const yestStr = `${months[yest.getMonth()]} ${yest.getDate()}, ${yest.getFullYear()}`
+                matchDate = (inq.createdAt || '').includes(yestStr)
+              } else if (dateRangePreset === 'this_month') {
+                const monthStr = `${months[now.getMonth()]} ${now.getFullYear()}`
+                matchDate = (inq.createdAt || '').includes(monthStr) || ((inq.createdAt || '').includes(months[now.getMonth()]) && (inq.createdAt || '').includes(`${now.getFullYear()}`))
+              }
+            }
+
+            return matchQuery && matchStatus && matchPayment && matchCity && matchService && matchDate
           })
 
           // Sort Logic
@@ -993,7 +1020,52 @@ export default function AdminPortal() {
                     ))}
                   </div>
 
-                  {/* Filter 3: City Dropdown */}
+                  {/* Filter 3: Date Filter & Calendar Picker */}
+                  <div className="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                    <span className="text-[11px] font-bold text-slate-500 px-2">📅 Date:</span>
+                    {[
+                      { id: 'all', label: 'All Dates' },
+                      { id: 'today', label: 'Today' },
+                      { id: 'yesterday', label: 'Yesterday' },
+                      { id: 'this_month', label: 'This Month' },
+                    ].map((d) => (
+                      <button
+                        key={d.id}
+                        onClick={() => {
+                          setDateRangePreset(d.id as any)
+                          setDateFilter('')
+                        }}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                          dateRangePreset === d.id && !dateFilter
+                            ? 'bg-[#0056a8] text-white shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {d.label}
+                      </button>
+                    ))}
+                    <div className="flex items-center gap-1 pl-1">
+                      <input
+                        type="date"
+                        value={dateFilter}
+                        onChange={(e) => {
+                          setDateFilter(e.target.value)
+                          setDateRangePreset('all')
+                        }}
+                        className="px-2 py-0.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                      />
+                      {dateFilter && (
+                        <button
+                          onClick={() => setDateFilter('')}
+                          className="text-slate-400 hover:text-slate-600 font-bold px-1 text-xs"
+                        >
+                          ✕
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Filter 4: City Dropdown */}
                   {uniqueCities.length > 0 && (
                     <select
                       value={cityFilter}
@@ -1007,7 +1079,7 @@ export default function AdminPortal() {
                     </select>
                   )}
 
-                  {/* Filter 4: Service Dropdown */}
+                  {/* Filter 5: Service Dropdown */}
                   {uniqueServices.length > 0 && (
                     <select
                       value={serviceFilter}
@@ -1022,7 +1094,7 @@ export default function AdminPortal() {
                   )}
 
                   {/* Reset Filters button */}
-                  {(searchQuery || statusFilter !== 'all' || paymentFilter !== 'all' || cityFilter !== 'all' || serviceFilter !== 'all') && (
+                  {(searchQuery || statusFilter !== 'all' || paymentFilter !== 'all' || cityFilter !== 'all' || serviceFilter !== 'all' || dateFilter || dateRangePreset !== 'all') && (
                     <button
                       onClick={() => {
                         setSearchQuery('')
@@ -1030,6 +1102,8 @@ export default function AdminPortal() {
                         setPaymentFilter('all')
                         setCityFilter('all')
                         setServiceFilter('all')
+                        setDateFilter('')
+                        setDateRangePreset('all')
                       }}
                       className="px-3 py-1 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 transition"
                     >
