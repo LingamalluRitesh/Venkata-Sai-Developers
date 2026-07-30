@@ -27,16 +27,40 @@ export default function AdminPortal() {
   const [forgotModalOpen, setForgotModalOpen] = useState(false)
   const [forgotSent, setForgotSent] = useState(false)
 
-  // Admin Portal Tab State
+  // Admin Portal Tab & Filter State
   const [activeTab, setActiveTab] = useState<'inquiries' | 'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('inquiries')
   const [formData, setFormData] = useState({ ...siteData })
   const [newCity, setNewCity] = useState('')
   const [savedSuccess, setSavedSuccess] = useState(false)
   const [customCloudUrlInput, setCustomCloudUrlInput] = useState(getActiveCloudUrl())
+  const [sidebarOpen, setSidebarOpen] = useState(false)
+
+  // Flipkart-style Search, Filter & Sort state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'contacted' | 'resolved'>('all')
+  const [paymentFilter, setPaymentFilter] = useState<'all' | 'unpaid' | 'deposit' | 'paid'>('all')
+  const [cityFilter, setCityFilter] = useState<string>('all')
+  const [serviceFilter, setServiceFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name' | 'quote'>('newest')
 
   const handleUpdateInquiryStatus = (id: string, status: 'new' | 'contacted' | 'resolved') => {
     const updated = (formData.inquiries || []).map((inq) =>
       inq.id === id ? { ...inq, status } : inq
+    )
+    setFormData({ ...formData, inquiries: updated })
+  }
+
+  const handleUpdateInquiryPayment = (
+    id: string,
+    updates: {
+      paymentStatus?: 'unpaid' | 'deposit' | 'paid'
+      quoteAmount?: number | string
+      paymentMethod?: 'UPI / GPay / PhonePe' | 'Cash on Delivery' | 'Bank Transfer'
+      paymentNotes?: string
+    }
+  ) => {
+    const updated = (formData.inquiries || []).map((inq) =>
+      inq.id === id ? { ...inq, ...updates } : inq
     )
     setFormData({ ...formData, inquiries: updated })
   }
@@ -457,93 +481,242 @@ export default function AdminPortal() {
     )
   }
 
-  // RENDER 2: FULL-PAGE ADMIN DASHBOARD (Clean, Human-Designed User-Friendly UI)
+  // RENDER 2: FULL-PAGE ADMIN DASHBOARD (Antigravity-Style Left Sidebar Dashboard)
   return (
-    <div className="fixed inset-0 z-50 w-screen h-screen bg-[#f0f8ff] overflow-y-auto flex flex-col">
+    <div className="fixed inset-0 z-50 w-screen h-screen bg-[#f4f8fc] overflow-hidden flex">
       
-      {/* User-Friendly Header Bar */}
-      <header className="sticky top-0 z-40 bg-[#001e3c] text-white px-6 py-3.5 border-b border-cyan-500/20 shadow-md flex items-center justify-between flex-shrink-0">
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between">
+      {/* ------------------------------------------------------------- */}
+      {/* LEFT SIDEBAR NAVIGATION (Antigravity IDE Theme: Dark Navy #001428) */}
+      {/* ------------------------------------------------------------- */}
+      <aside className={`fixed lg:static inset-y-0 left-0 z-50 w-64 bg-[#001428] text-slate-300 flex flex-col justify-between border-r border-slate-800 transition-transform duration-300 flex-shrink-0 ${
+        sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+      }`}>
+        
+        {/* Sidebar Top Header */}
+        <div className="p-5 border-b border-slate-800/80 space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#0056a8] to-[#00b4d8] p-0.5 shadow-md flex items-center justify-center flex-shrink-0">
+                <img
+                  src={formData.logoUrl || logoDefault}
+                  alt={siteData.companyName}
+                  className="w-full h-full object-contain bg-white rounded-lg p-0.5"
+                />
+              </div>
+              <div>
+                <div className="font-extrabold text-sm text-white tracking-tight font-serif">{siteData.companyName}</div>
+                <div className="text-[11px] text-cyan-400 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                  <span>Admin Portal v2.0</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Mobile close button */}
+            <button
+              onClick={() => setSidebarOpen(false)}
+              className="lg:hidden text-slate-400 hover:text-white p-1 font-bold"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        {/* Navigation Items List */}
+        <div className="flex-1 overflow-y-auto p-3 space-y-5">
+          
+          {/* Section 1: Customer Management */}
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              COMMERCE & REQUESTS
+            </div>
+            {[
+              {
+                id: 'inquiries',
+                label: 'Customer Requests & Payments',
+                icon: '📬',
+                badge: (formData.inquiries || []).filter(i => i.status === 'new').length,
+              },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any)
+                  setSidebarOpen(false)
+                }}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                  activeTab === tab.id
+                    ? 'bg-[#0056a8] text-white shadow-md shadow-blue-950/60'
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">{tab.icon}</span>
+                  <span className="truncate">{tab.label}</span>
+                </div>
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <span className="px-2 py-0.5 rounded-full bg-cyan-400 text-[#001428] text-[10px] font-extrabold animate-pulse">
+                    {tab.badge} New
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Section 2: Website Content Manager */}
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              CONTENT MANAGEMENT
+            </div>
+            {[
+              { id: 'gallery', label: 'Previous Work Gallery', icon: '🖼️' },
+              { id: 'services', label: 'Services Manager', icon: '🛠️' },
+              { id: 'general', label: 'Company & Contact Details', icon: '🏢' },
+              { id: 'coverage', label: 'AP Cities Coverage', icon: '📍' },
+              { id: 'images', label: 'Header & Logo Photos', icon: '📸' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any)
+                  setSidebarOpen(false)
+                }}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                  activeTab === tab.id
+                    ? 'bg-[#0056a8] text-white shadow-md shadow-blue-950/60'
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">{tab.icon}</span>
+                  <span className="truncate">{tab.label}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Section 3: System & Security */}
+          <div className="space-y-1">
+            <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">
+              SETTINGS & SYSTEM
+            </div>
+            {[
+              { id: 'security', label: 'Security & Login', icon: '🔐' },
+              { id: 'cloud', label: 'Cloud DB & Live Sync', icon: '⚡' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any)
+                  setSidebarOpen(false)
+                }}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between ${
+                  activeTab === tab.id
+                    ? 'bg-[#0056a8] text-white shadow-md shadow-blue-950/60'
+                    : 'text-slate-300 hover:bg-slate-800/60 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <span className="text-base">{tab.icon}</span>
+                  <span className="truncate">{tab.label}</span>
+                </div>
+              </button>
+            ))}
+          </div>
+
+        </div>
+
+        {/* Sidebar Footer User Info */}
+        <div className="p-4 border-t border-slate-800/80 bg-slate-900/50 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 font-bold flex items-center justify-center text-xs">
+                👤
+              </div>
+              <div className="truncate">
+                <div className="text-xs font-bold text-white capitalize truncate">{siteData.adminUsername || 'Admin'}</div>
+                <div className="text-[10px] text-slate-400">System Administrator</div>
+              </div>
+            </div>
+            <button
+              onClick={handleLogout}
+              title="Logout"
+              className="p-2 rounded-lg text-slate-400 hover:text-red-400 hover:bg-slate-800 transition text-xs font-bold"
+            >
+              🚪
+            </button>
+          </div>
+        </div>
+
+      </aside>
+
+      {/* ------------------------------------------------------------- */}
+      {/* MAIN WORKSPACE PANEL */}
+      {/* ------------------------------------------------------------- */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+        
+        {/* Top Header Bar */}
+        <header className="bg-white border-b border-slate-200 px-6 py-3.5 flex items-center justify-between gap-4 flex-shrink-0 shadow-xs">
           
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg overflow-hidden p-0.5 bg-white flex items-center justify-center flex-shrink-0">
-              <img
-                src={formData.logoUrl || logoDefault}
-                alt={siteData.companyName}
-                className="w-full h-full object-contain"
-              />
-            </div>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 font-bold text-sm"
+            >
+              ☰
+            </button>
+
             <div>
-              <div className="text-white font-bold text-base tracking-tight flex items-center gap-2">
-                {siteData.companyName} <span className="text-cyan-400 text-xs font-semibold">• Admin Dashboard</span>
-                <span className={`text-[11px] px-2.5 py-0.5 rounded-full font-bold border ${
-                  isSyncing
-                    ? 'bg-amber-500/20 text-amber-300 border-amber-400/40 animate-pulse'
-                    : syncStatus === 'synced'
-                    ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40'
-                    : 'bg-cyan-500/20 text-cyan-300 border-cyan-400/40'
-                }`}>
-                  {isSyncing ? '⚡ Syncing Live DB...' : syncStatus === 'synced' ? '✓ Published Live' : '☁️ Cloud DB Active'}
-                </span>
+              <h1 className="text-base font-extrabold text-[#001e3c] font-serif capitalize">
+                {activeTab === 'inquiries' && 'Customer Inquiries & Quote Requests'}
+                {activeTab === 'gallery' && 'Previous Work Photo Gallery'}
+                {activeTab === 'services' && 'Services Manager'}
+                {activeTab === 'general' && 'Company & Contact Details'}
+                {activeTab === 'coverage' && 'Andhra Pradesh Cities Coverage'}
+                {activeTab === 'security' && 'Security & Login Credentials'}
+                {activeTab === 'images' && 'Header & Logo Photos'}
+                {activeTab === 'cloud' && 'Cloud Database & Live Sync Settings'}
+              </h1>
+              <div className="text-[11px] text-slate-500 font-medium">
+                Sree Water Solutions Management Console
               </div>
             </div>
           </div>
 
+          {/* Right Header Actions & Live Status */}
           <div className="flex items-center gap-3">
+            <span className={`hidden sm:flex text-[11px] px-3 py-1 rounded-full font-bold border ${
+              isSyncing
+                ? 'bg-amber-100 text-amber-800 border-amber-300 animate-pulse'
+                : syncStatus === 'synced'
+                ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                : 'bg-cyan-100 text-cyan-800 border-cyan-300'
+            }`}>
+              {isSyncing ? '⚡ Syncing Live DB...' : syncStatus === 'synced' ? '✓ Published Live' : '☁️ Cloud Active'}
+            </span>
+
             <button
               disabled={isSyncing}
               onClick={handleSaveAll}
-              className={`px-4 py-2 rounded-lg text-white text-xs font-bold shadow-sm transition flex items-center gap-1.5 ${
+              className={`px-4 py-2 rounded-xl text-white text-xs font-bold shadow-md transition flex items-center gap-1.5 ${
                 isSyncing ? 'bg-amber-600 opacity-80 cursor-wait' : 'bg-[#0056a8] hover:bg-[#003870]'
               }`}
             >
-              {isSyncing ? '⏳ Syncing to Cloud...' : '☁️ Save & Publish Live Website'}
+              {isSyncing ? '⏳ Syncing...' : '☁️ Save & Publish Live'}
             </button>
-            <button
-              onClick={handleLogout}
-              className="px-3.5 py-2 rounded-lg bg-red-600/80 hover:bg-red-600 text-white text-xs font-bold transition"
-            >
-              Logout
-            </button>
+
             <button
               onClick={() => setIsAdminOpen(false)}
-              className="px-3.5 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition"
+              className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition"
             >
               Exit to Website
             </button>
           </div>
 
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content Body */}
-      <main className="flex-1 max-w-7xl mx-auto w-full px-6 py-6 space-y-6">
-        
-        {/* Navigation Tabs Bar */}
-        <div className="bg-white rounded-xl p-1.5 border border-[#c3ddf0] shadow-sm flex gap-1.5 overflow-x-auto">
-          {[
-            { id: 'inquiries', label: `📬 Customer Inquiries (${(formData.inquiries || []).length})` },
-            { id: 'gallery', label: 'Previous Work' },
-            { id: 'services', label: 'Services Manager' },
-            { id: 'general', label: 'Company & Contact Details' },
-            { id: 'coverage', label: 'AP Cities Coverage' },
-            { id: 'security', label: 'Security & Login' },
-            { id: 'images', label: 'Header & Logo Photos' },
-            { id: 'cloud', label: '⚡ Cloud DB & Live Sync' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
-              className={`px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'bg-[#0056a8] text-white shadow-sm'
-                  : 'text-[#001e3c] hover:bg-cyan-50'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {/* Scrollable Main Workspace Content */}
+        <main className="flex-1 overflow-y-auto p-6 space-y-6">
 
         {savedSuccess && (
           <div className="p-3.5 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-bold flex items-center gap-2">
@@ -551,144 +724,459 @@ export default function AdminPortal() {
           </div>
         )}
 
+        {/* TAB 0: FLIPKART-STYLE CUSTOMER INQUIRIES & PAYMENTS */}
+        {activeTab === 'inquiries' && (() => {
+          const allInquiries = formData.inquiries || []
 
-        {/* TAB 0: CUSTOMER INQUIRIES & QUOTE REQUESTS */}
-        {activeTab === 'inquiries' && (
-          <div className="bg-white rounded-2xl p-6 border border-[#c3ddf0] shadow-sm space-y-6">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div>
-                <h3 className="text-lg font-bold text-[#001e3c] flex items-center gap-2">
-                  <span>📬 Customer Inquiries & Quote Requests</span>
-                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#0056a8] text-white font-bold">
-                    {(formData.inquiries || []).length} Total
-                  </span>
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Real-time list of all quote requests and service inquiries submitted by visitors on your website
-                </p>
+          // Calculate Flipkart-style Metrics
+          const totalCount = allInquiries.length
+          const newCount = allInquiries.filter(i => i.status === 'new').length
+          const contactedCount = allInquiries.filter(i => i.status === 'contacted').length
+          const resolvedCount = allInquiries.filter(i => i.status === 'resolved').length
+
+          const totalQuoteSum = allInquiries.reduce((acc, i) => acc + (Number(i.quoteAmount) || 0), 0)
+          const paidSum = allInquiries
+            .filter(i => i.paymentStatus === 'paid')
+            .reduce((acc, i) => acc + (Number(i.quoteAmount) || 0), 0)
+          const pendingSum = totalQuoteSum - paidSum
+
+          // Real-time Flipkart-Style Filtering Logic
+          const filtered = allInquiries.filter((inq) => {
+            // 1. Search Query
+            const query = searchQuery.trim().toLowerCase()
+            const matchQuery =
+              !query ||
+              inq.name.toLowerCase().includes(query) ||
+              inq.phone.toLowerCase().includes(query) ||
+              (inq.city && inq.city.toLowerCase().includes(query)) ||
+              (inq.serviceType && inq.serviceType.toLowerCase().includes(query)) ||
+              (inq.message && inq.message.toLowerCase().includes(query))
+
+            // 2. Status Filter
+            const matchStatus = statusFilter === 'all' || inq.status === statusFilter
+
+            // 3. Payment Filter
+            const matchPayment = paymentFilter === 'all' || (inq.paymentStatus || 'unpaid') === paymentFilter
+
+            // 4. City Filter
+            const matchCity = cityFilter === 'all' || inq.city === cityFilter
+
+            // 5. Service Filter
+            const matchService = serviceFilter === 'all' || inq.serviceType === serviceFilter
+
+            return matchQuery && matchStatus && matchPayment && matchCity && matchService
+          })
+
+          // Sort Logic
+          const sorted = [...filtered].sort((a, b) => {
+            if (sortBy === 'name') return a.name.localeCompare(b.name)
+            if (sortBy === 'quote') return (Number(b.quoteAmount) || 0) - (Number(a.quoteAmount) || 0)
+            if (sortBy === 'oldest') return a.id.localeCompare(b.id)
+            return b.id.localeCompare(a.id) // newest
+          })
+
+          // Extract Unique Cities and Services for Filter Dropdowns
+          const uniqueCities = Array.from(new Set(allInquiries.map(i => i.city).filter(Boolean)))
+          const uniqueServices = Array.from(new Set(allInquiries.map(i => i.serviceType).filter(Boolean)))
+
+          return (
+            <div className="space-y-6">
+              
+              {/* Top Flipkart-Style Metrics Overview Bar */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                {/* Metric 1: Total Inquiries */}
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Total Requests</div>
+                    <div className="text-2xl font-extrabold text-[#001e3c] mt-0.5">{totalCount}</div>
+                    <div className="text-[11px] text-cyan-600 font-bold mt-0.5">{newCount} New Unread</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-700 flex items-center justify-center text-xl font-bold">
+                    📬
+                  </div>
+                </div>
+
+                {/* Metric 2: Resolution Status */}
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Resolved Requests</div>
+                    <div className="text-2xl font-extrabold text-emerald-600 mt-0.5">{resolvedCount}</div>
+                    <div className="text-[11px] text-amber-600 font-bold mt-0.5">{contactedCount} In Progress</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                    ✓
+                  </div>
+                </div>
+
+                {/* Metric 3: Total Quoted Value */}
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Total Quotations</div>
+                    <div className="text-2xl font-extrabold text-[#0056a8] mt-0.5">₹{totalQuoteSum.toLocaleString('en-IN')}</div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">Across all services</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-200 text-[#0056a8] flex items-center justify-center text-xl font-bold">
+                    💰
+                  </div>
+                </div>
+
+                {/* Metric 4: Collected vs Pending */}
+                <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Collected Revenue</div>
+                    <div className="text-2xl font-extrabold text-emerald-600 mt-0.5">₹{paidSum.toLocaleString('en-IN')}</div>
+                    <div className="text-[11px] text-rose-600 font-bold mt-0.5">₹{pendingSum.toLocaleString('en-IN')} Pending</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                    💳
+                  </div>
+                </div>
+
               </div>
 
-              {(formData.inquiries || []).length > 0 && (
-                <button
-                  onClick={() => {
-                    if (window.confirm('Clear all customer inquiries?')) {
-                      setFormData({ ...formData, inquiries: [] })
-                    }
-                  }}
-                  className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100"
-                >
-                  Clear All Inquiries
-                </button>
-              )}
-            </div>
+              {/* Flipkart-Style Search & Filter Control Center */}
+              <div className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                
+                {/* Search Bar */}
+                <div className="flex flex-col sm:flex-row items-center gap-3">
+                  <div className="relative flex-1 w-full">
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Search customer name, phone number, city, or service required (Flipkart search)..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-[#001e3c] focus:outline-none focus:border-[#0056a8] focus:bg-white transition"
+                    />
+                    {searchQuery && (
+                      <button
+                        onClick={() => setSearchQuery('')}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
 
-            {(!formData.inquiries || formData.inquiries.length === 0) ? (
-              <div className="p-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
-                <div className="text-3xl">📭</div>
-                <div className="text-sm font-bold text-[#001e3c]">No Customer Inquiries Yet</div>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  When a customer fills out the "Contact Us" or "Get Quote" form on your website, their name, phone number, city, and service requirement will appear here live.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {formData.inquiries.map((inq) => {
-                  const cleanPhone = (inq.phone || '').replace(/[^0-9]/g, '')
-                  return (
-                    <div
-                      key={inq.id}
-                      className={`p-5 rounded-xl border transition-all ${
-                        inq.status === 'new'
-                          ? 'bg-cyan-50/70 border-cyan-300 shadow-sm'
-                          : inq.status === 'contacted'
-                          ? 'bg-amber-50/50 border-amber-200'
-                          : 'bg-slate-50 border-slate-200 opacity-80'
-                      }`}
+                  <div className="flex items-center gap-2 w-full sm:w-auto">
+                    <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Sort By:</span>
+                    <select
+                      value={sortBy}
+                      onChange={(e) => setSortBy(e.target.value as any)}
+                      className="px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#001e3c] focus:outline-none focus:border-[#0056a8]"
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200/60 pb-3">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-extrabold text-sm text-[#001e3c]">{inq.name}</span>
-                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
-                              inq.status === 'new'
-                                ? 'bg-cyan-500 text-white animate-pulse'
-                                : inq.status === 'contacted'
-                                ? 'bg-amber-500 text-white'
-                                : 'bg-emerald-600 text-white'
-                            }`}>
-                              {inq.status}
-                            </span>
-                          </div>
+                      <option value="newest">📅 Newest First</option>
+                      <option value="oldest">⌛ Oldest First</option>
+                      <option value="name">🔤 Name (A-Z)</option>
+                      <option value="quote">💰 Highest Quote (₹)</option>
+                    </select>
+                  </div>
+                </div>
 
-                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
-                            <span className="font-bold text-[#0056a8]">📞 {inq.phone}</span>
-                            {inq.city && <span>📍 {inq.city}</span>}
-                            {inq.serviceType && (
-                              <span className="px-2 py-0.5 rounded bg-white border border-slate-200 font-semibold text-[#001e3c]">
-                                🛠️ {inq.serviceType}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                {/* Filter Pills Bar */}
+                <div className="pt-2 border-t border-slate-100 flex flex-wrap items-center gap-3 text-xs">
+                  
+                  {/* Filter 1: Status */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                    <span className="text-[11px] font-bold text-slate-500 px-2">Request Status:</span>
+                    {[
+                      { id: 'all', label: 'All' },
+                      { id: 'new', label: '⚡ New' },
+                      { id: 'contacted', label: '💬 Contacted' },
+                      { id: 'resolved', label: '✓ Resolved' },
+                    ].map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => setStatusFilter(s.id as any)}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                          statusFilter === s.id
+                            ? 'bg-[#0056a8] text-white shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {s.label}
+                      </button>
+                    ))}
+                  </div>
 
-                        <div className="text-right text-[11px] text-slate-400 font-semibold">
-                          📅 {inq.createdAt}
-                        </div>
-                      </div>
+                  {/* Filter 2: Payment Status */}
+                  <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl">
+                    <span className="text-[11px] font-bold text-slate-500 px-2">Payment:</span>
+                    {[
+                      { id: 'all', label: 'All' },
+                      { id: 'unpaid', label: '⚠️ Unpaid' },
+                      { id: 'deposit', label: '💳 Deposit' },
+                      { id: 'paid', label: '✅ Paid' },
+                    ].map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => setPaymentFilter(p.id as any)}
+                        className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                          paymentFilter === p.id
+                            ? 'bg-emerald-600 text-white shadow-xs'
+                            : 'text-slate-600 hover:bg-slate-200'
+                        }`}
+                      >
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
 
-                      {/* Message Content */}
-                      {inq.message && (
-                        <div className="pt-3 text-xs text-slate-700 bg-white/70 p-3 rounded-lg border border-slate-100 mt-3 font-medium">
-                          💬 "{inq.message}"
-                        </div>
-                      )}
+                  {/* Filter 3: City Dropdown */}
+                  {uniqueCities.length > 0 && (
+                    <select
+                      value={cityFilter}
+                      onChange={(e) => setCityFilter(e.target.value)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#001e3c]"
+                    >
+                      <option value="all">📍 All Cities ({uniqueCities.length})</option>
+                      {uniqueCities.map(c => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  )}
 
-                      {/* Action Bar */}
-                      <div className="pt-3.5 flex flex-wrap items-center justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <a
-                            href={`tel:${cleanPhone}`}
-                            className="px-3 py-1.5 rounded-lg bg-[#0056a8] text-white text-xs font-bold hover:bg-[#003870] flex items-center gap-1"
-                          >
-                            📞 Call Customer
-                          </a>
-                          <a
-                            href={`https://wa.me/${cleanPhone}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center gap-1"
-                          >
-                            💬 Chat on WhatsApp
-                          </a>
-                        </div>
+                  {/* Filter 4: Service Dropdown */}
+                  {uniqueServices.length > 0 && (
+                    <select
+                      value={serviceFilter}
+                      onChange={(e) => setServiceFilter(e.target.value)}
+                      className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#001e3c]"
+                    >
+                      <option value="all">🛠️ All Services ({uniqueServices.length})</option>
+                      {uniqueServices.map(s => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                  )}
 
-                        <div className="flex items-center gap-2">
-                          <select
-                            value={inq.status}
-                            onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value as any)}
-                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
-                          >
-                            <option value="new">Mark as New</option>
-                            <option value="contacted">Mark as Contacted</option>
-                            <option value="resolved">Mark as Resolved</option>
-                          </select>
+                  {/* Reset Filters button */}
+                  {(searchQuery || statusFilter !== 'all' || paymentFilter !== 'all' || cityFilter !== 'all' || serviceFilter !== 'all') && (
+                    <button
+                      onClick={() => {
+                        setSearchQuery('')
+                        setStatusFilter('all')
+                        setPaymentFilter('all')
+                        setCityFilter('all')
+                        setServiceFilter('all')
+                      }}
+                      className="px-3 py-1 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 transition"
+                    >
+                      Reset Filters ✕
+                    </button>
+                  )}
 
-                          <button
-                            onClick={() => handleDeleteInquiry(inq.id)}
-                            className="px-2.5 py-1 rounded-lg bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
+                </div>
 
-                    </div>
-                  )
-                })}
               </div>
-            )}
-          </div>
-        )}
+
+              {/* Customer Request Cards List */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between text-xs font-bold text-slate-500 px-1">
+                  <div>Showing {sorted.length} of {totalCount} requests</div>
+                  {allInquiries.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Clear all customer inquiries from database?')) {
+                          setFormData({ ...formData, inquiries: [] })
+                        }
+                      }}
+                      className="text-red-600 hover:underline"
+                    >
+                      Clear All Inquiries
+                    </button>
+                  )}
+                </div>
+
+                {sorted.length === 0 ? (
+                  <div className="p-12 text-center bg-white rounded-2xl border border-dashed border-slate-300 space-y-3">
+                    <div className="text-4xl">🔍</div>
+                    <div className="text-base font-bold text-[#001e3c]">No Requests Match Your Search / Filter</div>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Try clearing your search query or selecting "All" in status & payment filters.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setSearchQuery('')
+                        setStatusFilter('all')
+                        setPaymentFilter('all')
+                        setCityFilter('all')
+                        setServiceFilter('all')
+                      }}
+                      className="px-4 py-2 rounded-xl bg-[#0056a8] text-white text-xs font-bold shadow-sm"
+                    >
+                      Clear All Filters
+                    </button>
+                  </div>
+                ) : (
+                  sorted.map((inq) => {
+                    const cleanPhone = (inq.phone || '').replace(/[^0-9]/g, '')
+                    return (
+                      <div
+                        key={inq.id}
+                        className={`bg-white rounded-2xl p-5 border transition-all hover:shadow-md space-y-4 ${
+                          inq.status === 'new'
+                            ? 'border-cyan-400 ring-2 ring-cyan-100'
+                            : inq.status === 'contacted'
+                            ? 'border-amber-300'
+                            : 'border-slate-200'
+                        }`}
+                      >
+                        
+                        {/* Card Header: Customer Info & Status Badges */}
+                        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-slate-100 pb-3.5">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-extrabold text-base text-[#001e3c] font-serif">{inq.name}</span>
+                              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase tracking-wider ${
+                                inq.status === 'new'
+                                  ? 'bg-cyan-500 text-white animate-pulse'
+                                  : inq.status === 'contacted'
+                                  ? 'bg-amber-500 text-white'
+                                  : 'bg-emerald-600 text-white'
+                              }`}>
+                                {inq.status}
+                              </span>
+                              <span className={`text-[10px] px-2.5 py-0.5 rounded-full font-bold uppercase ${
+                                inq.paymentStatus === 'paid'
+                                  ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                                  : inq.paymentStatus === 'deposit'
+                                  ? 'bg-amber-100 text-amber-800 border border-amber-300'
+                                  : 'bg-rose-100 text-rose-800 border border-rose-300'
+                              }`}>
+                                {inq.paymentStatus === 'paid' ? '✅ Paid' : inq.paymentStatus === 'deposit' ? '💳 Deposit' : '⚠️ Unpaid'}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                              <span className="font-bold text-[#0056a8] flex items-center gap-1">
+                                📞 <span>{inq.phone}</span>
+                              </span>
+                              {inq.city && <span className="font-medium">📍 {inq.city}</span>}
+                              {inq.serviceType && (
+                                <span className="px-2.5 py-0.5 rounded-lg bg-slate-100 border border-slate-200 font-semibold text-[#001e3c]">
+                                  🛠️ {inq.serviceType}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Date & Time display */}
+                          <div className="text-right">
+                            <div className="text-xs font-bold text-[#001e3c]">📅 {inq.createdAt}</div>
+                            <div className="text-[10px] text-slate-400 font-medium">Recorded in Cloud DB</div>
+                          </div>
+                        </div>
+
+                        {/* Customer Message */}
+                        {inq.message && (
+                          <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-700 leading-relaxed font-medium">
+                            💬 <span className="italic">"{inq.message}"</span>
+                          </div>
+                        )}
+
+                        {/* Payment & Quote Management Strip */}
+                        <div className="p-3.5 rounded-xl bg-[#f0f7fd] border border-cyan-100 grid sm:grid-cols-3 gap-3 items-center">
+                          
+                          {/* Quote Amount Field */}
+                          <div>
+                            <label className="block text-[11px] font-bold text-[#001e3c] mb-1">Quote Price (₹)</label>
+                            <div className="relative">
+                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500">₹</span>
+                              <input
+                                type="number"
+                                placeholder="e.g. 12500"
+                                value={inq.quoteAmount || ''}
+                                onChange={(e) => handleUpdateInquiryPayment(inq.id, { quoteAmount: e.target.value })}
+                                className="w-full pl-7 pr-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                              />
+                            </div>
+                          </div>
+
+                          {/* Payment Status Dropdown */}
+                          <div>
+                            <label className="block text-[11px] font-bold text-[#001e3c] mb-1">Payment Status</label>
+                            <select
+                              value={inq.paymentStatus || 'unpaid'}
+                              onChange={(e) => handleUpdateInquiryPayment(inq.id, { paymentStatus: e.target.value as any })}
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                            >
+                              <option value="unpaid">⚠️ Unpaid / Pending</option>
+                              <option value="deposit">💳 Deposit Received</option>
+                              <option value="paid">✅ Fully Paid</option>
+                            </select>
+                          </div>
+
+                          {/* Payment Method Selector */}
+                          <div>
+                            <label className="block text-[11px] font-bold text-[#001e3c] mb-1">Payment Method</label>
+                            <select
+                              value={inq.paymentMethod || 'UPI / GPay / PhonePe'}
+                              onChange={(e) => handleUpdateInquiryPayment(inq.id, { paymentMethod: e.target.value as any })}
+                              className="w-full px-3 py-1.5 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                            >
+                              <option value="UPI / GPay / PhonePe">📱 UPI / PhonePe / GPay</option>
+                              <option value="Cash on Delivery">💵 Cash on Delivery</option>
+                              <option value="Bank Transfer">🏦 Bank Transfer</option>
+                            </select>
+                          </div>
+
+                        </div>
+
+                        {/* Card Action Bar: Call, WhatsApp, Request Status, Delete */}
+                        <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
+                          
+                          {/* 1-Click Action Buttons */}
+                          <div className="flex items-center gap-2">
+                            <a
+                              href={`tel:${cleanPhone}`}
+                              className="px-3.5 py-2 rounded-xl bg-[#0056a8] hover:bg-[#003870] text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+                            >
+                              📞 Call Customer
+                            </a>
+                            <a
+                              href={`https://wa.me/${cleanPhone}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+                            >
+                              💬 Chat on WhatsApp
+                            </a>
+                          </div>
+
+                          {/* Status & Deletion Control */}
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs font-bold text-slate-500">Status:</span>
+                            <select
+                              value={inq.status}
+                              onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value as any)}
+                              className="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                            >
+                              <option value="new">⚡ New Request</option>
+                              <option value="contacted">💬 Contacted</option>
+                              <option value="resolved">✓ Resolved / Completed</option>
+                            </select>
+
+                            <button
+                              onClick={() => handleDeleteInquiry(inq.id)}
+                              className="px-3 py-1.5 rounded-xl bg-rose-100 text-rose-700 text-xs font-bold hover:bg-rose-200 transition"
+                            >
+                              Delete
+                            </button>
+                          </div>
+
+                        </div>
+
+                      </div>
+                    )
+                  })
+                )}
+              </div>
+
+            </div>
+          )
+        })()}
 
         {/* TAB 1: PREVIOUS WORK */}
         {activeTab === 'gallery' && (
@@ -1435,6 +1923,7 @@ export default function AdminPortal() {
 
       </main>
 
+      </div>
     </div>
   )
 }

@@ -29,6 +29,10 @@ export interface InquiryData {
   message?: string
   createdAt: string
   status: 'new' | 'contacted' | 'resolved'
+  quoteAmount?: number | string
+  paymentStatus?: 'unpaid' | 'deposit' | 'paid'
+  paymentMethod?: 'UPI / GPay / PhonePe' | 'Cash on Delivery' | 'Bank Transfer'
+  paymentNotes?: string
 }
 
 export interface SiteData {
@@ -297,11 +301,18 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }
 
   const addInquiry = async (inquiry: Omit<InquiryData, 'id' | 'createdAt' | 'status'>) => {
+    const now = new Date()
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const dateFormatted = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} • ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+
     const newInquiry: InquiryData = {
       ...inquiry,
       id: `inq-${Date.now()}`,
-      createdAt: new Date().toLocaleString(),
+      createdAt: dateFormatted,
       status: 'new',
+      paymentStatus: inquiry.paymentStatus || 'unpaid',
+      quoteAmount: inquiry.quoteAmount || 0,
+      paymentMethod: inquiry.paymentMethod || 'UPI / GPay / PhonePe',
     }
 
     const updatedInquiries = [newInquiry, ...(siteData.inquiries || [])]
