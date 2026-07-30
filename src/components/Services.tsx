@@ -159,40 +159,20 @@ export default function Services() {
                 className="group rounded-3xl bg-white border border-[#e0eef8] hover:border-[#c3ddf0] overflow-hidden transition-all duration-300 hover:-translate-y-1.5 shadow-sm hover:shadow-xl flex flex-col justify-between"
               >
                 <div>
-                  {/* Service Image */}
-                  {s.imageUrl && (
-                    <div className="relative h-52 w-full overflow-hidden bg-slate-900 flex items-center justify-center">
-                      <img
-                        src={s.imageUrl}
-                        alt={s.title}
-                        className={`w-full h-full group-hover:scale-105 transition-transform duration-500 ${
-                          (s as any).cropMode === 'contain' ? 'object-contain p-2' : 'object-cover'
-                        }`}
-                      />
+                  <div className="p-7">
+                    <div className="flex items-center justify-between mb-5">
+                      <div
+                        className="w-13 h-13 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-sm text-[#0056a8] p-3"
+                        style={{ background: `${s.color || '#0056a8'}15`, color: s.color || '#0056a8' }}
+                      >
+                        {categoryIcons[s.category] || categoryIcons.residential}
+                      </div>
                       {s.badge && (
-                        <span className="absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-white/95 text-[#0056a8] shadow-md border border-cyan-200">
+                        <span className="px-3.5 py-1 rounded-full text-[10px] font-extrabold tracking-wide uppercase bg-cyan-100 text-[#0056a8] border border-cyan-300">
                           {s.badge}
                         </span>
                       )}
                     </div>
-                  )}
-
-                  <div className="p-7">
-                    {!s.imageUrl && (
-                      <div className="flex items-center justify-between mb-4">
-                        <div
-                          className="w-12 h-12 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform text-[#0056a8]"
-                          style={{ background: `${s.color || '#0056a8'}15`, color: s.color || '#0056a8' }}
-                        >
-                          {categoryIcons[s.category] || categoryIcons.residential}
-                        </div>
-                        {s.badge && (
-                          <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase bg-cyan-100 text-[#0056a8] border border-cyan-300">
-                            {s.badge}
-                          </span>
-                        )}
-                      </div>
-                    )}
 
                     <h3 className="text-xl font-extrabold text-[#001e3c] mb-2 group-hover:text-[#0056a8] transition-colors">
                       {s.title}
@@ -213,6 +193,7 @@ export default function Services() {
                     </ul>
                   </div>
                 </div>
+
 
                 <div className="p-7 pt-0">
                   <a

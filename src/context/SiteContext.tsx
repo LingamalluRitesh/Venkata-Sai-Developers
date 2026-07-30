@@ -73,8 +73,6 @@ const defaultSiteData: SiteData = {
       features: ['RO + UV + TDS Controller', 'Wall-mount & Under-sink models', 'Free TDS testing & installation', 'Comprehensive warranty support'],
       badge: 'Most Popular',
       color: '#0056a8',
-      imageUrl: 'https://images.unsplash.com/photo-1548839140-29a749e1cf4e?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
     {
       id: 'commercial-ro',
@@ -84,8 +82,6 @@ const defaultSiteData: SiteData = {
       features: ['500 LPH to 10,000 LPH capacity', 'Custom industrial plant design', 'Mineral water standard compliance', 'Heavy-duty stainless steel build'],
       badge: 'High Capacity',
       color: '#00b4d8',
-      imageUrl: 'https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
     {
       id: 'repair-service',
@@ -95,8 +91,6 @@ const defaultSiteData: SiteData = {
       features: ['24/7 Emergency Technician Visit', 'All brands & models serviced', '100% genuine replacement parts', 'Post-service warranty on labor'],
       badge: '24/7 Emergency',
       color: '#0056a8',
-      imageUrl: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
     {
       id: 'amc-contract',
@@ -106,8 +100,6 @@ const defaultSiteData: SiteData = {
       features: ['Scheduled periodic inspections', 'Free routine filter replacements', 'RO membrane deep cleaning', 'Priority emergency service calls'],
       badge: 'Best Value',
       color: '#00b4d8',
-      imageUrl: 'https://images.unsplash.com/photo-1581092335397-9583fe92d232?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
     {
       id: 'regular-maintenance',
@@ -116,8 +108,6 @@ const defaultSiteData: SiteData = {
       desc: 'Preventative servicing including filter changes, UV tube sanitization, membrane descaling, and digital TDS calibration checks.',
       features: ['Sediment & carbon filter renewal', 'UV lamp & RO membrane check', 'TDS calibration & purity test', 'Whole-system chemical sanitization'],
       color: '#0056a8',
-      imageUrl: 'https://images.unsplash.com/photo-1527689368864-3a821dbccc34?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
     {
       id: 'spare-parts',
@@ -126,8 +116,6 @@ const defaultSiteData: SiteData = {
       desc: 'High-grade OEM and certified compatible spare parts — membranes, sediment filters, booster pumps, solenoid valves, housings, and adapters.',
       features: ['OEM-certified & ISO tested', 'High-rejection RO membranes', 'Heavy-duty booster pumps', 'Expert installation included'],
       color: '#00b4d8',
-      imageUrl: 'https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?w=600&auto=format&fit=crop&q=80',
-      cropMode: 'cover',
     },
   ],
   galleryItems: [
