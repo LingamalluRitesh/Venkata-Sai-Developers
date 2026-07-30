@@ -28,7 +28,7 @@ export default function AdminPortal() {
   const [forgotSent, setForgotSent] = useState(false)
 
   // Admin Portal Tab & Filter State
-  const [activeTab, setActiveTab] = useState<'inquiries' | 'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('inquiries')
+  const [activeTab, setActiveTab] = useState<'inquiries' | 'transactions' | 'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('inquiries')
   const [formData, setFormData] = useState({ ...siteData })
   const [newCity, setNewCity] = useState('')
   const [savedSuccess, setSavedSuccess] = useState(false)
@@ -42,6 +42,70 @@ export default function AdminPortal() {
   const [cityFilter, setCityFilter] = useState<string>('all')
   const [serviceFilter, setServiceFilter] = useState<string>('all')
   const [sortBy, setSortBy] = useState<'newest' | 'oldest' | 'name' | 'quote'>('newest')
+
+  // Quote Generator Modal State
+  const [quoteModalOpen, setQuoteModalOpen] = useState(false)
+  const [selectedInquiryForQuote, setSelectedInquiryForQuote] = useState<any>(null)
+  const [quoteForm, setQuoteForm] = useState({
+    title: '',
+    price: '',
+    discount: '0',
+    notes: 'Includes free TDS testing, 1-year warranty, and free standard installation.',
+  })
+
+  // UPI QR Code Modal State
+  const [qrModalOpen, setQrModalOpen] = useState(false)
+  const [selectedInquiryForQr, setSelectedInquiryForQr] = useState<any>(null)
+
+  // Transaction Ledger State
+  const [txnForm, setTxnForm] = useState({
+    customerName: '',
+    customerPhone: '',
+    amount: '',
+    paymentMode: 'UPI / GPay / PhonePe',
+    status: 'verified' as const,
+    notes: '',
+  })
+
+  const handleAddTransaction = () => {
+    if (!txnForm.customerName || !txnForm.amount) {
+      alert('Please enter Customer Name and Amount.')
+      return
+    }
+
+    const now = new Date()
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+    const dateFormatted = `${months[now.getMonth()]} ${now.getDate()}, ${now.getFullYear()} • ${now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+
+    const newTxn = {
+      id: `TXN-${Date.now()}`,
+      customerName: txnForm.customerName,
+      customerPhone: txnForm.customerPhone,
+      amount: Number(txnForm.amount) || 0,
+      paymentMode: txnForm.paymentMode,
+      date: dateFormatted,
+      status: txnForm.status,
+      notes: txnForm.notes,
+    }
+
+    const updatedTxns = [newTxn, ...(formData.transactions || [])]
+    setFormData({ ...formData, transactions: updatedTxns })
+    setTxnForm({
+      customerName: '',
+      customerPhone: '',
+      amount: '',
+      paymentMode: 'UPI / GPay / PhonePe',
+      status: 'verified',
+      notes: '',
+    })
+  }
+
+  const handleDeleteTransaction = (id: string) => {
+    if (window.confirm('Delete this financial transaction record?')) {
+      const updated = (formData.transactions || []).filter(t => t.id !== id)
+      setFormData({ ...formData, transactions: updated })
+    }
+  }
 
   const handleUpdateInquiryStatus = (id: string, status: 'new' | 'contacted' | 'resolved') => {
     const updated = (formData.inquiries || []).map((inq) =>
@@ -533,9 +597,15 @@ export default function AdminPortal() {
             {[
               {
                 id: 'inquiries',
-                label: 'Customer Requests & Payments',
+                label: 'Customer Requests',
                 icon: '📬',
                 badge: (formData.inquiries || []).filter(i => i.status === 'new').length,
+              },
+              {
+                id: 'transactions',
+                label: 'Financial Ledger & UPI',
+                icon: '💳',
+                badge: (formData.transactions || []).length,
               },
             ].map((tab) => (
               <button
@@ -1128,12 +1198,12 @@ export default function AdminPortal() {
                         <div className="flex flex-wrap items-center justify-between gap-3 pt-1">
                           
                           {/* 1-Click Action Buttons */}
-                          <div className="flex items-center gap-2">
+                          <div className="flex flex-wrap items-center gap-2">
                             <a
                               href={`tel:${cleanPhone}`}
                               className="px-3.5 py-2 rounded-xl bg-[#0056a8] hover:bg-[#003870] text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
                             >
-                              📞 Call Customer
+                              📞 Call
                             </a>
                             <a
                               href={`https://wa.me/${cleanPhone}`}
@@ -1141,8 +1211,32 @@ export default function AdminPortal() {
                               rel="noopener noreferrer"
                               className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
                             >
-                              💬 Chat on WhatsApp
+                              💬 WhatsApp
                             </a>
+                            <button
+                              onClick={() => {
+                                setSelectedInquiryForQuote(inq)
+                                setQuoteForm({
+                                  title: inq.serviceType || 'Water Purifier Service / Installation',
+                                  price: inq.quoteAmount ? String(inq.quoteAmount) : '12500',
+                                  discount: '0',
+                                  notes: 'Includes free TDS testing, 1-year warranty, and free standard installation.',
+                                })
+                                setQuoteModalOpen(true)
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+                            >
+                              📄 Send Official Quote
+                            </button>
+                            <button
+                              onClick={() => {
+                                setSelectedInquiryForQr(inq)
+                                setQrModalOpen(true)
+                              }}
+                              className="px-3.5 py-2 rounded-xl bg-[#001e3c] hover:bg-slate-800 text-white text-xs font-bold shadow-xs transition flex items-center gap-1.5"
+                            >
+                              💳 Pay via UPI / QR
+                            </button>
                           </div>
 
                           {/* Status & Deletion Control */}
@@ -1171,6 +1265,217 @@ export default function AdminPortal() {
                       </div>
                     )
                   })
+                )}
+              </div>
+
+            </div>
+          )
+        })()}
+
+        {/* TAB 0.5: ADMIN-ONLY FINANCIAL TRANSACTION LEDGER */}
+        {activeTab === 'transactions' && (() => {
+          const txns = formData.transactions || []
+          const totalRev = txns
+            .filter(t => t.status === 'verified')
+            .reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+          const pendingRev = txns
+            .filter(t => t.status === 'pending')
+            .reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+
+          return (
+            <div className="space-y-6">
+              
+              {/* Financial Summary Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Verified Revenue (₹)</div>
+                    <div className="text-2xl font-extrabold text-emerald-600 mt-1">₹{totalRev.toLocaleString('en-IN')}</div>
+                    <div className="text-[11px] text-slate-500 font-medium">Recorded in private ledger</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 border border-emerald-200 text-xl font-bold flex items-center justify-center">
+                    💰
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Pending Verification (₹)</div>
+                    <div className="text-2xl font-extrabold text-amber-600 mt-1">₹{pendingRev.toLocaleString('en-IN')}</div>
+                    <div className="text-[11px] text-slate-500 font-medium">Awaiting bank settlement</div>
+                  </div>
+                  <div className="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 border border-amber-200 text-xl font-bold flex items-center justify-center">
+                    ⏳
+                  </div>
+                </div>
+
+                <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex items-center justify-between">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase text-slate-500">Company Active UPI ID</div>
+                    <input
+                      type="text"
+                      value={formData.companyUpiId || '9666827570@upi'}
+                      onChange={(e) => setFormData({ ...formData, companyUpiId: e.target.value })}
+                      className="w-full px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-300 text-xs font-bold font-mono text-[#0056a8] mt-1"
+                    />
+                    <div className="text-[10px] text-slate-400 font-medium mt-0.5">Used for customer QR payments</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Add New Transaction Record Form */}
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <div className="border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-extrabold text-[#001e3c] font-serif">➕ Record Customer Payment Transaction</h3>
+                  <p className="text-xs text-slate-500">Add received payment details directly into your private ledger.</p>
+                </div>
+
+                <div className="grid sm:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Customer Name *</label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Ramesh Reddy"
+                      value={txnForm.customerName}
+                      onChange={(e) => setTxnForm({ ...txnForm, customerName: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-[#001e3c]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Phone Number</label>
+                    <input
+                      type="tel"
+                      placeholder="+91 9876543210"
+                      value={txnForm.customerPhone}
+                      onChange={(e) => setTxnForm({ ...txnForm, customerPhone: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-[#001e3c]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Amount Paid (₹) *</label>
+                    <input
+                      type="number"
+                      placeholder="12500"
+                      value={txnForm.amount}
+                      onChange={(e) => setTxnForm({ ...txnForm, amount: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#0056a8]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 mb-1">Payment Method</label>
+                    <select
+                      value={txnForm.paymentMode}
+                      onChange={(e) => setTxnForm({ ...txnForm, paymentMode: e.target.value })}
+                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#001e3c]"
+                    >
+                      <option value="UPI / GPay / PhonePe">📱 UPI / PhonePe / GPay</option>
+                      <option value="Cash on Delivery">💵 Cash on Delivery</option>
+                      <option value="Bank Transfer">🏦 Bank Transfer</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between pt-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-700">Verification Status:</span>
+                    <select
+                      value={txnForm.status}
+                      onChange={(e) => setTxnForm({ ...txnForm, status: e.target.value as any })}
+                      className="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 text-xs font-bold text-[#001e3c]"
+                    >
+                      <option value="verified">✅ Verified & Received</option>
+                      <option value="pending">⏳ Pending Settlement</option>
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={handleAddTransaction}
+                    className="px-5 py-2.5 rounded-xl bg-[#0056a8] hover:bg-[#003870] text-white text-xs font-bold shadow-md transition"
+                  >
+                    💾 Record Payment Entry
+                  </button>
+                </div>
+              </div>
+
+              {/* Transactions History Ledger Table */}
+              <div className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                  <h3 className="text-base font-extrabold text-[#001e3c] font-serif flex items-center gap-2">
+                    <span>💳 Private Transaction History</span>
+                    <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold border border-slate-200">
+                      {txns.length} Records
+                    </span>
+                  </h3>
+
+                  {txns.length > 0 && (
+                    <button
+                      onClick={() => {
+                        if (window.confirm('Clear all transaction logs?')) {
+                          setFormData({ ...formData, transactions: [] })
+                        }
+                      }}
+                      className="text-xs font-bold text-red-600 hover:underline"
+                    >
+                      Clear Logs
+                    </button>
+                  )}
+                </div>
+
+                {txns.length === 0 ? (
+                  <div className="p-10 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
+                    <div className="text-3xl">💳</div>
+                    <div className="text-sm font-bold text-[#001e3c]">No Transactions Recorded Yet</div>
+                    <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                      Use the form above to log customer payments. All entries remain strictly private inside the Admin Portal.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider font-bold text-[10px]">
+                          <th className="p-3">Txn ID</th>
+                          <th className="p-3">Customer</th>
+                          <th className="p-3">Phone</th>
+                          <th className="p-3">Amount (₹)</th>
+                          <th className="p-3">Method</th>
+                          <th className="p-3">Date</th>
+                          <th className="p-3">Status</th>
+                          <th className="p-3 text-right">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 font-semibold text-slate-700">
+                        {txns.map((t) => (
+                          <tr key={t.id} className="hover:bg-slate-50/80 transition">
+                            <td className="p-3 font-mono text-[11px] text-[#0056a8]">{t.id}</td>
+                            <td className="p-3 font-extrabold text-[#001e3c]">{t.customerName}</td>
+                            <td className="p-3 text-slate-600">{t.customerPhone || '—'}</td>
+                            <td className="p-3 font-extrabold text-emerald-600">₹{Number(t.amount).toLocaleString('en-IN')}</td>
+                            <td className="p-3 text-slate-600">{t.paymentMode}</td>
+                            <td className="p-3 text-slate-500 text-[11px]">{t.date}</td>
+                            <td className="p-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                                t.status === 'verified' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                              }`}>
+                                {t.status}
+                              </span>
+                            </td>
+                            <td className="p-3 text-right">
+                              <button
+                                onClick={() => handleDeleteTransaction(t.id)}
+                                className="text-red-600 hover:underline text-xs font-bold"
+                              >
+                                Delete
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
               </div>
 
@@ -1924,6 +2229,181 @@ export default function AdminPortal() {
       </main>
 
       </div>
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL 1: OFFICIAL QUOTATION GENERATOR & WHATSAPP DISPATCH */}
+      {/* ------------------------------------------------------------- */}
+      {quoteModalOpen && selectedInquiryForQuote && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 border border-slate-200">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div>
+                <h3 className="text-lg font-extrabold text-[#001e3c] font-serif">📄 Generate & Send Official Quote</h3>
+                <p className="text-xs text-slate-500">Customer: <strong className="text-[#0056a8]">{selectedInquiryForQuote.name}</strong> ({selectedInquiryForQuote.phone})</p>
+              </div>
+              <button onClick={() => setQuoteModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Service / Requirement Title</label>
+                <input
+                  type="text"
+                  value={quoteForm.title}
+                  onChange={(e) => setQuoteForm({ ...quoteForm, title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-semibold text-[#001e3c]"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Quote Price (₹) *</label>
+                  <input
+                    type="number"
+                    value={quoteForm.price}
+                    onChange={(e) => setQuoteForm({ ...quoteForm, price: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-[#0056a8]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Discount (₹)</label>
+                  <input
+                    type="number"
+                    value={quoteForm.discount}
+                    onChange={(e) => setQuoteForm({ ...quoteForm, discount: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-bold text-emerald-600"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 mb-1">Terms & Service Inclusions</label>
+                <textarea
+                  rows={2}
+                  value={quoteForm.notes}
+                  onChange={(e) => setQuoteForm({ ...quoteForm, notes: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 font-medium text-slate-700"
+                />
+              </div>
+            </div>
+
+            {/* Preview Box */}
+            <div className="p-3.5 rounded-2xl bg-cyan-50/70 border border-cyan-200 space-y-1.5 text-[11px] text-slate-700">
+              <div className="font-bold text-[#0056a8]">Official Quote Message Summary:</div>
+              <div className="font-mono bg-white p-2.5 rounded-xl border border-cyan-100 leading-relaxed">
+                <div>• Customer: {selectedInquiryForQuote.name}</div>
+                <div>• Service: {quoteForm.title}</div>
+                <div>• Price: ₹{quoteForm.price}</div>
+                <div>• Net Total: ₹{Math.max(0, (Number(quoteForm.price) || 0) - (Number(quoteForm.discount) || 0))}</div>
+                <div>• Direct Payment UPI: {formData.companyUpiId || '9666827570@upi'}</div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setQuoteModalOpen(false)}
+                className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 text-xs"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  const netPrice = Math.max(0, (Number(quoteForm.price) || 0) - (Number(quoteForm.discount) || 0))
+                  
+                  // Also update quote in local formData inquiry
+                  handleUpdateInquiryPayment(selectedInquiryForQuote.id, {
+                    quoteAmount: netPrice,
+                  })
+
+                  const cleanPhone = selectedInquiryForQuote.phone.replace(/[^0-9]/g, '')
+                  const upiId = formData.companyUpiId || '9666827570@upi'
+                  
+                  const msg = `*SREE WATER SOLUTIONS - OFFICIAL QUOTATION*%0A%0A` +
+                    `Dear *${encodeURIComponent(selectedInquiryForQuote.name)}*,%0A` +
+                    `Thank you for reaching out to Sree Water Solutions! Here is your official service quotation:%0A%0A` +
+                    `📋 *Service:* ${encodeURIComponent(quoteForm.title)}%0A` +
+                    `💰 *Quoted Price:* ₹${quoteForm.price}%0A` +
+                    (Number(quoteForm.discount) > 0 ? `🎁 *Discount Applied:* ₹${quoteForm.discount}%0A` : '') +
+                    `✅ *Final Net Total:* ₹${netPrice}%0A%0A` +
+                    `📝 *Inclusions:* ${encodeURIComponent(quoteForm.notes)}%0A%0A` +
+                    `💳 *Direct Bank/UPI Payment Details:*%0A` +
+                    `UPI ID: *${upiId}*%0A` +
+                    `GPay / PhonePe Number: *9666827570*%0A%0A` +
+                    `Reply YES to confirm your booking or call us at +91 9666827570!`
+
+                  window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank')
+                  setQuoteModalOpen(false)
+                }}
+                className="flex-1 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md"
+              >
+                💬 Dispatch Quote via WhatsApp
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL 2: DIRECT UPI QR CODE & BANK PAYMENT POPUP */}
+      {/* ------------------------------------------------------------- */}
+      {qrModalOpen && selectedInquiryForQr && (() => {
+        const upiId = formData.companyUpiId || '9666827570@upi'
+        const amount = selectedInquiryForQr.quoteAmount || 0
+        const upiPayString = `upi://pay?pa=${upiId}&pn=SreeWaterSolutions&am=${amount}&cu=INR`
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(upiPayString)}`
+
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+            <div className="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl space-y-5 border border-slate-200 text-center">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div className="text-left">
+                  <h3 className="text-base font-extrabold text-[#001e3c]">💳 Instant UPI QR Payment</h3>
+                  <div className="text-xs text-slate-500">{selectedInquiryForQr.name}</div>
+                </div>
+                <button onClick={() => setQrModalOpen(false)} className="text-slate-400 hover:text-slate-600 font-bold">✕</button>
+              </div>
+
+              {/* Dynamic QR Code */}
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 inline-block mx-auto shadow-inner">
+                <img src={qrUrl} alt="UPI Payment QR Code" className="w-48 h-48 mx-auto rounded-xl" />
+              </div>
+
+              <div className="space-y-1">
+                <div className="text-xs text-slate-500">Scan with Google Pay, PhonePe, Paytm, or BHIM</div>
+                <div className="text-xl font-extrabold text-[#0056a8]">₹{Number(amount).toLocaleString('en-IN')}</div>
+                <div className="text-xs font-mono font-bold text-slate-700 bg-cyan-50 p-2 rounded-xl border border-cyan-200">
+                  UPI ID: {upiId}
+                </div>
+              </div>
+
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={() => {
+                    const cleanPhone = selectedInquiryForQr.phone.replace(/[^0-9]/g, '')
+                    const msg = `Hi *${encodeURIComponent(selectedInquiryForQr.name)}*, please scan to pay ₹${amount} for Sree Water Solutions:%0A%0A` +
+                      `UPI ID: *${upiId}*%0A` +
+                      `Direct Payment Link: ${encodeURIComponent(upiPayString)}`
+                    window.open(`https://wa.me/${cleanPhone}?text=${msg}`, '_blank')
+                  }}
+                  className="flex-1 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs"
+                >
+                  💬 Send QR via WhatsApp
+                </button>
+                <button
+                  onClick={() => setQrModalOpen(false)}
+                  className="px-4 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-bold text-xs"
+                >
+                  Close
+                </button>
+              </div>
+
+            </div>
+          </div>
+        )
+      })()}
+
     </div>
   )
 }

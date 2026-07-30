@@ -5,6 +5,12 @@ import type { VercelRequest, VercelResponse } from '@vercel/node'
 let globalSiteData: any = null
 
 export default function handler(req: VercelRequest, res: VercelResponse) {
+  // Security Headers against Clickjacking, MIME sniffing & XSS
+  res.setHeader('X-Frame-Options', 'DENY')
+  res.setHeader('X-Content-Type-Options', 'nosniff')
+  res.setHeader('X-XSS-Protection', '1; mode=block')
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin')
+
   // Set CORS headers for cross-origin client access
   res.setHeader('Access-Control-Allow-Credentials', 'true')
   res.setHeader('Access-Control-Allow-Origin', '*')

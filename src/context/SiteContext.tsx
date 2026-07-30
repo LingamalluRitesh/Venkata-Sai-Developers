@@ -35,6 +35,18 @@ export interface InquiryData {
   paymentNotes?: string
 }
 
+export interface TransactionRecord {
+  id: string
+  inquiryId?: string
+  customerName: string
+  customerPhone: string
+  amount: number
+  paymentMode: string
+  date: string
+  status: 'verified' | 'pending'
+  notes?: string
+}
+
 export interface SiteData {
   companyName: string
   companySubtitle: string
@@ -52,10 +64,23 @@ export interface SiteData {
   founderImgUrl: string
   adminUsername: string
   adminPass: string
+  companyUpiId: string
   services: ServiceData[]
   galleryItems: ServiceGalleryItem[]
   cities: string[]
   inquiries?: InquiryData[]
+  transactions?: TransactionRecord[]
+}
+
+export function sanitizeInput(input: string): string {
+  if (!input) return ''
+  return String(input)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/\//g, '&#x2F;')
 }
 
 const defaultSiteData: SiteData = {
@@ -76,6 +101,8 @@ const defaultSiteData: SiteData = {
   founderImgUrl: "",
   adminUsername: "sreewater",
   adminPass: "9666827570",
+  companyUpiId: "9666827570@upi",
+  transactions: [],
   cities: [
     'Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Nellore',
     'Kurnool', 'Rajahmundry', 'Kakinada', 'Eluru', 'Ongole',
