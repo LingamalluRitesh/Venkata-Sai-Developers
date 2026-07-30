@@ -70,8 +70,8 @@ const defaultSiteData: SiteData = {
   logoUrl: "",
   heroImageUrl: "",
   founderImgUrl: "",
-  adminUsername: "admin",
-  adminPass: "sreewater@2026",
+  adminUsername: "sreewater",
+  adminPass: "9666827570",
   cities: [
     'Visakhapatnam', 'Vijayawada', 'Guntur', 'Tirupati', 'Nellore',
     'Kurnool', 'Rajahmundry', 'Kakinada', 'Eluru', 'Ongole',
@@ -196,7 +196,7 @@ interface SiteContextType {
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
 
-const STORAGE_KEY = 'sree_water_site_data_v3'
+const STORAGE_KEY = 'sree_water_site_data_v4'
 
 export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [siteData, setSiteData] = useState<SiteData>(() => {
