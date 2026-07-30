@@ -1385,10 +1385,31 @@ export default function AdminPortal() {
                     }}
                     className="px-3 py-2 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold"
                   >
-                    Reset to Default
+                    Reset Endpoint
                   </button>
                 </div>
               </div>
+            </div>
+
+            {/* Reset All Database Edits to Fresh Code Defaults */}
+            <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-rose-900">Revert All Content to Default Code Values</div>
+                <div className="text-[11px] text-rose-700">
+                  Discards all live Admin Portal database edits and resets company phone, text, services, and photos back to default codebase values.
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to discard all Admin Portal edits and revert back to fresh code defaults?')) {
+                    resetToDefaults()
+                    alert('All site content has been reset to default code values.')
+                  }
+                }}
+                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm whitespace-nowrap"
+              >
+                ⚠️ Revert to Code Defaults
+              </button>
             </div>
           </div>
         )}
