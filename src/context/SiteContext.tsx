@@ -182,10 +182,12 @@ interface SiteContextType {
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
 
+const STORAGE_KEY = 'sree_water_site_data_v2'
+
 export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [siteData, setSiteData] = useState<SiteData>(() => {
     try {
-      const saved = localStorage.getItem('sree_water_site_data')
+      const saved = localStorage.getItem(STORAGE_KEY)
       if (saved) {
         const parsed = JSON.parse(saved)
         return { ...defaultSiteData, ...parsed }
@@ -212,9 +214,10 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const remoteData = await fetchRemoteSiteData()
       if (remoteData && Object.keys(remoteData).length > 0) {
         setSiteData((prev) => {
+          // Priority: defaultSiteData -> prev (local) -> remoteData (server overrides local cache)
           const merged = { ...defaultSiteData, ...prev, ...remoteData }
           try {
-            localStorage.setItem('sree_water_site_data', JSON.stringify(merged))
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged))
           } catch (err) {
             console.error(err)
           }
@@ -233,13 +236,16 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }
 
+
   useEffect(() => {
     syncWithCloud()
   }, [])
 
   useEffect(() => {
     try {
-      localStorage.setItem('sree_water_site_data', JSON.stringify(siteData))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(siteData))
+      // Clean up legacy cache key if present
+      localStorage.removeItem('sree_water_site_data')
     } catch (e) {
       console.error(e)
     }
@@ -260,7 +266,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSyncStatus('syncing')
 
     try {
-      localStorage.setItem('sree_water_site_data', JSON.stringify(updated))
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated))
     } catch (e) {
       console.error(e)
     }
@@ -278,9 +284,11 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const resetToDefaults = () => {
     setSiteData(defaultSiteData)
+    localStorage.removeItem(STORAGE_KEY)
     localStorage.removeItem('sree_water_site_data')
     setIsAuthenticated(false)
   }
+
 
   return (
     <SiteContext.Provider
