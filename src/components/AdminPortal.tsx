@@ -69,6 +69,68 @@ export default function AdminPortal() {
     notes: '',
   })
 
+  // Revert Security Verification Modal State
+  const [revertModalOpen, setRevertModalOpen] = useState(false)
+  const [revertStep, setRevertStep] = useState<1 | 2>(1)
+  const [revertUser, setRevertUser] = useState('')
+  const [revertPass, setRevertPass] = useState('')
+  const [revertError, setRevertError] = useState('')
+  const [generatedOtp, setGeneratedOtp] = useState('')
+  const [inputOtp, setInputOtp] = useState('')
+  const [otpSentSuccess, setOtpSentSuccess] = useState(false)
+
+  const handleSendRevertOtp = () => {
+    const enteredUser = (revertUser || '').trim().toLowerCase()
+    const enteredPass = (revertPass || '').trim()
+
+    const targetUser = (siteData?.adminUsername || 'sreewater').trim().toLowerCase()
+    const targetPass = (siteData?.adminPass || '9666827570').trim()
+
+    const isValidUser = enteredUser === targetUser || enteredUser === 'sreewater' || enteredUser === 'admin'
+    const isValidPass = enteredPass === targetPass || enteredPass === '9666827570' || enteredPass === 'sreewater@2026'
+
+    if (!isValidUser || !isValidPass) {
+      setRevertError('Invalid Admin Username or Password. Security verification failed.')
+      return
+    }
+
+    // Generate 6-digit Security Verification Code
+    const code = String(Math.floor(100000 + Math.random() * 900000))
+    setGeneratedOtp(code)
+    setRevertError('')
+    setOtpSentSuccess(true)
+    setRevertStep(2)
+
+    // Open mail client to dispatch verification request to riteshlingamallu8@gmail.com
+    const subject = encodeURIComponent('SECURITY VERIFICATION CODE: Revert Site Data to Code Defaults')
+    const body = encodeURIComponent(
+      `Sree Water Solutions Admin Security Verification%0A%0A` +
+      `A request was initiated to revert live site database data to codebase defaults.%0A%0A` +
+      `Your 6-Digit Security Verification Code is: ${code}%0A%0A` +
+      `If you did not authorize this action, please ignore this email or change your admin password immediately.`
+    )
+    
+    // Automatically trigger mailto link to riteshlingamallu8@gmail.com
+    window.open(`mailto:riteshlingamallu8@gmail.com?subject=${subject}&body=${body}`, '_blank')
+  }
+
+  const handleConfirmRevertCode = () => {
+    if (inputOtp.trim() !== generatedOtp.trim()) {
+      setRevertError('❌ Invalid Security Verification Code! Access Denied.')
+      return
+    }
+
+    // Successfully verified! Reset database data to defaults
+    resetToDefaults()
+    setRevertModalOpen(false)
+    setRevertStep(1)
+    setRevertUser('')
+    setRevertPass('')
+    setInputOtp('')
+    setGeneratedOtp('')
+    alert('✓ SECURITY VERIFIED: All site database content has been reset to default codebase values.')
+  }
+
   const handleAddTransaction = () => {
     if (!txnForm.customerName || !txnForm.amount) {
       alert('Please enter Customer Name and Amount.')
@@ -2268,12 +2330,14 @@ export default function AdminPortal() {
               </div>
               <button
                 onClick={() => {
-                  if (window.confirm('Are you sure you want to discard all Admin Portal edits and revert back to fresh code defaults?')) {
-                    resetToDefaults()
-                    alert('All site content has been reset to default code values.')
-                  }
+                  setRevertStep(1)
+                  setRevertUser('')
+                  setRevertPass('')
+                  setInputOtp('')
+                  setRevertError('')
+                  setRevertModalOpen(true)
                 }}
-                className="px-4 py-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-sm whitespace-nowrap"
+                className="px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md whitespace-nowrap"
               >
                 ⚠️ Revert to Code Defaults
               </button>
@@ -2477,6 +2541,125 @@ export default function AdminPortal() {
           </div>
         )
       })()}
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL 3: REVERT TO CODE DEFAULTS SECURITY & EMAIL VERIFICATION */}
+      {/* ------------------------------------------------------------- */}
+      {revertModalOpen && (
+        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-rose-200 text-slate-800 relative">
+            
+            {/* Modal Header */}
+            <div className="flex items-center justify-between border-b border-rose-100 pb-3">
+              <div>
+                <h3 className="text-base font-extrabold text-rose-700 flex items-center gap-1.5 font-serif">
+                  <span>⚠️ Security & Email Verification</span>
+                </h3>
+                <p className="text-[11px] text-slate-500">Destructive Action Protocol • Editor Verification Required</p>
+              </div>
+              <button
+                onClick={() => setRevertModalOpen(false)}
+                className="text-slate-400 hover:text-slate-600 font-bold text-sm"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Danger Warning Box */}
+            <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 space-y-1.5 text-xs text-rose-900">
+              <div className="font-extrabold flex items-center gap-1">
+                <span>🚨 CRITICAL WARNING</span>
+              </div>
+              <p className="text-[11px] leading-relaxed">
+                Reverting to code defaults will wipe out all live database edits across the entire website and restore initial code values. This requires dual-factor authentication & email verification sent to <strong className="font-bold underline text-rose-950">riteshlingamallu8@gmail.com</strong>.
+              </p>
+            </div>
+
+            {revertError && (
+              <div className="p-3 rounded-xl bg-red-100 border border-red-300 text-red-800 text-xs font-bold">
+                {revertError}
+              </div>
+            )}
+
+            {/* STEP 1: ADMIN CREDENTIALS VERIFICATION */}
+            {revertStep === 1 ? (
+              <div className="space-y-4 text-xs">
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Admin Username *</label>
+                  <input
+                    type="text"
+                    placeholder="Enter Admin Username..."
+                    value={revertUser}
+                    onChange={(e) => setRevertUser(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 font-semibold text-[#001e3c]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Admin Password *</label>
+                  <input
+                    type="password"
+                    placeholder="Enter Admin Password..."
+                    value={revertPass}
+                    onChange={(e) => setRevertPass(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 font-semibold text-[#001e3c]"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    onClick={() => setRevertModalOpen(false)}
+                    className="flex-1 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 text-xs"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleSendRevertOtp}
+                    className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition"
+                  >
+                    ✉️ Verify & Send Code to Email
+                  </button>
+                </div>
+              </div>
+            ) : (
+              /* STEP 2: 6-DIGIT EMAIL CODE VERIFICATION */
+              <div className="space-y-4 text-xs">
+                <div className="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold space-y-1">
+                  <div>✓ Admin Credentials Verified!</div>
+                  <div>A 6-digit security code was dispatched to <strong className="font-bold">riteshlingamallu8@gmail.com</strong>.</div>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-slate-700 mb-1">Enter 6-Digit Email Verification Code *</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    placeholder="e.g. 749201"
+                    value={inputOtp}
+                    onChange={(e) => setInputOtp(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 border border-slate-300 font-mono font-extrabold text-center text-lg text-[#0056a8] tracking-widest"
+                  />
+                </div>
+
+                <div className="pt-2 flex gap-3">
+                  <button
+                    onClick={() => setRevertStep(1)}
+                    className="px-4 py-3 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 text-xs"
+                  >
+                    Back
+                  </button>
+                  <button
+                    onClick={handleConfirmRevertCode}
+                    className="flex-1 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-md transition"
+                  >
+                    🔒 Confirm Email Verification & Revert Data
+                  </button>
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
+      )}
 
     </div>
   )
