@@ -28,11 +28,25 @@ export default function AdminPortal() {
   const [forgotSent, setForgotSent] = useState(false)
 
   // Admin Portal Tab State
-  const [activeTab, setActiveTab] = useState<'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('gallery')
+  const [activeTab, setActiveTab] = useState<'inquiries' | 'gallery' | 'services' | 'general' | 'coverage' | 'security' | 'images' | 'cloud'>('inquiries')
   const [formData, setFormData] = useState({ ...siteData })
   const [newCity, setNewCity] = useState('')
   const [savedSuccess, setSavedSuccess] = useState(false)
   const [customCloudUrlInput, setCustomCloudUrlInput] = useState(getActiveCloudUrl())
+
+  const handleUpdateInquiryStatus = (id: string, status: 'new' | 'contacted' | 'resolved') => {
+    const updated = (formData.inquiries || []).map((inq) =>
+      inq.id === id ? { ...inq, status } : inq
+    )
+    setFormData({ ...formData, inquiries: updated })
+  }
+
+  const handleDeleteInquiry = (id: string) => {
+    if (window.confirm('Delete this customer inquiry?')) {
+      const updated = (formData.inquiries || []).filter((inq) => inq.id !== id)
+      setFormData({ ...formData, inquiries: updated })
+    }
+  }
 
   useEffect(() => {
     setFormData({ ...siteData })
@@ -505,6 +519,7 @@ export default function AdminPortal() {
         {/* Navigation Tabs Bar */}
         <div className="bg-white rounded-xl p-1.5 border border-[#c3ddf0] shadow-sm flex gap-1.5 overflow-x-auto">
           {[
+            { id: 'inquiries', label: `📬 Customer Inquiries (${(formData.inquiries || []).length})` },
             { id: 'gallery', label: 'Previous Work' },
             { id: 'services', label: 'Services Manager' },
             { id: 'general', label: 'Company & Contact Details' },
@@ -533,6 +548,144 @@ export default function AdminPortal() {
           </div>
         )}
 
+
+        {/* TAB 0: CUSTOMER INQUIRIES & QUOTE REQUESTS */}
+        {activeTab === 'inquiries' && (
+          <div className="bg-white rounded-2xl p-6 border border-[#c3ddf0] shadow-sm space-y-6">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#001e3c] flex items-center gap-2">
+                  <span>📬 Customer Inquiries & Quote Requests</span>
+                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#0056a8] text-white font-bold">
+                    {(formData.inquiries || []).length} Total
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Real-time list of all quote requests and service inquiries submitted by visitors on your website
+                </p>
+              </div>
+
+              {(formData.inquiries || []).length > 0 && (
+                <button
+                  onClick={() => {
+                    if (window.confirm('Clear all customer inquiries?')) {
+                      setFormData({ ...formData, inquiries: [] })
+                    }
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-red-50 text-red-600 border border-red-200 text-xs font-bold hover:bg-red-100"
+                >
+                  Clear All Inquiries
+                </button>
+              )}
+            </div>
+
+            {(!formData.inquiries || formData.inquiries.length === 0) ? (
+              <div className="p-12 text-center bg-slate-50 rounded-xl border border-dashed border-slate-200 space-y-2">
+                <div className="text-3xl">📭</div>
+                <div className="text-sm font-bold text-[#001e3c]">No Customer Inquiries Yet</div>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                  When a customer fills out the "Contact Us" or "Get Quote" form on your website, their name, phone number, city, and service requirement will appear here live.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {formData.inquiries.map((inq) => {
+                  const cleanPhone = (inq.phone || '').replace(/[^0-9]/g, '')
+                  return (
+                    <div
+                      key={inq.id}
+                      className={`p-5 rounded-xl border transition-all ${
+                        inq.status === 'new'
+                          ? 'bg-cyan-50/70 border-cyan-300 shadow-sm'
+                          : inq.status === 'contacted'
+                          ? 'bg-amber-50/50 border-amber-200'
+                          : 'bg-slate-50 border-slate-200 opacity-80'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-start justify-between gap-3 border-b border-slate-200/60 pb-3">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-extrabold text-sm text-[#001e3c]">{inq.name}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${
+                              inq.status === 'new'
+                                ? 'bg-cyan-500 text-white animate-pulse'
+                                : inq.status === 'contacted'
+                                ? 'bg-amber-500 text-white'
+                                : 'bg-emerald-600 text-white'
+                            }`}>
+                              {inq.status}
+                            </span>
+                          </div>
+
+                          <div className="flex flex-wrap items-center gap-3 text-xs text-slate-600">
+                            <span className="font-bold text-[#0056a8]">📞 {inq.phone}</span>
+                            {inq.city && <span>📍 {inq.city}</span>}
+                            {inq.serviceType && (
+                              <span className="px-2 py-0.5 rounded bg-white border border-slate-200 font-semibold text-[#001e3c]">
+                                🛠️ {inq.serviceType}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-right text-[11px] text-slate-400 font-semibold">
+                          📅 {inq.createdAt}
+                        </div>
+                      </div>
+
+                      {/* Message Content */}
+                      {inq.message && (
+                        <div className="pt-3 text-xs text-slate-700 bg-white/70 p-3 rounded-lg border border-slate-100 mt-3 font-medium">
+                          💬 "{inq.message}"
+                        </div>
+                      )}
+
+                      {/* Action Bar */}
+                      <div className="pt-3.5 flex flex-wrap items-center justify-between gap-2">
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${cleanPhone}`}
+                            className="px-3 py-1.5 rounded-lg bg-[#0056a8] text-white text-xs font-bold hover:bg-[#003870] flex items-center gap-1"
+                          >
+                            📞 Call Customer
+                          </a>
+                          <a
+                            href={`https://wa.me/${cleanPhone}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-bold hover:bg-emerald-700 flex items-center gap-1"
+                          >
+                            💬 Chat on WhatsApp
+                          </a>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={inq.status}
+                            onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value as any)}
+                            className="px-2.5 py-1 rounded-lg bg-white border border-slate-300 text-xs font-bold text-[#001e3c]"
+                          >
+                            <option value="new">Mark as New</option>
+                            <option value="contacted">Mark as Contacted</option>
+                            <option value="resolved">Mark as Resolved</option>
+                          </select>
+
+                          <button
+                            onClick={() => handleDeleteInquiry(inq.id)}
+                            className="px-2.5 py-1 rounded-lg bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* TAB 1: PREVIOUS WORK */}
         {activeTab === 'gallery' && (

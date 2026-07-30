@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSiteContext } from '../context/SiteContext'
 
 export default function Contact() {
-  const { siteData } = useSiteContext()
+  const { siteData, addInquiry } = useSiteContext()
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -11,14 +11,27 @@ export default function Contact() {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const cleanPhone = siteData.phoneNumber.replace(/[^0-9]/g, '')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setSubmitted(true)
+    setIsSubmitting(true)
 
-    // Build formatted message text for company WhatsApp
+    // 1. Save inquiry to database & cloud sync
+    await addInquiry({
+      name: formData.name,
+      phone: formData.phone,
+      city: formData.city,
+      serviceType: formData.serviceType,
+      message: formData.message,
+    })
+
+    setSubmitted(true)
+    setIsSubmitting(false)
+
+    // 2. Build formatted message text for company WhatsApp
     const whatsappMsg = `*New Service Enquiry - Sree Water Solutions*%0A%0A` +
       `*Name:* ${encodeURIComponent(formData.name)}%0A` +
       `*Phone:* ${encodeURIComponent(formData.phone)}%0A` +
@@ -26,7 +39,7 @@ export default function Contact() {
       `*Service Required:* ${encodeURIComponent(formData.serviceType || 'General Purifier Inquiry')}%0A` +
       `*Message:* ${encodeURIComponent(formData.message || 'I need water purifier service / quote.')}`
 
-    // Automatically open WhatsApp to company number (+91 9666827570)
+    // 3. Automatically open WhatsApp to company number (+91 9666827570)
     window.open(`https://wa.me/${cleanPhone}?text=${whatsappMsg}`, '_blank')
   }
 

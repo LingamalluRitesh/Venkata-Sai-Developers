@@ -20,6 +20,17 @@ export interface ServiceGalleryItem {
   cropMode?: 'cover' | 'contain'
 }
 
+export interface InquiryData {
+  id: string
+  name: string
+  phone: string
+  city?: string
+  serviceType?: string
+  message?: string
+  createdAt: string
+  status: 'new' | 'contacted' | 'resolved'
+}
+
 export interface SiteData {
   companyName: string
   companySubtitle: string
@@ -40,9 +51,11 @@ export interface SiteData {
   services: ServiceData[]
   galleryItems: ServiceGalleryItem[]
   cities: string[]
+  inquiries?: InquiryData[]
 }
 
 const defaultSiteData: SiteData = {
+  inquiries: [],
   companyName: "Sree Water Solutions",
   companySubtitle: "Purification & Services",
   phoneNumber: "+91 9666827570",
@@ -178,6 +191,7 @@ interface SiteContextType {
   syncStatus: 'idle' | 'syncing' | 'synced' | 'error'
   lastSyncedAt: Date | null
   syncWithCloud: () => Promise<void>
+  addInquiry: (inquiry: Omit<InquiryData, 'id' | 'createdAt' | 'status'>) => Promise<void>
 }
 
 const SiteContext = createContext<SiteContextType | undefined>(undefined)
@@ -282,6 +296,18 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return success
   }
 
+  const addInquiry = async (inquiry: Omit<InquiryData, 'id' | 'createdAt' | 'status'>) => {
+    const newInquiry: InquiryData = {
+      ...inquiry,
+      id: `inq-${Date.now()}`,
+      createdAt: new Date().toLocaleString(),
+      status: 'new',
+    }
+
+    const updatedInquiries = [newInquiry, ...(siteData.inquiries || [])]
+    await updateSiteData({ inquiries: updatedInquiries })
+  }
+
   const resetToDefaults = () => {
     setSiteData(defaultSiteData)
     localStorage.removeItem(STORAGE_KEY)
@@ -304,6 +330,7 @@ export const SiteProvider: React.FC<{ children: React.ReactNode }> = ({ children
         syncStatus,
         lastSyncedAt,
         syncWithCloud,
+        addInquiry,
       }}
     >
       {children}
@@ -326,6 +353,7 @@ export const useSiteContext = () => {
       syncStatus: 'idle' as const,
       lastSyncedAt: null,
       syncWithCloud: async () => {},
+      addInquiry: async () => {},
     }
   }
   return context
