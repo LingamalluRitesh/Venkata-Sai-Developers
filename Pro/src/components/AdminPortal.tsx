@@ -154,7 +154,7 @@ export const AdminPortal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
-  const MAX_GALLERY_PHOTOS = 4;
+  const MAX_GALLERY_PHOTOS = 20;
 
   const handleAddGalleryImage = () => {
     if (targetGalleryVenture.galleryImages.length >= MAX_GALLERY_PHOTOS) {
