@@ -113,15 +113,10 @@ export const Footer: React.FC = () => {
 
         </div>
 
-        {/* Bottom copyright & admin quick switch */}
+        {/* Bottom copyright */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <p>© {new Date().getFullYear()} {settings.ventureName}. All rights reserved.</p>
-          <button
-            onClick={() => setActiveTab('ADMIN_PORTAL')}
-            className="flex items-center gap-1 text-slate-400 hover:text-emerald-400 font-semibold"
-          >
-            <ShieldCheck className="w-4 h-4" /> Admin Management Access
-          </button>
+          <p className="text-slate-400 font-semibold">Crafting Premium Villa Plots & Eco Living Spaces</p>
         </div>
       </div>
     </footer>
