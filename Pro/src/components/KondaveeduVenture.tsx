@@ -88,53 +88,43 @@ export const KondaveeduVenture: React.FC = () => {
             {activeProject.tagline}
           </p>
 
-          {/* Glossy Interactive Action CTAs */}
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
+          {/* Standardized Equal-Size Action CTAs Grid */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full max-w-4xl mx-auto">
+            
             <button
               onClick={() => setIsInquiryModalOpen(true)}
-              className="btn-glossy btn-glossy-blue px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2"
+              className="h-13 px-5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <Sparkles className="w-4 h-4 text-white animate-spin-slow" />
-              <span>Enquire & Reserve Spot</span>
+              <Sparkles className="w-4 h-4 shrink-0" />
+              <span className="truncate">Enquire & Reserve</span>
             </button>
 
             <button
               onClick={() => setIsSiteVisitModalOpen(true)}
-              className="btn-glossy btn-glossy-white px-6 py-3.5 rounded-2xl font-black text-xs tracking-wide shadow-xl flex items-center gap-2"
+              className="h-13 px-5 bg-white hover:bg-slate-50 text-slate-900 font-bold text-xs sm:text-sm rounded-xl shadow-lg border border-slate-200 transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <Calendar className="w-4 h-4 text-blue-600" />
-              <span>Schedule Free Site Visit</span>
+              <Calendar className="w-4 h-4 text-blue-600 shrink-0" />
+              <span className="truncate">Schedule Visit</span>
             </button>
 
             <a
               href={whatsappUrl}
               target="_blank"
               rel="noreferrer"
-              className="btn-glossy btn-glossy-emerald px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2 cursor-pointer"
+              className="h-13 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <MessageSquare className="w-4 h-4 text-white animate-bounce" />
-              <span>WhatsApp Us</span>
+              <MessageSquare className="w-4 h-4 shrink-0" />
+              <span className="truncate">WhatsApp Chat</span>
             </a>
 
             <a
               href="tel:+919030903364"
-              className="btn-glossy btn-glossy-amber px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2 cursor-pointer"
+              className="h-13 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg border border-slate-700 transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <PhoneCall className="w-4 h-4 text-white animate-pulse" />
-              <span>Call +91 90309 03364</span>
+              <PhoneCall className="w-4 h-4 text-amber-400 shrink-0" />
+              <span className="truncate">Call Office</span>
             </a>
 
-            {activeProject.brochureUrl && (
-              <a
-                href={activeProject.brochureUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="btn-glossy btn-glossy-dark px-5 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2"
-              >
-                <Download className="w-4 h-4 text-blue-400" />
-                <span>PDF Brochure</span>
-              </a>
-            )}
           </div>
 
           {/* Quick Metrics Bar */}
