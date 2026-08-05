@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { ArrowRight, Calendar, MapPin, Sparkles, Download } from 'lucide-react';
+import { ArrowRight, Calendar, MapPin, Sparkles, Download, MessageSquare, PhoneCall } from 'lucide-react';
 
 const TYPING_QUOTES = [
   "Investing in the land will make your future better.",
@@ -9,9 +9,15 @@ const TYPING_QUOTES = [
   "Secure your children's future with prime villa plots."
 ];
 
+// High-Definition Aerial Drone Video Stream URL for Cloud Hosting (Render / Production)
+const ONLINE_DRONE_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4";
+
 export const HeroVideoSection: React.FC = () => {
-  const { setActiveTab, setIsSiteVisitModalOpen, activeProject } = useApp();
+  const { setActiveTab, setIsSiteVisitModalOpen, activeProject, settings } = useApp();
   
+  // Dynamic video source handling for local vs cloud deployment
+  const [videoSrc, setVideoSrc] = useState('/landing_video.mp4');
+
   // Typing animation state
   const [textIndex, setTextIndex] = useState(0);
   const [charIndex, setCharIndex] = useState(0);
@@ -41,24 +47,31 @@ export const HeroVideoSection: React.FC = () => {
     return () => clearTimeout(timeout);
   }, [charIndex, isDeleting, textIndex]);
 
+  const phoneNum = settings.contactPhone || '+919030903364';
+  const whatsappUrl = `https://wa.me/918978815621?text=Hi%20Venkata%20Sai%20Developers%2C%20I%20am%20interested%20in%20Kondaveedu%20Venture%20Plots`;
+
   return (
     <div className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-950">
       
-      {/* Landing Page Video Background - Instant Play (No Poster Image) */}
+      {/* Landing Page Video Background with Auto Fallback for Render */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <video
+          key={videoSrc}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
+          onError={() => {
+            // Fallback to online CDN drone video if local 500MB video is omitted from Git repo
+            if (videoSrc !== ONLINE_DRONE_VIDEO_URL) {
+              setVideoSrc(ONLINE_DRONE_VIDEO_URL);
+            }
+          }}
           className="w-full h-full object-cover scale-105 filter brightness-90 saturate-110 transform transition-transform duration-10000 hover:scale-100"
         >
-          <source src="/landing_video.mp4" type="video/mp4" />
-          <source
-            src="https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4"
-            type="video/mp4"
-          />
+          <source src={videoSrc} type="video/mp4" />
+          <source src={ONLINE_DRONE_VIDEO_URL} type="video/mp4" />
         </video>
         
         {/* Crisp Gradient Overlay for text contrast */}
@@ -90,10 +103,10 @@ export const HeroVideoSection: React.FC = () => {
         </p>
 
         {/* Action Buttons */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full max-w-xl">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full max-w-2xl">
           <button
             onClick={() => setActiveTab('KONDAVEEDU_VENTURE')}
-            className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-base rounded-2xl shadow-xl hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-3 group"
+            className="w-full sm:w-auto px-7 py-4 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm rounded-2xl shadow-xl hover:shadow-blue-500/30 transition-all transform hover:-translate-y-0.5 flex items-center justify-center gap-2.5 group"
           >
             <Sparkles className="w-5 h-5 group-hover:rotate-12 transition-transform" />
             <span>Explore Kondaveedu Venture</span>
@@ -102,18 +115,28 @@ export const HeroVideoSection: React.FC = () => {
 
           <button
             onClick={() => setIsSiteVisitModalOpen(true)}
-            className="w-full sm:w-auto px-7 py-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-base rounded-2xl shadow-lg border border-white transition-all flex items-center justify-center gap-2.5 hover:shadow-xl"
+            className="w-full sm:w-auto px-6 py-4 bg-white/95 hover:bg-white text-slate-900 font-bold text-sm rounded-2xl shadow-lg border border-white transition-all flex items-center justify-center gap-2 hover:shadow-xl"
           >
             <Calendar className="w-5 h-5 text-blue-600" />
             <span>Schedule Free Visit</span>
           </button>
+
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noreferrer"
+            className="w-full sm:w-auto px-5 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm rounded-2xl shadow-lg transition-all flex items-center justify-center gap-2"
+          >
+            <MessageSquare className="w-4 h-4" />
+            <span>WhatsApp Us</span>
+          </a>
 
           {activeProject.brochureUrl && (
             <a
               href={activeProject.brochureUrl}
               target="_blank"
               rel="noreferrer"
-              className="w-full sm:w-auto px-6 py-4 bg-slate-900/90 hover:bg-slate-900 text-white font-bold text-sm rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2"
+              className="w-full sm:w-auto px-5 py-4 bg-slate-900/90 hover:bg-slate-900 text-white font-bold text-sm rounded-2xl border border-white/20 transition-all flex items-center justify-center gap-2"
             >
               <Download className="w-4 h-4 text-blue-400" />
               <span>Brochure PDF</span>
