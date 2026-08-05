@@ -9,14 +9,11 @@ const TYPING_QUOTES = [
   "Secure your children's future with prime villa plots."
 ];
 
-// High-Definition Aerial Drone Video Stream URL for Cloud Hosting (Render / Production)
-const ONLINE_DRONE_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4";
+// High-Definition Aerial Drone Video Stream for Instant Render & Mobile Playback
+const HERO_DRONE_VIDEO_URL = "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4";
 
 export const HeroVideoSection: React.FC = () => {
   const { setActiveTab, setIsSiteVisitModalOpen, activeProject, settings } = useApp();
-  
-  // Dynamic video source handling for local vs cloud deployment
-  const [videoSrc, setVideoSrc] = useState('/landing_video.mp4');
 
   // Typing animation state
   const [textIndex, setTextIndex] = useState(0);
@@ -53,25 +50,18 @@ export const HeroVideoSection: React.FC = () => {
   return (
     <div className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-950">
       
-      {/* Landing Page Video Background with Auto Fallback for Render */}
+      {/* Landing Page Video Background - Instant Playback on Render & Mobile */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <video
-          key={videoSrc}
           autoPlay
           loop
           muted
           playsInline
           preload="auto"
-          onError={() => {
-            // Fallback to online CDN drone video if local 500MB video is omitted from Git repo
-            if (videoSrc !== ONLINE_DRONE_VIDEO_URL) {
-              setVideoSrc(ONLINE_DRONE_VIDEO_URL);
-            }
-          }}
           className="w-full h-full object-cover scale-105 filter brightness-90 saturate-110 transform transition-transform duration-10000 hover:scale-100"
         >
-          <source src={videoSrc} type="video/mp4" />
-          <source src={ONLINE_DRONE_VIDEO_URL} type="video/mp4" />
+          <source src={HERO_DRONE_VIDEO_URL} type="video/mp4" />
+          <source src="/landing_video.mp4" type="video/mp4" />
         </video>
         
         {/* Crisp Gradient Overlay for text contrast */}
