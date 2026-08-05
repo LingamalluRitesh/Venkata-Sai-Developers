@@ -154,7 +154,13 @@ export const AdminPortal: React.FC = () => {
     reader.readAsDataURL(file);
   };
 
+  const MAX_GALLERY_PHOTOS = 4;
+
   const handleAddGalleryImage = () => {
+    if (targetGalleryVenture.galleryImages.length >= MAX_GALLERY_PHOTOS) {
+      alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture. Please remove an existing photo before adding a new one.`);
+      return;
+    }
     if (!newGalleryUrl.trim()) {
       alert('Please enter an Image URL or use the Browse File button.');
       return;
@@ -917,6 +923,10 @@ export const AdminPortal: React.FC = () => {
                       accept="image/*"
                       className="hidden"
                       onChange={(e) => {
+                        if (targetGalleryVenture.galleryImages.length >= MAX_GALLERY_PHOTOS) {
+                          alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture. Please remove an existing photo before adding a new one.`);
+                          return;
+                        }
                         if (e.target.files?.[0]) {
                           handleFileUpload(e.target.files[0], (dataUrl) => {
                             const updated = [...targetGalleryVenture.galleryImages, dataUrl];
@@ -949,7 +959,7 @@ export const AdminPortal: React.FC = () => {
             {/* Gallery Grid with Delete Option */}
             <div className="space-y-2">
               <span className="text-xs font-bold text-slate-700 uppercase block">
-                Current Photos ({targetGalleryVenture.galleryImages.length}) — Click red button to remove photo
+                Current Photos ({targetGalleryVenture.galleryImages.length} / {MAX_GALLERY_PHOTOS} Max Allowed) — Click red button to remove photo
               </span>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
