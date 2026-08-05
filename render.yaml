@@ -1,0 +1,12 @@
+# Render Deployment Blueprint Configuration for Venkata Sai Developers
+services:
+  - type: web
+    name: venkata-sai-developers
+    env: static
+    rootDir: Pro
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
