@@ -112,7 +112,7 @@ export const AdminPortal: React.FC = () => {
   // Target venture for gallery editing
   const targetGalleryVenture = allProjects.find((p) => p.id === selectedVentureIdForGallery) || kondaveeduProject;
 
-  // File Upload Helper (converts image file to Data URL)
+  // File Upload Helper (converts & compresses image file to crisp Data URL)
   const handleFileUpload = (file: File, callback: (dataUrl: string) => void) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -122,7 +122,33 @@ export const AdminPortal: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        callback(event.target.result as string);
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
+          callback(compressedDataUrl);
+        };
+        img.src = event.target.result as string;
       }
     };
     reader.readAsDataURL(file);

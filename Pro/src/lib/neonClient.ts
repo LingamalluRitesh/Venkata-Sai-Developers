@@ -1,14 +1,14 @@
 import { neon } from '@neondatabase/serverless';
 import { Inquiry, Project, SiteVisit } from '../types';
 
+const LIVE_NEON_FALLBACK_URL = "postgresql://neondb_owner:npg_xQLqDFIPid16@ep-weathered-math-aydrkoz6-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require";
+
 export class NeonService {
-  // Reads connection URL strictly from environment variables (.env file or Render Environment Settings)
+  // Reads connection URL from env variables OR defaults to live Neon connection string for universal multi-device sync
   private static getDbUrl(): string {
-    return (
-      (import.meta as any).env?.VITE_NEON_DATABASE_URL ||
-      (import.meta as any).env?.VITE_DATABASE_URL ||
-      ''
-    ).trim();
+    const envUrl = (import.meta as any).env?.VITE_NEON_DATABASE_URL || (import.meta as any).env?.VITE_DATABASE_URL || '';
+    if (envUrl && envUrl.startsWith('postgres')) return envUrl.trim();
+    return LIVE_NEON_FALLBACK_URL;
   }
 
   public static isConfigured(): boolean {
