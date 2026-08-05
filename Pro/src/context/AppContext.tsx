@@ -91,6 +91,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
   }, [allProjects]);
 
+  // Fetch live projects and photo galleries from Neon DB when website loads
+  useEffect(() => {
+    async function loadCloudProjects() {
+      const dbProjects = await NeonService.fetchProjectsFromNeon();
+      if (dbProjects && dbProjects.length > 0) {
+        setAllProjects(dbProjects);
+      }
+    }
+    loadCloudProjects();
+  }, []);
+
   const [upcomingProjects] = useState<Project[]>(INITIAL_UPCOMING_PROJECTS);
 
   const [plots, setPlots] = useState<Plot[]>(() => {
@@ -203,7 +214,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateKondaveeduProject = (updated: Partial<Project>) => {
     setAllProjects((prev) =>
-      prev.map((p, idx) => (idx === 0 ? { ...p, ...updated } : p))
+      prev.map((p, idx) => {
+        if (idx === 0) {
+          const newProj = { ...p, ...updated };
+          NeonService.syncProjectToNeon(newProj);
+          return newProj;
+        }
+        return p;
+      })
     );
     showToast('Venture details updated!');
   };
@@ -213,12 +231,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newProj: Project = { ...newProjData, id };
     setAllProjects((prev) => [...prev, newProj]);
     setActiveProjectState(newProj);
+    NeonService.syncProjectToNeon(newProj);
     showToast(`New Venture "${newProj.title}" created successfully!`);
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
     setAllProjects((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updated } : p))
+      prev.map((p) => {
+        if (p.id === id) {
+          const newProj = { ...p, ...updated };
+          NeonService.syncProjectToNeon(newProj);
+          return newProj;
+        }
+        return p;
+      })
     );
     showToast('Venture updated successfully!');
   };
