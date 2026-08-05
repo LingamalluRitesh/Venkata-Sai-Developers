@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS site_visits (
 `;
 
 export class NeonService {
-  private static dbUrl: string | null = import.meta.env.VITE_NEON_DATABASE_URL || null;
+  private static dbUrl: string | null = (import.meta as any).env?.VITE_NEON_DATABASE_URL || null;
 
   public static setDbUrl(url: string) {
     this.dbUrl = url.trim();
