@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminSettings, Inquiry, Plot, PlotStatus, Project, SiteVisit, ActiveTab, FounderInfo } from '../types';
 import { INITIAL_INQUIRIES, INITIAL_PLOTS, INITIAL_SETTINGS, INITIAL_SITE_VISITS, INITIAL_UPCOMING_PROJECTS, KONDAVEEDU_PROJECT, INITIAL_FOUNDER } from '../data/initialData';
-import { NeonService } from '../lib/neonClient';
 
 interface AppContextType {
   settings: AdminSettings;
@@ -169,9 +168,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync to local storage
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-    if (settings.neonDatabaseUrl) {
-      NeonService.setDbUrl(settings.neonDatabaseUrl);
-    }
   }, [settings]);
 
   useEffect(() => {
@@ -200,13 +196,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [siteVisits]);
 
   const updateSettings = (newSettings: Partial<AdminSettings>) => {
-    setSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      if (newSettings.neonDatabaseUrl) {
-        NeonService.setDbUrl(newSettings.neonDatabaseUrl);
-      }
-      return updated;
-    });
+    setSettings((prev) => ({ ...prev, ...newSettings }));
     showToast('Admin settings updated successfully!');
   };
 
@@ -276,22 +266,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setInquiries((prev) => [newInquiry, ...prev]);
-    
-    // Optional Neon Sync
-    await NeonService.syncInquiryToNeon(newInquiry);
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 
   const updateInquiryStatus = async (id: string, status: Inquiry['status']) => {
     setInquiries((prev) =>
-      prev.map((inq) => {
-        if (inq.id === id) {
-          const updated = { ...inq, status };
-          NeonService.syncInquiryToNeon(updated);
-          return updated;
-        }
-        return inq;
-      })
+      prev.map((inq) => (inq.id === id ? { ...inq, status } : inq))
     );
     showToast('Inquiry status updated.');
   };
@@ -304,22 +284,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setSiteVisits((prev) => [newVisit, ...prev]);
-
-    // Optional Neon Sync
-    await NeonService.syncSiteVisitToNeon(newVisit);
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 
   const updateSiteVisitStatus = async (id: string, status: SiteVisit['status']) => {
     setSiteVisits((prev) =>
-      prev.map((v) => {
-        if (v.id === id) {
-          const updated = { ...v, status };
-          NeonService.syncSiteVisitToNeon(updated);
-          return updated;
-        }
-        return v;
-      })
+      prev.map((v) => (v.id === id ? { ...v, status } : v))
     );
     showToast('Site visit status updated.');
   };

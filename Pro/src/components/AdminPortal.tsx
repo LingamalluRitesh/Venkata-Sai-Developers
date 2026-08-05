@@ -1,21 +1,18 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Plot, PlotStatus, FacingDirection, Project } from '../types';
-import { NeonService, NEON_SCHEMA_SQL } from '../lib/neonClient';
 import { 
-  ShieldCheck, 
   Users, 
   Layers, 
   Image as ImageIcon, 
-  Database, 
   Plus, 
   Trash2, 
   ArrowLeft,
   Calendar,
   Building,
   FileText,
-  Upload,
-  FolderOpen
+  FolderOpen,
+  Settings as SettingsIcon
 } from 'lucide-react';
 
 export const AdminPortal: React.FC = () => {
@@ -42,7 +39,7 @@ export const AdminPortal: React.FC = () => {
     showToast
   } = useApp();
 
-  const [activeAdminTab, setActiveAdminTab] = useState<'LEADS' | 'VENTURES' | 'PLOTS' | 'GALLERY' | 'NEON_SETTINGS'>('LEADS');
+  const [activeAdminTab, setActiveAdminTab] = useState<'LEADS' | 'VENTURES' | 'PLOTS' | 'GALLERY' | 'SETTINGS'>('LEADS');
 
   // Selected Venture ID for Gallery editing
   const [selectedVentureIdForGallery, setSelectedVentureIdForGallery] = useState<string>(kondaveeduProject.id);
@@ -71,29 +68,6 @@ export const AdminPortal: React.FC = () => {
 
   // Gallery URL input state
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
-
-  // Neon DB state
-  const [neonInputUrl, setNeonInputUrl] = useState(settings.neonDatabaseUrl || '');
-  const [neonTesting, setNeonTesting] = useState(false);
-  const [neonStatusMsg, setNeonStatusMsg] = useState<{ success?: boolean; text?: string } | null>(null);
-
-  const handleTestNeon = async () => {
-    setNeonTesting(true);
-    setNeonStatusMsg(null);
-    const result = await NeonService.testConnection(neonInputUrl);
-    setNeonTesting(false);
-    setNeonStatusMsg({ success: result.success, text: result.message });
-    if (result.success) {
-      updateSettings({ neonDatabaseUrl: neonInputUrl, isNeonConnected: true });
-    }
-  };
-
-  const handleInitNeonTables = async () => {
-    setNeonTesting(true);
-    const result = await NeonService.initTables(neonInputUrl);
-    setNeonTesting(false);
-    setNeonStatusMsg({ success: result.success, text: result.message });
-  };
 
   const handleAddPlotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -187,17 +161,12 @@ export const AdminPortal: React.FC = () => {
               <span className="px-2.5 py-0.5 bg-blue-500 text-white font-extrabold text-[11px] rounded-full uppercase">
                 Admin Control Portal
               </span>
-              {settings.isNeonConnected && (
-                <span className="px-2.5 py-0.5 bg-blue-500/20 text-blue-300 border border-blue-400/40 text-[11px] font-bold rounded-full">
-                  ⚡ Neon DB Connected
-                </span>
-              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
               Management Dashboard — {settings.ventureName}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Manage incoming enquiries, site visits, browse & upload images, manage ventures, plots, and database settings.
+              Manage customer enquiries, scheduled site visits, ventures, plot availability, pricing, photo galleries, and office settings.
             </p>
           </div>
 
@@ -278,15 +247,15 @@ export const AdminPortal: React.FC = () => {
             </button>
 
             <button
-              onClick={() => setActiveAdminTab('NEON_SETTINGS')}
+              onClick={() => setActiveAdminTab('SETTINGS')}
               className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
-                activeAdminTab === 'NEON_SETTINGS'
+                activeAdminTab === 'SETTINGS'
                   ? 'bg-slate-900 text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100'
               }`}
             >
-              <Database className="w-4 h-4 text-cyan-400" />
-              Neon DB & Office Settings
+              <SettingsIcon className="w-4 h-4 text-emerald-400" />
+              Company & Office Settings
             </button>
 
           </div>
@@ -505,7 +474,7 @@ export const AdminPortal: React.FC = () => {
               <form onSubmit={handleCreateVentureSubmit} className="bg-blue-50/70 p-6 rounded-3xl border border-blue-200 space-y-4">
                 <h4 className="text-sm font-extrabold text-blue-900 uppercase flex items-center gap-2">
                   <Building className="w-4 h-4 text-blue-600" />
-                  Add Another Venture to Website & Database
+                  Add Another Venture to Website
                 </h4>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -982,8 +951,8 @@ export const AdminPortal: React.FC = () => {
           </div>
         )}
 
-        {/* ADMIN TAB 5: NEON DB & EDITABLE OFFICE LOCATION */}
-        {activeAdminTab === 'NEON_SETTINGS' && (
+        {/* ADMIN TAB 5: COMPANY & OFFICE SETTINGS */}
+        {activeAdminTab === 'SETTINGS' && (
           <div className="space-y-8 max-w-4xl">
             
             {/* Office Location & Contact Settings with Browse Logo Option */}
@@ -1030,7 +999,7 @@ export const AdminPortal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Phone</label>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Phone (Calls)</label>
                   <input
                     type="text"
                     value={settings.contactPhone}
@@ -1040,6 +1009,16 @@ export const AdminPortal: React.FC = () => {
                 </div>
 
                 <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase mb-1">WhatsApp Phone Number</label>
+                  <input
+                    type="text"
+                    value={settings.whatsappPhone || '+91 89788 15621'}
+                    onChange={(e) => updateSettings({ whatsappPhone: e.target.value })}
+                    className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm font-semibold"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
                   <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Contact Email</label>
                   <input
                     type="email"
@@ -1116,75 +1095,6 @@ export const AdminPortal: React.FC = () => {
                     </label>
                   </div>
                 </div>
-              </div>
-            </div>
-
-            {/* Neon Serverless Postgres Setup */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-cyan-100 text-cyan-800 rounded-xl flex items-center justify-center">
-                  <Database className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Neon Postgres Serverless Database</h3>
-                  <p className="text-xs text-slate-500">
-                    Connect your serverless Neon Postgres database for real-time cloud data storage.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700 uppercase">
-                  Neon Database Connection String (`DATABASE_URL`)
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="password"
-                    placeholder="postgres://user:pass@ep-xyz.neon.tech/neondb?sslmode=require"
-                    value={neonInputUrl}
-                    onChange={(e) => setNeonInputUrl(e.target.value)}
-                    className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-xs font-mono"
-                  />
-                  <button
-                    onClick={handleTestNeon}
-                    disabled={neonTesting}
-                    className="px-5 py-3 bg-slate-900 text-white font-bold text-xs rounded-xl shadow-xs hover:bg-slate-800 transition-colors"
-                  >
-                    {neonTesting ? 'Connecting...' : 'Test Connection'}
-                  </button>
-                  <button
-                    onClick={handleInitNeonTables}
-                    disabled={neonTesting}
-                    className="px-5 py-3 bg-cyan-700 text-white font-bold text-xs rounded-xl shadow-xs hover:bg-cyan-600 transition-colors"
-                  >
-                    Init Neon Tables
-                  </button>
-                </div>
-
-                {neonStatusMsg && (
-                  <div
-                    className={`p-4 rounded-xl text-xs font-semibold ${
-                      neonStatusMsg.success
-                        ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                        : 'bg-rose-50 text-rose-900 border border-rose-200'
-                    }`}
-                  >
-                    {neonStatusMsg.text}
-                  </div>
-                )}
-              </div>
-
-              {/* Raw Schema */}
-              <div className="pt-4 border-t border-slate-100">
-                <span className="block text-xs font-bold text-slate-600 uppercase mb-2">
-                  Neon Database SQL Schema Definition
-                </span>
-                <textarea
-                  readOnly
-                  rows={6}
-                  value={NEON_SCHEMA_SQL}
-                  className="w-full p-3 bg-slate-900 text-cyan-400 rounded-xl text-[11px] font-mono select-all"
-                />
               </div>
             </div>
 
