@@ -91,7 +91,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
   }, [allProjects]);
 
-  // Fetch live projects and photo galleries from Neon DB when website loads
+  // Fetch live projects and photo galleries from Neon DB when website loads & poll every 4s for instant multi-device sync
   useEffect(() => {
     async function loadCloudProjects() {
       const dbProjects = await NeonService.fetchProjectsFromNeon();
@@ -100,6 +100,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
     loadCloudProjects();
+    const interval = setInterval(loadCloudProjects, 4000);
+    return () => clearInterval(interval);
   }, []);
 
   const [upcomingProjects] = useState<Project[]>(INITIAL_UPCOMING_PROJECTS);

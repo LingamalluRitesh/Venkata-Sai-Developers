@@ -21,17 +21,16 @@ export class NeonService {
     try {
       const sql = neon(this.getDbUrl());
       const galleryJson = JSON.stringify(project.galleryImages || []);
-      const featuresJson = JSON.stringify(project.keyFeatures || []);
 
       await sql`
         INSERT INTO projects (
           id, title, tagline, category, is_upcoming, location, distance_from_ghat_road_meters,
-          price_range_sqyd, description, key_features, hero_image, gallery_images, brochure_url
+          price_range_sqyd, description, hero_image, gallery_images, brochure_url
         )
         VALUES (
           ${project.id}, ${project.title}, ${project.tagline || ''}, ${project.category},
           ${project.isUpcoming || false}, ${project.location}, ${project.distanceFromGhatRoadMeters || 200},
-          ${project.priceRangeSqYd || ''}, ${project.description || ''}, ${featuresJson},
+          ${project.priceRangeSqYd || ''}, ${project.description || ''},
           ${project.heroImage || ''}, ${galleryJson}, ${project.brochureUrl || ''}
         )
         ON CONFLICT (id) DO UPDATE SET
@@ -66,9 +65,16 @@ export class NeonService {
         distanceFromGhatRoadMeters: r.distance_from_ghat_road_meters || 200,
         priceRangeSqYd: r.price_range_sqyd || '',
         description: r.description || '',
-        keyFeatures: Array.isArray(r.key_features) ? r.key_features : JSON.parse(r.key_features || '[]'),
+        keyFeatures: [
+          '200 meters to Kondaveedu Ghat Road',
+          'CRDA Approved Layout Blueprint',
+          '40ft & 33ft Blacktop Internal Roads',
+          'Underground Utility Pipeline & Drainage',
+          '24/7 Security Entry Arch & Solar Streetlights',
+          'High ROI Tourism & Commercial Zone'
+        ],
         heroImage: r.hero_image || '',
-        galleryImages: Array.isArray(r.gallery_images) ? r.gallery_images : JSON.parse(r.gallery_images || '[]'),
+        galleryImages: typeof r.gallery_images === 'string' ? JSON.parse(r.gallery_images || '[]') : (r.gallery_images || []),
         brochureUrl: r.brochure_url || ''
       }));
     } catch (err) {
