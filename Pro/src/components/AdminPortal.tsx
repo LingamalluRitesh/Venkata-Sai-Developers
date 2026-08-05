@@ -1,12 +1,10 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Plot, PlotStatus, FacingDirection, Project } from '../types';
-import { NeonService, NEON_SCHEMA_SQL } from '../lib/neonClient';
 import { 
   Users, 
   Layers, 
   Image as ImageIcon, 
-  Database,
   Plus, 
   Trash2, 
   ArrowLeft,
@@ -70,29 +68,6 @@ export const AdminPortal: React.FC = () => {
 
   // Gallery URL input state
   const [newGalleryUrl, setNewGalleryUrl] = useState('');
-
-  // Neon DB state
-  const [neonInputUrl, setNeonInputUrl] = useState(settings.neonDatabaseUrl || '');
-  const [neonTesting, setNeonTesting] = useState(false);
-  const [neonStatusMsg, setNeonStatusMsg] = useState<{ success?: boolean; text?: string } | null>(null);
-
-  const handleTestNeon = async () => {
-    setNeonTesting(true);
-    setNeonStatusMsg(null);
-    const result = await NeonService.testConnection(neonInputUrl);
-    setNeonTesting(false);
-    setNeonStatusMsg({ success: result.success, text: result.message });
-    if (result.success) {
-      updateSettings({ neonDatabaseUrl: neonInputUrl, isNeonConnected: true });
-    }
-  };
-
-  const handleInitNeonTables = async () => {
-    setNeonTesting(true);
-    const result = await NeonService.initTables(neonInputUrl);
-    setNeonTesting(false);
-    setNeonStatusMsg({ success: result.success, text: result.message });
-  };
 
   const handleAddPlotSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -186,17 +161,12 @@ export const AdminPortal: React.FC = () => {
               <span className="px-2.5 py-0.5 bg-blue-500 text-white font-extrabold text-[11px] rounded-full uppercase">
                 Admin Control Portal
               </span>
-              {settings.isNeonConnected && (
-                <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 text-[11px] font-bold rounded-full">
-                  ⚡ Neon Cloud DB Connected
-                </span>
-              )}
             </div>
             <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
               Management Dashboard — {settings.ventureName}
             </h1>
             <p className="text-xs text-slate-400 mt-1">
-              Manage customer enquiries, scheduled site visits, ventures, plot availability, pricing, photo galleries, and database settings.
+              Manage customer enquiries, scheduled site visits, ventures, plot availability, pricing, photo galleries, and office settings.
             </p>
           </div>
 
@@ -285,7 +255,7 @@ export const AdminPortal: React.FC = () => {
               }`}
             >
               <SettingsIcon className="w-4 h-4 text-emerald-400" />
-              Database & Office Settings
+              Company & Office Settings
             </button>
 
           </div>
@@ -981,78 +951,10 @@ export const AdminPortal: React.FC = () => {
           </div>
         )}
 
-        {/* ADMIN TAB 5: DATABASE & OFFICE SETTINGS */}
+        {/* ADMIN TAB 5: COMPANY & OFFICE SETTINGS */}
         {activeAdminTab === 'SETTINGS' && (
           <div className="space-y-8 max-w-4xl">
             
-            {/* Cloud Database Setup */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-cyan-100 text-cyan-800 rounded-xl flex items-center justify-center">
-                  <Database className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold text-slate-900">Neon Postgres Cloud Database Connection</h3>
-                  <p className="text-xs text-slate-500">
-                    Connect your Neon Postgres database to sync customer leads and site visits to your cloud database.
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <label className="block text-xs font-bold text-slate-700 uppercase">
-                  Neon Database Connection String (`DATABASE_URL`)
-                </label>
-                <div className="flex flex-col sm:flex-row gap-2">
-                  <input
-                    type="password"
-                    placeholder="postgres://neondb_owner:YOUR_PASSWORD@ep-xyz.neon.tech/neondb?sslmode=require"
-                    value={neonInputUrl}
-                    onChange={(e) => setNeonInputUrl(e.target.value)}
-                    className="flex-1 px-4 py-3 border border-slate-200 rounded-xl text-xs font-mono"
-                  />
-                  <button
-                    onClick={handleTestNeon}
-                    disabled={neonTesting}
-                    className="px-5 py-3 bg-slate-900 text-white font-bold text-xs rounded-xl shadow-xs hover:bg-slate-800 transition-colors"
-                  >
-                    {neonTesting ? 'Connecting...' : 'Test Connection'}
-                  </button>
-                  <button
-                    onClick={handleInitNeonTables}
-                    disabled={neonTesting}
-                    className="px-5 py-3 bg-cyan-700 text-white font-bold text-xs rounded-xl shadow-xs hover:bg-cyan-600 transition-colors"
-                  >
-                    Init Cloud Tables
-                  </button>
-                </div>
-
-                {neonStatusMsg && (
-                  <div
-                    className={`p-4 rounded-xl text-xs font-semibold ${
-                      neonStatusMsg.success
-                        ? 'bg-emerald-50 text-emerald-900 border border-emerald-200'
-                        : 'bg-rose-50 text-rose-900 border border-rose-200'
-                    }`}
-                  >
-                    {neonStatusMsg.text}
-                  </div>
-                )}
-              </div>
-
-              <div className="pt-4 border-t border-slate-100">
-                <span className="block text-xs font-bold text-slate-600 uppercase mb-2">
-                  Neon Cloud Database SQL Schema Reference
-                </span>
-                <textarea
-                  readOnly
-                  rows={6}
-                  value={NEON_SCHEMA_SQL}
-                  className="w-full p-3 bg-slate-900 text-cyan-400 rounded-xl text-[11px] font-mono select-all"
-                />
-              </div>
-            </div>
-
             {/* Office Location & Contact Settings with Browse Logo Option */}
             <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-200 shadow-xs space-y-4">
               <h3 className="text-xl font-bold text-slate-900">Company & Office Location Details</h3>

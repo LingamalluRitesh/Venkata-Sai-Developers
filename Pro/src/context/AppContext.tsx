@@ -169,9 +169,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Sync to local storage & Neon DB
   useEffect(() => {
     localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-    if (settings.neonDatabaseUrl) {
-      NeonService.setDbUrl(settings.neonDatabaseUrl);
-    }
   }, [settings]);
 
   useEffect(() => {
@@ -200,13 +197,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [siteVisits]);
 
   const updateSettings = (newSettings: Partial<AdminSettings>) => {
-    setSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      if (newSettings.neonDatabaseUrl) {
-        NeonService.setDbUrl(newSettings.neonDatabaseUrl);
-      }
-      return updated;
-    });
+    setSettings((prev) => ({ ...prev, ...newSettings }));
     showToast('Admin settings updated successfully!');
   };
 
