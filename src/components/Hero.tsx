@@ -1,186 +1,184 @@
-import logoDefault from '../../logo.png'
-import { useSiteContext } from '../context/SiteContext'
+import { useState } from 'react'
+import { useRealEstate } from '../context/RealEstateContext'
 
 export default function Hero() {
-  const { siteData } = useSiteContext()
-  const heroImage = siteData.heroImageUrl || logoDefault
+  const { filters, setFilters, properties } = useRealEstate()
+  const [activeTab, setActiveTab] = useState<'all' | 'For Sale' | 'For Rent'>('all')
+
+  const cities = Array.from(new Set(properties.map(p => p.city)))
+  const propertyTypes = Array.from(new Set(properties.map(p => p.type)))
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    setFilters(prev => ({
+      ...prev,
+      category: activeTab
+    }))
+    const element = document.getElementById('properties')
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
 
   return (
-    <>
-      <style>{`
-        /* Floating Bottle / Hero Image Animation */
-        @keyframes floatBottle {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-18px); }
-        }
-
-        .floatingBottle {
-          animation: floatBottle 4s ease-in-out infinite;
-        }
-
-        /* Water Bubbles Animation */
-        @keyframes bubbleFloat {
-          0% {
-            transform: translateY(0) scale(0.5);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.7;
-          }
-          100% {
-            transform: translateY(-90vh) scale(1.3);
-            opacity: 0;
-          }
-        }
-
-        .bubble {
-          position: absolute;
-          bottom: -80px;
-          border-radius: 50%;
-          background: rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(3px);
-          animation: bubbleFloat linear infinite;
-          pointer-events: none;
-        }
-
-        /* SVG Wave Movement */
-        @keyframes waveMove {
-          from { transform: translateX(0); }
-          to { transform: translateX(-50%); }
-        }
-
-        @keyframes waveMove2 {
-          from { transform: translateX(-50%); }
-          to { transform: translateX(0); }
-        }
-
-        .waves {
-          position: absolute;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-          height: 120px;
-          overflow: hidden;
-          pointer-events: none;
-        }
-
-        .wave {
-          position: absolute;
-          width: 200%;
-          height: 100%;
-          background-repeat: repeat-x;
-          background-size: 1200px 120px;
-          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120'%3E%3Cpath fill='%2300b4d8' fill-opacity='0.35' d='M0,64L40,58.7C80,53,160,43,240,42.7C320,43,400,53,480,69.3C560,85,640,107,720,106.7C800,107,880,85,960,80C1040,75,1120,85,1160,90.7L1200,96V120H0Z'/%3E%3C/svg%3E");
-        }
-
-        .wave1 {
-          animation: waveMove 10s linear infinite;
-        }
-
-        .wave2 {
-          opacity: 0.5;
-          animation: waveMove2 14s linear infinite;
-        }
-      `}</style>
-
-      <section
-        id="home"
-        className="relative min-h-screen overflow-hidden bg-gradient-to-b from-cyan-50 via-white to-cyan-100 flex items-center pt-32 pb-20"
-      >
-        {/* Floating Bubbles */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden">
-          {[...Array(20)].map((_, i) => (
-            <span
-              key={i}
-              className="bubble"
-              style={{
-                left: `${(i * 5.2) % 100}%`,
-                width: `${10 + (i % 5) * 6}px`,
-                height: `${10 + (i % 5) * 6}px`,
-                animationDuration: `${6 + (i % 6) * 1.5}s`,
-                animationDelay: `${(i % 5) * 1.2}s`,
-              }}
-            />
-          ))}
-        </div>
-
-        {/* Water Theme Overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none"
-          style={{
-            background:
-              "linear-gradient(rgba(0,180,216,0.08), rgba(255,255,255,0.18))",
-          }}
+    <section id="home" className="relative min-h-[92vh] lg:min-h-screen w-full bg-slate-950 text-white flex flex-col justify-between pt-28 pb-16 overflow-hidden">
+      
+      {/* Background Image Overlay with Vignette */}
+      <div className="absolute inset-0 pointer-events-none">
+        <img
+          src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1800&auto=format&fit=crop&q=80"
+          alt="Luxury Mansion Background"
+          className="w-full h-full object-cover object-center scale-105 filter brightness-50"
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/70 to-slate-950/40" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-transparent via-slate-950/40 to-slate-950" />
+      </div>
 
-        {/* Hero Content - Expanded Width to fill full screen */}
-        <div className="relative z-10 w-full max-w-[95%] xl:max-w-[1550px] mx-auto px-6 sm:px-10 lg:px-16 min-h-[75vh] flex flex-col-reverse lg:flex-row items-center justify-between gap-12">
+      {/* Main Hero Body */}
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 flex-1 flex flex-col justify-center py-10 lg:py-16 space-y-10">
+        
+        {/* Top Text Content */}
+        <div className="max-w-3xl space-y-6 text-center md:text-left">
+          
+          {/* Tagline Pill */}
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-bold tracking-widest uppercase backdrop-blur-md">
+            <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
+            <span>EXCLUSIVELY CURATED LUXURY REAL ESTATE</span>
+          </div>
 
-          {/* Text */}
-          <div className="w-full lg:w-1/2 text-center lg:text-left space-y-6">
+          {/* Main Title */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.1] font-serif">
+            <span>Discover Exceptional </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-amber-400 to-amber-500">
+              Homes & Luxury Estates
+            </span>
+          </h1>
+
+          <p className="text-slate-300 text-base sm:text-lg leading-relaxed max-w-2xl font-normal">
+            Explore India's finest architectural marvels, waterfront villas, penthouses, and private estates curated for refined living.
+          </p>
+        </div>
+
+        {/* Multi-Tab Property Search Box */}
+        <div className="w-full max-w-5xl rounded-3xl bg-slate-900/90 border border-slate-800 shadow-2xl backdrop-blur-xl p-4 sm:p-6 space-y-4">
+          
+          {/* Buy / Rent Tabs */}
+          <div className="flex items-center gap-2 border-b border-slate-800 pb-3">
+            {[
+              { id: 'all', label: 'All Listings' },
+              { id: 'For Sale', label: 'Buy Property' },
+              { id: 'For Rent', label: 'Rent Property' },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id as any)
+                  setFilters(prev => ({ ...prev, category: tab.id as any }))
+                }}
+                className={`px-5 py-2 rounded-xl text-xs font-extrabold transition-all duration-200 ${
+                  activeTab === tab.id
+                    ? 'bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20'
+                    : 'bg-slate-800/60 hover:bg-slate-800 text-slate-300'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search Controls Inputs */}
+          <form onSubmit={handleSearch} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
             
-            {/* 24/7 Availability Pill */}
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-100 border border-emerald-300 text-emerald-800 text-xs font-extrabold shadow-sm">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-              <span>24/7 Service & Installation Available All Days</span>
+            {/* Search Input */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold tracking-widest uppercase text-slate-400 pl-1">
+                LOCATION / KEYWORD
+              </label>
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="e.g. Jubilee Hills, Ocean View..."
+                  value={filters.searchQuery}
+                  onChange={(e) => setFilters(prev => ({ ...prev, searchQuery: e.target.value }))}
+                  className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:border-amber-400 transition"
+                />
+              </div>
             </div>
 
-            <h1
-              className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-bold leading-tight"
-              style={{ fontFamily: "Lora, serif" }}
-            >
-              <span className="text-[#00b4d8]">Pure Water, </span>
-              <span className="text-[#001e3c]">Healthy Life</span>
-            </h1>
-
-            <p className="mt-4 text-gray-700 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto lg:mx-0 leading-relaxed">
-              Delivering clean, safe and mineral-balanced drinking water with trusted 24/7 technician support for homes, businesses and commercial RO plants across Andhra Pradesh.
-            </p>
-
-            {/* Direct WhatsApp Action */}
-            <div className="pt-4 flex flex-wrap justify-center lg:justify-start gap-4">
-              <a
-                href={`https://wa.me/${siteData.phoneNumber.replace(/[^0-9]/g, '')}?text=Hi%2C%20I%20need%20water%20purifier%20service%2Finstallation`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-8 py-4 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-3"
+            {/* Property Type Dropdown */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold tracking-widest uppercase text-slate-400 pl-1">
+                PROPERTY TYPE
+              </label>
+              <select
+                value={filters.propertyType}
+                onChange={(e) => setFilters(prev => ({ ...prev, propertyType: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-400 transition"
               >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-                </svg>
-                <span>Chat 24/7 on WhatsApp</span>
-              </a>
-
-              <a
-                href={`tel:${siteData.phoneNumber}`}
-                className="px-8 py-4 rounded-full bg-[#0056a8] hover:bg-[#003870] text-white font-bold text-sm shadow-xl hover:scale-105 transition-all duration-200 flex items-center gap-3"
-              >
-                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                  <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.27c1.21.49 2.53.76 3.88.76a1 1 0 011 1V20a1 1 0 01-1 1A17 17 0 013 4a1 1 0 011-1h3.5a1 1 0 011 1c0 1.35.27 2.67.76 3.88a1 1 0 01-.27 1.11l-2.37 2.4z"/>
-                </svg>
-                <span>Call 24/7 Helpline</span>
-              </a>
+                <option value="All">All Types (Villa, Penthouse...)</option>
+                {propertyTypes.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
             </div>
 
-          </div>
+            {/* City Dropdown */}
+            <div className="space-y-1">
+              <label className="text-[10px] font-extrabold tracking-widest uppercase text-slate-400 pl-1">
+                CITY / REGION
+              </label>
+              <select
+                value={filters.city}
+                onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value }))}
+                className="w-full px-4 py-3 rounded-xl bg-slate-950 border border-slate-800 text-xs font-medium text-white focus:outline-none focus:border-amber-400 transition"
+              >
+                <option value="All">All Cities</option>
+                {cities.map(c => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Image - Clean display matching original */}
-          <div className="w-full lg:w-1/2 flex justify-center">
-            <img
-              src={heroImage}
-              alt="Water Purifier"
-              className="floatingBottle w-full max-w-sm sm:max-w-md lg:max-w-2xl object-contain drop-shadow-2xl"
-            />
-          </div>
+            {/* Submit Button */}
+            <div className="space-y-1 flex flex-col justify-end">
+              <button
+                type="submit"
+                className="w-full py-3 px-6 rounded-xl bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 font-extrabold text-xs shadow-xl shadow-amber-500/20 hover:scale-[1.02] transition-all flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4 fill-none stroke-current" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35"/>
+                </svg>
+                <span>Search Properties</span>
+              </button>
+            </div>
+
+          </form>
 
         </div>
 
-        {/* Animated Waves */}
-        <div className="waves">
-          <div className="wave wave1"></div>
-          <div className="wave wave2"></div>
+        {/* Quick Stats Bar */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4 border-t border-slate-800/80 max-w-4xl">
+          <div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-white font-serif">$2.4B+</div>
+            <div className="text-xs text-slate-400 font-medium">Real Estate Sold</div>
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-serif">12,500+</div>
+            <div className="text-xs text-slate-400 font-medium">Happy Families</div>
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-white font-serif">100%</div>
+            <div className="text-xs text-slate-400 font-medium">Verified Clean Titles</div>
+          </div>
+          <div>
+            <div className="text-2xl sm:text-3xl font-extrabold text-amber-400 font-serif">15+</div>
+            <div className="text-xs text-slate-400 font-medium">Architectural Awards</div>
+          </div>
         </div>
-      </section>
-    </>
-  );
+
+      </div>
+
+    </section>
+  )
 }

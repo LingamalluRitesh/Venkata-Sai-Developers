@@ -1,5 +1,7 @@
 node_modules
-dist
 .DS_Store
+dist
+dist-ssr
 *.local
-*.log
+Pro/public/landing_video.mp4
+*.mp4

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
-import Founder from './components/Founder'
-import Services from './components/Services'
-import WhyUs from './components/WhyUs'
-import Coverage from './components/Coverage'
-import Contact from './components/Contact'
+import PropertiesGrid from './components/PropertiesGrid'
+import PropertyModal from './components/PropertyModal'
+import ScheduleTourModal from './components/ScheduleTourModal'
+import MortgageCalculator from './components/MortgageCalculator'
+import Neighborhoods from './components/Neighborhoods'
+import WhyChooseUs from './components/WhyChooseUs'
+import ContactSection from './components/ContactSection'
 import Footer from './components/Footer'
 import AdminPortal from './components/AdminPortal'
-import WelcomeSplash from './components/WelcomeSplash'
-import { SiteProvider } from './context/SiteContext'
+import { RealEstateProvider } from './context/RealEstateContext'
 
 export default function App() {
   const [scrolled, setScrolled] = useState(false)
@@ -23,23 +24,28 @@ export default function App() {
   }, [])
 
   return (
-    <SiteProvider>
-      <div className="min-h-screen bg-[#f0f8ff] text-[#001e3c] font-sans antialiased selection:bg-cyan-500 selection:text-white">
-        {/* Welcome Splash Screen Animation */}
-        <WelcomeSplash />
-
+    <RealEstateProvider>
+      <div className="min-h-screen bg-slate-950 text-white font-sans antialiased selection:bg-amber-400 selection:text-slate-950">
+        
         <Navbar scrolled={scrolled} />
+        
         <main>
           <Hero />
-          <Founder />
-          <Services />
-          <WhyUs />
-          <Coverage />
-          <Contact />
+          <PropertiesGrid />
+          <Neighborhoods />
+          <MortgageCalculator />
+          <WhyChooseUs />
+          <ContactSection />
         </main>
+
         <Footer />
+
+        {/* Interactive Modals */}
+        <PropertyModal />
+        <ScheduleTourModal />
         <AdminPortal />
+
       </div>
-    </SiteProvider>
+    </RealEstateProvider>
   )
 }

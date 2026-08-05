@@ -1,155 +1,153 @@
 import { useState } from 'react'
-import logoDefault from '../../logo.png'
-import { useSiteContext } from '../context/SiteContext'
+import { useRealEstate } from '../context/RealEstateContext'
 
 interface NavbarProps {
   scrolled: boolean
 }
 
-const links = [
-  { label: 'Home', href: '#home' },
-  { label: 'Founder', href: '#founder' },
-  { label: 'Services', href: '#services' },
-  { label: 'Why Choose Us', href: '#why-us' },
-  { label: 'Coverage', href: '#coverage' },
-  { label: 'Contact', href: '#contact' },
-]
-
 export default function Navbar({ scrolled }: NavbarProps) {
-  const [menuOpen, setMenuOpen] = useState(false)
-  const { siteData } = useSiteContext()
-
-  const logoSrc = siteData.logoUrl || logoDefault
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const { favorites, setIsAdminOpen, filters, setFilters } = useRealEstate()
 
   return (
     <header className="fixed top-0 left-0 right-0 z-40 transition-all duration-300 w-full">
       <div
-        className={`w-full transition-all duration-300 px-3 sm:px-6 lg:px-8 xl:px-12 ${
+        className={`w-full transition-all duration-300 px-4 sm:px-8 lg:px-12 py-3.5 ${
           scrolled
-            ? 'bg-[#001e3c]/95 backdrop-blur-xl border-b border-cyan-500/30 shadow-xl py-2.5'
-            : 'bg-[#001e3c]/90 backdrop-blur-md border-b border-cyan-500/20 py-3'
+            ? 'bg-[#0f172a]/95 backdrop-blur-xl border-b border-slate-800 shadow-2xl py-3'
+            : 'bg-gradient-to-b from-[#0f172a]/90 via-[#0f172a]/60 to-transparent backdrop-blur-sm'
         }`}
       >
-        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-2 lg:gap-4">
+        <div className="max-w-7xl mx-auto w-full flex items-center justify-between gap-4">
           
-          {/* Logo & Full Company Name */}
-          <a href="#home" className="flex items-center gap-2.5 sm:gap-3 group flex-shrink-0">
-            <div className="relative flex-shrink-0 w-9 h-9 sm:w-11 sm:h-11 rounded-xl overflow-hidden p-0.5 bg-gradient-to-tr from-cyan-400 via-blue-600 to-cyan-300 shadow-md group-hover:scale-105 transition-transform duration-300">
-              <div className="w-full h-full bg-white rounded-[10px] flex items-center justify-center overflow-hidden p-0.5 sm:p-1">
-                <img
-                  src={logoSrc}
-                  alt={siteData.companyName}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+          {/* Brand Logo */}
+          <a href="#home" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-slate-950 flex items-center justify-center font-extrabold text-xl shadow-lg shadow-amber-500/20 group-hover:scale-105 transition-transform duration-300">
+              🏰
             </div>
-
-            {/* FULL COMPANY NAME */}
-            <div className="whitespace-nowrap">
-              <div className="text-white font-extrabold text-base sm:text-lg xl:text-xl tracking-tight group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
-                <span>{siteData.companyName}</span>
-                <span className="inline-block w-2 h-2 rounded-full bg-cyan-400 animate-pulse flex-shrink-0" />
+            <div>
+              <div className="font-extrabold text-xl text-white tracking-tight flex items-center gap-1.5 font-serif">
+                <span>HAVEN</span>
+                <span className="text-amber-400 font-sans text-xs tracking-widest uppercase px-1.5 py-0.5 rounded bg-amber-400/10 border border-amber-400/20 font-bold">LUXE</span>
               </div>
-              <div className="text-cyan-400 font-bold text-[9px] sm:text-[10px] xl:text-xs tracking-[0.14em] uppercase flex items-center gap-1">
-                <span>{siteData.companySubtitle}</span>
-                <span className="text-white/40">•</span>
-                <span className="text-emerald-400 font-extrabold">24/7 OPEN</span>
+              <div className="text-[10px] text-slate-400 font-medium tracking-wider uppercase -mt-0.5">
+                REAL ESTATE & ESTATES
               </div>
             </div>
           </a>
 
-          {/* Desktop Navigation Links */}
-          <nav className="hidden lg:flex items-center gap-1 xl:gap-1.5 bg-white/10 border border-white/15 rounded-full px-3 xl:px-4 py-1.5 backdrop-blur-md">
-            {links.map((l) => (
+          {/* Navigation Links */}
+          <nav className="hidden lg:flex items-center gap-1 bg-slate-900/60 border border-slate-800/80 rounded-full px-4 py-1.5 backdrop-blur-md shadow-inner">
+            {[
+              { label: 'Properties', href: '#properties' },
+              { label: 'Neighborhoods', href: '#neighborhoods' },
+              { label: 'Mortgage Estimator', href: '#mortgage' },
+              { label: 'Why Us', href: '#why-us' },
+              { label: 'Contact', href: '#contact' },
+            ].map((link) => (
               <a
-                key={l.href}
-                href={l.href}
-                className="text-xs font-semibold px-2.5 xl:px-3 py-1 rounded-full text-slate-100 hover:text-white hover:bg-cyan-500/25 transition-all duration-200 whitespace-nowrap"
+                key={link.href}
+                href={link.href}
+                className="text-xs font-semibold px-3.5 py-1.5 rounded-full text-slate-300 hover:text-white hover:bg-slate-800/80 transition-all duration-200"
               >
-                {l.label}
+                {link.label}
               </a>
             ))}
           </nav>
 
-          {/* Desktop Right Actions */}
-          <div className="hidden lg:flex items-center gap-2 xl:gap-3 flex-shrink-0">
-            {/* 24/7 Availability Pill - Shown on extra large screens only */}
-            <div className="hidden 2xl:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-300 text-xs font-extrabold whitespace-nowrap">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-              <span>24/7 Available</span>
-            </div>
-
-            {/* CALL NOW BUTTON */}
+          {/* Right Actions */}
+          <div className="hidden sm:flex items-center gap-3">
+            
+            {/* Favorites Badge Button */}
             <a
-              href={`tel:${siteData.phoneNumber}`}
-              className="flex items-center gap-1.5 text-xs font-bold text-cyan-300 hover:text-white bg-cyan-950/80 border border-cyan-400/40 px-3.5 xl:px-4 py-2 rounded-full transition-all duration-200 hover:border-cyan-300 shadow-sm whitespace-nowrap"
+              href="#properties"
+              onClick={() => setFilters(prev => ({ ...prev, category: 'all' }))}
+              className="relative p-2.5 rounded-full bg-slate-900/80 border border-slate-800 text-slate-300 hover:text-amber-400 hover:border-amber-500/40 transition-all flex items-center justify-center group"
+              title="Saved Favorites"
             >
-              <svg className="w-3.5 h-3.5 fill-cyan-400" viewBox="0 0 24 24">
-                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.65 3.18 2 2 0 0 1 3.62 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.54A16 16 0 0 0 14 14.54l.91-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+              <svg className="w-4 h-4 fill-current text-rose-500" viewBox="0 0 24 24">
+                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
               </svg>
-              <span>Call Now</span>
+              {favorites.length > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white font-extrabold text-[10px] flex items-center justify-center animate-pulse">
+                  {favorites.length}
+                </span>
+              )}
             </a>
 
+            {/* Admin Add Property Button */}
+            <button
+              onClick={() => setIsAdminOpen(true)}
+              className="px-4 py-2 rounded-full text-xs font-bold text-slate-300 hover:text-white bg-slate-900 border border-slate-700/80 hover:border-slate-500 transition-all flex items-center gap-1.5"
+            >
+              <span>+ Add Property</span>
+            </button>
+
+            {/* List Property / Schedule Call CTA */}
             <a
               href="#contact"
-              className="px-4 xl:px-5 py-2 rounded-full text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 shadow-md hover:scale-105 transition-all duration-200 whitespace-nowrap"
+              className="px-5 py-2.5 rounded-full text-xs font-extrabold text-slate-950 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-lg shadow-amber-500/20 hover:scale-105 transition-all duration-200 whitespace-nowrap"
             >
-              Get Free Quote
+              Schedule Tour
             </a>
+
           </div>
 
-          {/* Mobile hamburger */}
-          <div className="flex items-center gap-2 lg:hidden">
+          {/* Mobile Menu Button */}
+          <div className="flex sm:hidden items-center gap-2">
             <button
-              className="text-white p-2.5 rounded-xl bg-white/10 hover:bg-white/20 transition"
-              onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
+              onClick={() => setIsAdminOpen(true)}
+              className="p-2 text-xs font-bold text-amber-400 bg-amber-400/10 rounded-lg border border-amber-400/20"
             >
-              <div className="w-6 flex flex-col gap-1.5">
-                <span className={`h-0.5 bg-cyan-400 rounded-full transition-all duration-300 ${menuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`h-0.5 bg-white rounded-full transition-all duration-300 ${menuOpen ? 'opacity-0' : ''}`} />
-                <span className={`h-0.5 bg-cyan-400 rounded-full transition-all duration-300 ${menuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
-              </div>
+              + Add
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-white"
+              aria-label="Toggle Navigation"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
             </button>
           </div>
 
         </div>
 
-        {/* Mobile menu dropdown */}
-        {menuOpen && (
-          <div className="lg:hidden mt-4 pt-4 border-t border-white/15 flex flex-col gap-2 pb-2">
-            <div className="px-4 py-2 rounded-xl bg-emerald-500/20 text-emerald-300 text-xs font-bold flex items-center justify-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>⚡ 24/7 Open — All 7 Days Working</span>
-            </div>
-
-            {links.map((l) => (
+        {/* Mobile Dropdown Menu */}
+        {mobileMenuOpen && (
+          <div className="lg:hidden mt-3 p-4 bg-slate-900/95 border border-slate-800 rounded-2xl flex flex-col gap-2.5 shadow-2xl backdrop-blur-xl">
+            {[
+              { label: 'Properties', href: '#properties' },
+              { label: 'Neighborhoods', href: '#neighborhoods' },
+              { label: 'Mortgage Estimator', href: '#mortgage' },
+              { label: 'Why Choose Us', href: '#why-us' },
+              { label: 'Contact Us', href: '#contact' },
+            ].map((link) => (
               <a
-                key={l.href}
-                href={l.href}
-                className="text-slate-100 hover:text-cyan-300 text-sm font-semibold py-2.5 px-4 rounded-xl hover:bg-white/10 transition"
-                onClick={() => setMenuOpen(false)}
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-slate-200 hover:text-white font-medium text-sm py-2 px-3 rounded-lg hover:bg-slate-800/80 transition"
               >
-                {l.label}
+                {link.label}
               </a>
             ))}
-            <div className="pt-2 flex flex-col gap-2.5">
-              <a
-                href={`tel:${siteData.phoneNumber}`}
-                className="w-full text-center py-3 rounded-xl text-xs font-bold text-cyan-300 bg-cyan-950 border border-cyan-400/30"
-              >
-                📞 Call Now (24/7 Helpline)
-              </a>
-              <a
-                href="#contact"
-                className="w-full text-center py-3 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-cyan-500 to-blue-600 shadow-lg"
-                onClick={() => setMenuOpen(false)}
-              >
-                Get Free Quote
-              </a>
-            </div>
+
+            <a
+              href="#contact"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full text-center py-3 rounded-xl text-xs font-extrabold text-slate-950 bg-amber-400 shadow-md mt-1"
+            >
+              Schedule Property Tour
+            </a>
           </div>
         )}
+
       </div>
     </header>
   )
