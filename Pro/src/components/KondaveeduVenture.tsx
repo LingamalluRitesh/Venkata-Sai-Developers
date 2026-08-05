@@ -38,17 +38,17 @@ export const KondaveeduVenture: React.FC = () => {
     <div className="bg-white min-h-screen pb-24">
       
       {/* Top Banner Hero */}
-      <div className="relative w-full h-[440px] sm:h-[500px] flex items-center justify-center overflow-hidden bg-slate-900">
+      <div className="relative w-full min-h-[480px] sm:min-h-[540px] flex items-center justify-center overflow-hidden bg-slate-950 py-16">
         
         {/* Background Image */}
         <img
-          src={activeProject.heroImage}
+          src={activeProject.heroImage || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80"}
           alt={activeProject.title}
-          className="absolute inset-0 w-full h-full object-cover object-center filter brightness-95"
+          className="absolute inset-0 w-full h-full object-cover object-center scale-105 filter brightness-90 saturate-120"
         />
         
-        {/* Subtle vignette gradient */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/40 to-slate-950/40" />
+        {/* Rich Glassmorphism Dark Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-slate-950/60 to-slate-950/90 backdrop-blur-[2px]" />
 
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">
@@ -88,19 +88,19 @@ export const KondaveeduVenture: React.FC = () => {
             {activeProject.tagline}
           </p>
 
-          {/* Action CTAs */}
-          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+          {/* Glossy Interactive Action CTAs */}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3.5">
             <button
               onClick={() => setIsInquiryModalOpen(true)}
-              className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2"
+              className="btn-glossy btn-glossy-blue px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2"
             >
-              <Sparkles className="w-4 h-4 text-white" />
+              <Sparkles className="w-4 h-4 text-white animate-spin-slow" />
               <span>Enquire & Reserve Spot</span>
             </button>
 
             <button
               onClick={() => setIsSiteVisitModalOpen(true)}
-              className="px-6 py-3.5 bg-white/95 hover:bg-white text-slate-900 font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2"
+              className="btn-glossy btn-glossy-white px-6 py-3.5 rounded-2xl font-black text-xs tracking-wide shadow-xl flex items-center gap-2"
             >
               <Calendar className="w-4 h-4 text-blue-600" />
               <span>Schedule Free Site Visit</span>
@@ -110,17 +110,17 @@ export const KondaveeduVenture: React.FC = () => {
               href={whatsappUrl}
               target="_blank"
               rel="noreferrer"
-              className="px-5 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-xl shadow-lg transition-all flex items-center gap-2"
+              className="btn-glossy btn-glossy-emerald px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2 cursor-pointer"
             >
-              <MessageSquare className="w-4 h-4" />
+              <MessageSquare className="w-4 h-4 text-white animate-bounce" />
               <span>WhatsApp Us</span>
             </a>
 
             <a
               href="tel:+919030903364"
-              className="px-5 py-3.5 bg-slate-900/90 hover:bg-slate-900 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2"
+              className="btn-glossy btn-glossy-amber px-6 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2 cursor-pointer"
             >
-              <PhoneCall className="w-4 h-4 text-blue-400" />
+              <PhoneCall className="w-4 h-4 text-white animate-pulse" />
               <span>Call +91 90309 03364</span>
             </a>
 
@@ -129,7 +129,7 @@ export const KondaveeduVenture: React.FC = () => {
                 href={activeProject.brochureUrl}
                 target="_blank"
                 rel="noreferrer"
-                className="px-5 py-3.5 bg-slate-800 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2"
+                className="btn-glossy btn-glossy-dark px-5 py-3.5 rounded-2xl font-extrabold text-xs tracking-wide shadow-xl flex items-center gap-2"
               >
                 <Download className="w-4 h-4 text-blue-400" />
                 <span>PDF Brochure</span>

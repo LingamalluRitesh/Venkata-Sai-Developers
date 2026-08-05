@@ -185,108 +185,134 @@ export const AdminPortal: React.FC = () => {
     <div className="bg-slate-50 min-h-screen pb-24">
       
       {/* Admin Top Header */}
-      <div className="bg-slate-900 text-white py-8 border-b border-slate-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+      <div className="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 text-white py-10 border-b border-slate-800 shadow-2xl relative overflow-hidden">
+        <div className="absolute inset-0 bg-blue-600/5 backdrop-blur-3xl pointer-events-none" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-blue-500 text-white font-extrabold text-[11px] rounded-full uppercase">
-                Admin Control Portal
-              </span>
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-black text-[11px] rounded-full uppercase tracking-wider shadow-md">
+                  Admin Control Portal
+                </span>
+                <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold rounded-full">
+                  ⚡ Live Neon Cloud DB Sync Active
+                </span>
+              </div>
+              <h1 className="text-2xl sm:text-4xl font-black mt-2 tracking-tight text-white drop-shadow-md">
+                Management Dashboard — {settings.ventureName}
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 mt-1 font-medium max-w-2xl">
+                Manage customer leads, scheduled field visits with pickup addresses, venture layouts, plot pricing, photo galleries, and office details.
+              </p>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold mt-1">
-              Management Dashboard — {settings.ventureName}
-            </h1>
-            <p className="text-xs text-slate-400 mt-1">
-              Manage customer enquiries, scheduled site visits, ventures, plot availability, pricing, photo galleries, and office settings.
-            </p>
+
+            <div className="flex items-center gap-3 shrink-0">
+              <button
+                onClick={() => {
+                  setActiveTab('USER_HOME');
+                  window.location.hash = '';
+                }}
+                className="btn-glossy btn-glossy-white px-4 py-2.5 rounded-xl text-xs font-extrabold flex items-center gap-2 shadow-lg"
+              >
+                <ArrowLeft className="w-4 h-4 text-slate-900" />
+                Website View
+              </button>
+
+              <button
+                onClick={logoutAdmin}
+                className="btn-glossy btn-glossy-amber px-4 py-2.5 rounded-xl text-xs font-extrabold shadow-lg"
+              >
+                Log Out
+              </button>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => {
-                setActiveTab('USER_HOME');
-                window.location.hash = '';
-              }}
-              className="px-4 py-2 bg-white/10 hover:bg-white/20 text-white font-bold text-xs rounded-xl border border-white/20 transition-all flex items-center gap-2"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Website View
-            </button>
-
-            <button
-              onClick={logoutAdmin}
-              className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all"
-            >
-              Log Out
-            </button>
+          {/* Quick Metrics Bar */}
+          <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 border-t border-white/10">
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <span className="block text-2xl font-black text-white">{inquiries.length}</span>
+              <span className="text-xs text-slate-300 font-semibold">Total Customer Enquiries</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <span className="block text-2xl font-black text-emerald-400">{siteVisits.length}</span>
+              <span className="text-xs text-slate-300 font-semibold">Scheduled Site Visits</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <span className="block text-2xl font-black text-amber-300">{allProjects.length}</span>
+              <span className="text-xs text-slate-300 font-semibold">Active Ventures</span>
+            </div>
+            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10">
+              <span className="block text-2xl font-black text-blue-400">{plots.length}</span>
+              <span className="text-xs text-slate-300 font-semibold">Plots in Inventory</span>
+            </div>
           </div>
 
         </div>
       </div>
 
       {/* Admin Tabs Bar */}
-      <div className="bg-white border-b border-slate-200 shadow-xs sticky top-20 z-30">
+      <div className="bg-white border-b border-slate-200 shadow-md sticky top-20 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto py-3 no-scrollbar">
+          <div className="flex items-center gap-2.5 overflow-x-auto py-3.5 no-scrollbar">
             
             <button
               onClick={() => setActiveAdminTab('LEADS')}
-              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-5 py-3 text-xs font-black rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeAdminTab === 'LEADS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'btn-glossy btn-glossy-blue shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <Users className="w-4 h-4 text-blue-400" />
+              <Users className="w-4 h-4" />
               Enquiries & Site Visits ({inquiries.length + siteVisits.length})
             </button>
 
             <button
               onClick={() => setActiveAdminTab('VENTURES')}
-              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-5 py-3 text-xs font-black rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeAdminTab === 'VENTURES'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'btn-glossy btn-glossy-blue shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <Building className="w-4 h-4 text-amber-400" />
+              <Building className="w-4 h-4" />
               Ventures & Projects ({allProjects.length})
             </button>
 
             <button
               onClick={() => setActiveAdminTab('PLOTS')}
-              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-5 py-3 text-xs font-black rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeAdminTab === 'PLOTS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'btn-glossy btn-glossy-blue shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <Layers className="w-4 h-4 text-blue-400" />
+              <Layers className="w-4 h-4" />
               Plot Inventory Management ({plots.length} Plots)
             </button>
 
             <button
               onClick={() => setActiveAdminTab('GALLERY')}
-              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-5 py-3 text-xs font-black rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeAdminTab === 'GALLERY'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'btn-glossy btn-glossy-blue shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <ImageIcon className="w-4 h-4 text-purple-400" />
-              Photo Galleries & Browse Images
+              <ImageIcon className="w-4 h-4" />
+              Photo Galleries (Up to 20 Photos)
             </button>
 
             <button
               onClick={() => setActiveAdminTab('SETTINGS')}
-              className={`px-4 py-2.5 text-xs font-bold rounded-xl transition-all flex items-center gap-2 whitespace-nowrap ${
+              className={`px-5 py-3 text-xs font-black rounded-2xl transition-all flex items-center gap-2 whitespace-nowrap ${
                 activeAdminTab === 'SETTINGS'
-                  ? 'bg-slate-900 text-white shadow-xs'
-                  : 'text-slate-600 hover:bg-slate-100'
+                  ? 'btn-glossy btn-glossy-blue shadow-lg'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              <SettingsIcon className="w-4 h-4 text-emerald-400" />
+              <SettingsIcon className="w-4 h-4" />
               Company & Office Settings
             </button>
 
