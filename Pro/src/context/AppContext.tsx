@@ -72,24 +72,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return saved ? JSON.parse(saved) : INITIAL_FOUNDER;
   });
 
-  const [kondaveeduProject, setKondaveeduProject] = useState<Project>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_PROJECT);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (!parsed.heroImage || parsed.heroImage.includes('kondaveedu_1')) {
-        parsed.heroImage = KONDAVEEDU_PROJECT.heroImage;
-      }
-      return parsed;
-    }
-    return KONDAVEEDU_PROJECT;
-  });
-
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
     const saved = localStorage.getItem('sree_all_projects_v1');
-    return saved ? JSON.parse(saved) : [KONDAVEEDU_PROJECT];
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+    }
+    return [KONDAVEEDU_PROJECT];
   });
 
-  const [activeProject, setActiveProject] = useState<Project>(kondaveeduProject);
+  const kondaveeduProject = allProjects[0] || KONDAVEEDU_PROJECT;
+
+  const [activeProjectState, setActiveProjectState] = useState<Project>(kondaveeduProject);
+
+  const activeProject = allProjects.find((p) => p.id === activeProjectState.id) || kondaveeduProject;
 
   useEffect(() => {
     localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
@@ -215,12 +211,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateKondaveeduProject = (updated: Partial<Project>) => {
-    setKondaveeduProject((prev) => {
-      const newProj = { ...prev, ...updated };
-      setAllProjects((all) => all.map((p) => (p.id === prev.id ? newProj : p)));
-      if (activeProject.id === prev.id) setActiveProject(newProj);
-      return newProj;
-    });
+    setAllProjects((prev) =>
+      prev.map((p, idx) => (idx === 0 ? { ...p, ...updated } : p))
+    );
     showToast('Venture details updated!');
   };
 
@@ -228,21 +221,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const id = `project-${Date.now()}`;
     const newProj: Project = { ...newProjData, id };
     setAllProjects((prev) => [...prev, newProj]);
-    setActiveProject(newProj);
+    setActiveProjectState(newProj);
     showToast(`New Venture "${newProj.title}" created successfully!`);
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
     setAllProjects((prev) =>
-      prev.map((p) => {
-        if (p.id === id) {
-          const updatedProj = { ...p, ...updated };
-          if (p.id === kondaveeduProject.id) setKondaveeduProject(updatedProj);
-          if (activeProject.id === id) setActiveProject(updatedProj);
-          return updatedProj;
-        }
-        return p;
-      })
+      prev.map((p) => (p.id === id ? { ...p, ...updated } : p))
     );
     showToast('Venture updated successfully!');
   };
@@ -255,7 +240,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAllProjects((prev) => prev.filter((p) => p.id !== id));
     if (activeProject.id === id) {
       const remaining = allProjects.filter((p) => p.id !== id);
-      setActiveProject(remaining[0]);
+      setActiveProjectState(remaining[0]);
     }
     showToast('Venture deleted.');
   };
@@ -353,7 +338,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         updateKondaveeduProject,
         allProjects,
         activeProject,
-        setActiveProject,
+        setActiveProject: setActiveProjectState,
         addProject,
         updateProject,
         deleteProject,

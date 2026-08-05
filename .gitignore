@@ -3,5 +3,3 @@ node_modules
 dist
 dist-ssr
 *.local
-Pro/public/landing_video.mp4
-*.mp4

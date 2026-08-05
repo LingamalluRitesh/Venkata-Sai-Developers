@@ -9,13 +9,6 @@ const TYPING_QUOTES = [
   "Secure your children's future with prime villa plots."
 ];
 
-// Reliable HD Aerial Drone MP4 Video Streams (Works cross-platform on Mobile & Desktop)
-const VIDEO_SOURCES = [
-  "https://cdn.coverr.co/videos/coverr-drone-shot-of-a-landscape-5384/1080p.mp4",
-  "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4",
-  "/landing_video.mp4"
-];
-
 export const HeroVideoSection: React.FC = () => {
   const { setActiveTab, setIsSiteVisitModalOpen, activeProject, settings } = useApp();
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -32,7 +25,7 @@ export const HeroVideoSection: React.FC = () => {
       const playPromise = videoRef.current.play();
       if (playPromise !== undefined) {
         playPromise.catch((err) => {
-          console.warn('Autoplay prevented by browser, waiting for interaction:', err);
+          console.warn('Autoplay prevented by browser:', err);
         });
       }
     }
@@ -68,7 +61,7 @@ export const HeroVideoSection: React.FC = () => {
   return (
     <div className="relative w-full min-h-[90vh] flex items-center justify-center overflow-hidden bg-slate-950">
       
-      {/* Landing Page Video Background - Guaranteed Autoplay across Mobile & Desktop */}
+      {/* Landing Page Video Background - Compressed 25MB Custom Video */}
       <div className="absolute inset-0 w-full h-full z-0 overflow-hidden">
         <video
           ref={videoRef}
@@ -79,14 +72,10 @@ export const HeroVideoSection: React.FC = () => {
           preload="auto"
           className="w-full h-full object-cover scale-105 filter brightness-90 saturate-110 transform transition-transform duration-10000 hover:scale-100"
         >
-          {VIDEO_SOURCES.map((src, index) => (
-            <source key={index} src={src} type="video/mp4" />
-          ))}
-          {/* Fallback image if browser restricts video autoplay */}
-          <img 
-            src="https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80" 
-            alt="Kondaveedu Hills Landscape"
-            className="w-full h-full object-cover"
+          <source src="/landing_video.mp4" type="video/mp4" />
+          <source
+            src="https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4"
+            type="video/mp4"
           />
         </video>
         
