@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { MapPin, Phone, Mail, Sparkles, Building2, ShieldCheck } from 'lucide-react';
+import { MapPin, Phone, Mail, Sparkles, Building2, ShieldCheck, MessageSquare } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   const { settings, setActiveTab, setIsSiteVisitModalOpen } = useApp();
@@ -94,7 +94,7 @@ export const Footer: React.FC = () => {
                 <a href="tel:+919030903364" className="hover:text-white font-bold">Call: +91 90309 03364</a>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm">💬</span>
+                <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0" />
                 <a href="https://wa.me/918978815621" target="_blank" rel="noreferrer" className="hover:text-emerald-400 font-bold text-emerald-400">WhatsApp: +91 89788 15621</a>
               </div>
               <div className="flex items-center gap-2">
