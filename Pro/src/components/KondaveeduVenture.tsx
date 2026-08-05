@@ -15,6 +15,7 @@ import {
   PhoneCall,
   MessageSquare
 } from 'lucide-react';
+import { WhatsAppIcon, PhoneCallIcon } from './Icons';
 
 export const KondaveeduVenture: React.FC = () => {
   const { 
@@ -113,7 +114,7 @@ export const KondaveeduVenture: React.FC = () => {
               rel="noreferrer"
               className="h-13 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <img src="/whatsapp_icon.png" alt="WhatsApp" className="w-5 h-5 object-contain shrink-0" />
+              <WhatsAppIcon className="w-5 h-5 shrink-0" />
               <span className="truncate">WhatsApp Chat</span>
             </a>
 
@@ -121,7 +122,7 @@ export const KondaveeduVenture: React.FC = () => {
               href="tel:+919030903364"
               className="h-13 px-5 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs sm:text-sm rounded-xl shadow-lg border border-slate-700 transition-all flex items-center justify-center gap-2 hover:-translate-y-0.5"
             >
-              <img src="/phone_icon.png" alt="Call Office" className="w-5 h-5 object-contain rounded shrink-0" />
+              <PhoneCallIcon className="w-5 h-5 shrink-0 rounded" />
               <span className="truncate">Call Office</span>
             </a>
 
