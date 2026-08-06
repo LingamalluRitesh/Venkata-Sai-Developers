@@ -993,9 +993,31 @@ export const AdminPortal: React.FC = () => {
 
             {/* Gallery Grid with Delete Option */}
             <div className="space-y-2">
-              <span className="text-xs font-bold text-slate-700 uppercase block">
-                Current Photos ({targetGalleryVenture.galleryImages.length} / {MAX_GALLERY_PHOTOS} Max Allowed) — Click red button to remove photo
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700 uppercase block">
+                  Current Photos ({targetGalleryVenture.galleryImages.length} / {MAX_GALLERY_PHOTOS} Max Allowed) — Click red button to remove photo
+                </span>
+                {targetGalleryVenture.galleryImages.length > 0 && (
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`Remove ALL ${targetGalleryVenture.galleryImages.length} photos from the gallery? This cannot be undone.`)) {
+                        updateProject(targetGalleryVenture.id, { galleryImages: [] });
+                        try {
+                          const stored = JSON.parse(localStorage.getItem('sree_all_projects_v1') || '[]');
+                          const updated = stored.map((p: any) =>
+                            p.id === targetGalleryVenture.id ? { ...p, galleryImages: [] } : p
+                          );
+                          localStorage.setItem('sree_all_projects_v1', JSON.stringify(updated));
+                        } catch (e) {}
+                        showToast('All gallery photos cleared from cache!');
+                      }
+                    }}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold text-[11px] transition-all shadow-sm"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" /> Clear All Cache
+                  </button>
+                )}
+              </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
                 {targetGalleryVenture.galleryImages.map((url, idx) => (
