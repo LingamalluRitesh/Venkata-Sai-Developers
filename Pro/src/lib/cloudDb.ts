@@ -1,8 +1,7 @@
 import { Project } from '../types';
 import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
-const CLOUD_DB_OBJECT_ID = 'ff8081819f7e10ae019fd6beda5101cf';
-const CLOUD_DB_ENDPOINT = `https://api.restful-api.dev/objects/${CLOUD_DB_OBJECT_ID}`;
+const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fd6d6-d429-7a16-be15-ade1053b9fe1';
 
 export class CloudDbService {
   // Sync all projects and gallery image URLs to Live Cloud Database
@@ -19,11 +18,11 @@ export class CloudDbService {
 
       const res = await fetch(CLOUD_DB_ENDPOINT, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: 'venkata_sai_projects',
-          data: { projects: cleanedProjects },
-        }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ projects: cleanedProjects }),
       });
 
       return res.ok;
@@ -36,11 +35,13 @@ export class CloudDbService {
   // Fetch live projects and gallery images from Live Cloud Database for all visitors on all devices
   public static async fetchProjectsFromCloud(): Promise<Project[] | null> {
     try {
-      const res = await fetch(CLOUD_DB_ENDPOINT);
+      const res = await fetch(CLOUD_DB_ENDPOINT, {
+        headers: { 'Accept': 'application/json' }
+      });
       if (!res.ok) return null;
       const json = await res.json();
-      if (json && json.data && Array.isArray(json.data.projects) && json.data.projects.length > 0) {
-        return json.data.projects.map((p: any) => ({
+      if (json && Array.isArray(json.projects) && json.projects.length > 0) {
+        return json.projects.map((p: any) => ({
           ...KONDAVEEDU_PROJECT,
           ...p,
           location: p.location || KONDAVEEDU_PROJECT.location,
