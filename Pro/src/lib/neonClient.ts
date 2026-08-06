@@ -1,7 +1,7 @@
 import { neon } from '@neondatabase/serverless';
 import { Inquiry, Project, SiteVisit } from '../types';
 
-const LIVE_NEON_FALLBACK_URL = "postgresql://neondb_owner:npg_xQLqDFIPid16@ep-weathered-math-aydrkoz6-pooler.c-5.us-east-2.aws.neon.tech/neondb?sslmode=require";
+const LIVE_NEON_FALLBACK_URL = "postgresql://venkata_sai_db_user:3n83Do8WceScv3ssTD1AN4JaB6HAc7F5@dpg-d9q4drflk1mc73eietk0-a.oregon-postgres.render.com/venkata_sai_db";
 
 export class NeonService {
   // Reads connection URL from env variables OR defaults to live Neon connection string for universal multi-device sync
