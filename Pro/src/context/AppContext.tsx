@@ -55,6 +55,14 @@ const LOCAL_STORAGE_KEY_INQUIRIES = 'sree_realestate_inquiries_v1';
 const LOCAL_STORAGE_KEY_VISITS = 'sree_realestate_visits_v1';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // On startup: remove the old large project key that fills localStorage with base64 images
+  // This prevents QuotaExceededError from crashing the app
+  React.useEffect(() => {
+    try {
+      localStorage.removeItem('sree_realestate_project_v1');
+    } catch (e) {}
+  }, []);
+
   const [settings, setSettings] = useState<AdminSettings>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY_SETTINGS);
@@ -180,35 +188,37 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }, 4000);
   };
 
-  // Sync to local storage & Neon DB
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings));
-  }, [settings]);
+  // Safe localStorage write — never crash on QuotaExceededError
+  const safeSetItem = (key: string, value: string) => {
+    try {
+      localStorage.setItem(key, value);
+    } catch (e) {
+      // localStorage quota exceeded — silently ignore, app still works in memory
+      console.warn('localStorage quota exceeded for key:', key);
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_FOUNDER, JSON.stringify(founder));
-  }, [founder]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings)); }, [settings]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_FOUNDER, JSON.stringify(founder)); }, [founder]);
 
   const updateFounder = (updated: Partial<FounderInfo>) => {
     setFounder((prev) => ({ ...prev, ...updated }));
     showToast('Founder profile details updated!');
   };
 
+  // Save projects WITHOUT base64 gallery images to keep storage small
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_PROJECT, JSON.stringify(kondaveeduProject));
-  }, [kondaveeduProject]);
+    try {
+      const stripped = allProjects.map(p => ({ ...p, galleryImages: [] }));
+      safeSetItem('sree_all_projects_v1', JSON.stringify(stripped));
+      // Also clear the old project key that was causing quota crash
+      localStorage.removeItem(LOCAL_STORAGE_KEY_PROJECT);
+    } catch (e) {}
+  }, [allProjects]);
 
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_PLOTS, JSON.stringify(plots));
-  }, [plots]);
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_INQUIRIES, JSON.stringify(inquiries));
-  }, [inquiries]);
-
-  useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY_VISITS, JSON.stringify(siteVisits));
-  }, [siteVisits]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_PLOTS, JSON.stringify(plots)); }, [plots]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_INQUIRIES, JSON.stringify(inquiries)); }, [inquiries]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_VISITS, JSON.stringify(siteVisits)); }, [siteVisits]);
 
   const updateSettings = (newSettings: Partial<AdminSettings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
