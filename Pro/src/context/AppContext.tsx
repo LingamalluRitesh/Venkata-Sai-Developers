@@ -202,11 +202,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
-  // Save projects WITHOUT base64 gallery images to keep storage small
+  // Save projects with cloud URLs (http/https/relative) while stripping heavy base64 strings
   useEffect(() => {
     try {
-      const stripped = allProjects.map(p => ({ ...p, galleryImages: [] }));
-      safeSetItem('sree_all_projects_v1', JSON.stringify(stripped));
+      const cleaned = allProjects.map(p => ({
+        ...p,
+        galleryImages: (p.galleryImages || []).filter(img => !img.startsWith('data:'))
+      }));
+      safeSetItem('sree_all_projects_v1', JSON.stringify(cleaned));
     } catch (e) {}
   }, [allProjects]);
 

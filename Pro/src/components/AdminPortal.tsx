@@ -12,6 +12,8 @@ import {
   Building,
   FileText,
   FolderOpen,
+  Loader2,
+  CloudUpload,
   Settings as SettingsIcon
 } from 'lucide-react';
 
@@ -111,6 +113,27 @@ export const AdminPortal: React.FC = () => {
 
   // Target venture for gallery editing
   const targetGalleryVenture = allProjects.find((p) => p.id === selectedVentureIdForGallery) || kondaveeduProject;
+
+  const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
+
+  // Upload image file directly to ImgBB Free Cloud Host to get a permanent public URL
+  const uploadFileToCloud = async (file: File): Promise<string> => {
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('https://api.imgbb.com/1/upload?key=3b7f64be348e3cf340be998782a201c1', {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await res.json();
+      if (data && data.data && data.data.url) {
+        return data.data.url;
+      }
+    } catch (e) {
+      console.warn('Cloud upload failed:', e);
+    }
+    return '';
+  };
 
   // File Upload Helper (converts & compresses image file to crisp Data URL)
   const handleFileUpload = (file: File, callback: (dataUrl: string) => void) => {
@@ -939,17 +962,27 @@ export const AdminPortal: React.FC = () => {
 
                 <div className="md:col-span-1 text-center font-bold text-xs text-slate-400">OR</div>
 
-                {/* Method B: Native Browse File Input */}
+                {/* Method B: Native Browse File Input with Automatic Cloud Server Upload */}
                 <div className="md:col-span-4">
-                  <label className="w-full py-3 px-4 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-2 shadow-xs transition-all">
-                    <FolderOpen className="w-4 h-4 text-blue-400" />
-                    <span>Browse & Upload Image File</span>
+                  <label className={`w-full py-3 px-4 ${isUploadingToCloud ? 'bg-blue-600 cursor-wait' : 'bg-slate-900 hover:bg-slate-800 cursor-pointer'} text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-xs transition-all`}>
+                    {isUploadingToCloud ? (
+                      <>
+                        <Loader2 className="w-4 h-4 text-white animate-spin shrink-0" />
+                        <span>Uploading to Cloud Server...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CloudUpload className="w-4 h-4 text-blue-400 shrink-0" />
+                        <span>Browse & Upload to Cloud</span>
+                      </>
+                    )}
                     <input
                       type="file"
                       accept="image/*"
                       multiple
+                      disabled={isUploadingToCloud}
                       className="hidden"
-                      onChange={(e) => {
+                      onChange={async (e) => {
                         const selectedFiles = Array.from(e.target.files || []);
                         if (selectedFiles.length === 0) return;
 
@@ -959,16 +992,36 @@ export const AdminPortal: React.FC = () => {
                           return;
                         }
 
-                        let processedCount = 0;
-                        selectedFiles.forEach((file) => {
-                          if (currentGallery.length >= MAX_GALLERY_PHOTOS) return;
-                          handleFileUpload(file, (dataUrl) => {
-                            currentGallery = [...currentGallery, dataUrl];
-                            processedCount++;
-                            updateProject(targetGalleryVenture.id, { galleryImages: currentGallery });
-                            showToast(`${processedCount} photo(s) uploaded & compressed!`);
-                          });
-                        });
+                        setIsUploadingToCloud(true);
+                        showToast('Uploading photo(s) to Cloud Server...');
+
+                        const uploadedUrls: string[] = [];
+                        for (const file of selectedFiles) {
+                          if (currentGallery.length + uploadedUrls.length >= MAX_GALLERY_PHOTOS) break;
+                          
+                          // Upload to cloud server
+                          const cloudUrl = await uploadFileToCloud(file);
+                          if (cloudUrl) {
+                            uploadedUrls.push(cloudUrl);
+                          } else {
+                            // Local fallback if cloud network fails
+                            await new Promise<void>((resolve) => {
+                              handleFileUpload(file, (dataUrl) => {
+                                uploadedUrls.push(dataUrl);
+                                resolve();
+                              });
+                            });
+                          }
+                        }
+
+                        setIsUploadingToCloud(false);
+                        if (uploadedUrls.length > 0) {
+                          const updatedGallery = [...currentGallery, ...uploadedUrls];
+                          updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
+                          showToast(`✅ ${uploadedUrls.length} photo(s) uploaded to Cloud Server! Live for all devices.`);
+                        } else {
+                          showToast('Upload failed. Please try again or paste an Image URL.');
+                        }
                       }}
                     />
                   </label>
