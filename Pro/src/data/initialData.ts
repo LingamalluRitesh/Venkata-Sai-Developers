@@ -20,11 +20,11 @@ export const INITIAL_FOUNDER = {
   projectsDelivered: 28,
   happyFamilies: 1200,
   bio: 'Ratnala Venkata Punnarao is a visionary real estate developer and leader with over 18 years of pioneering excellence in Andhra Pradesh real estate. Under his dynamic leadership, Venkata Sai Developers has transformed land investments into wealth-generating landmarks for over 1,200 families.',
-  visionMessage: 'At Venkata Sai Developers, our motto "Fulfill Your Dreams" is not just a slogan — it is our core commitment. Every plot layout we design near iconic locations like Kondaveedu Ghat Road is crafted with 100% legal clearance, CRDA approvals, and world-class infrastructure so your investment yields high returns for generations.',
+  visionMessage: 'At Venkata Sai Developers, our motto "Fulfill Your Dreams" is not just a slogan — it is our core commitment. Every plot layout we design near iconic locations like Kondaveedu Ghat Road is crafted with 100% legal clearance, spot registration, and world-class infrastructure so your investment yields high returns for generations.',
   coreValues: [
     'Uncompromising Integrity & 100% Legal Title Transparency',
     'Prime Strategic Locations with Rapid Land Value Appreciation',
-    'CRDA Approved Blueprints & On-Time Infrastructure Delivery',
+    'Clear Title Blueprints & On-Time Infrastructure Delivery',
     'Customer-Centric Relations & Lifelong Support'
   ]
 };
@@ -41,7 +41,7 @@ export const KONDAVEEDU_PROJECT: Project = {
   description: 'A magnificent 45-acre master-planned gated villa plot layout strategically situated merely 200 meters from the famous Kondaveedu Ghat Road. Surrounded by scenic hill vistas, rich historical heritage of Kondaveedu Fort, and rapid upcoming tourism & highway infrastructure.',
   keyFeatures: [
     '200 Meters from Historical Kondaveedu Ghat Road',
-    'CRDA Approved Layout Blueprint & clear titles',
+    '100% Spot Registration & Clear Titles',
     '40ft & 60ft Blacktop internal avenues',
     'Underground Electrical & Water Supply network',
     'Grand Entrance Arch with 24/7 Security Gate',

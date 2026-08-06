@@ -67,9 +67,9 @@ export class NeonService {
         description: r.description || '',
         keyFeatures: [
           '200 meters to Kondaveedu Ghat Road',
-          'CRDA Approved Layout Blueprint',
+          '100% Spot Registration & Clear Title',
           '40ft & 33ft Blacktop Internal Roads',
-          'Underground Utility Pipeline & Drainage',
+          'Electrical & Water Supply Line Connections',
           '24/7 Security Entry Arch & Solar Streetlights',
           'High ROI Tourism & Commercial Zone'
         ],

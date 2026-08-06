@@ -161,8 +161,8 @@ export const HeroVideoSection: React.FC = () => {
             <span className="text-xs text-slate-300 font-medium">To Kondaveedu Ghat Road</span>
           </div>
           <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-            <span className="block text-2xl font-black text-blue-400">CRDA</span>
-            <span className="text-xs text-slate-300 font-medium">Approved Layout Blueprint</span>
+            <span className="block text-2xl font-black text-blue-400">100%</span>
+            <span className="text-xs text-slate-300 font-medium">Spot Registration & Clear Title</span>
           </div>
           <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
             <span className="block text-2xl font-black text-amber-300">300%+</span>
