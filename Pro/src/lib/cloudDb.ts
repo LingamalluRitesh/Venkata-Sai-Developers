@@ -1,4 +1,5 @@
 import { Project } from '../types';
+import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
 const CLOUD_DB_OBJECT_ID = 'ff8081819f7e10ae019fd6beda5101cf';
 const CLOUD_DB_ENDPOINT = `https://api.restful-api.dev/objects/${CLOUD_DB_OBJECT_ID}`;
@@ -7,9 +8,12 @@ export class CloudDbService {
   // Sync all projects and gallery image URLs to Live Cloud Database
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
-      // Filter out heavy base64 strings if any, only sync clean image URLs
       const cleanedProjects = projects.map((p) => ({
+        ...KONDAVEEDU_PROJECT,
         ...p,
+        location: p.location || KONDAVEEDU_PROJECT.location,
+        priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
+        keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0) ? p.keyFeatures : KONDAVEEDU_PROJECT.keyFeatures,
         galleryImages: (p.galleryImages || []).filter((img) => !img.startsWith('data:')),
       }));
 
@@ -37,9 +41,16 @@ export class CloudDbService {
       const json = await res.json();
       if (json && json.data && Array.isArray(json.data.projects) && json.data.projects.length > 0) {
         return json.data.projects.map((p: any) => ({
+          ...KONDAVEEDU_PROJECT,
           ...p,
-          galleryImages: Array.isArray(p.galleryImages) ? p.galleryImages : [],
-          keyFeatures: Array.isArray(p.keyFeatures) ? p.keyFeatures : [],
+          location: p.location || KONDAVEEDU_PROJECT.location,
+          priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
+          keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
+            ? p.keyFeatures
+            : KONDAVEEDU_PROJECT.keyFeatures,
+          galleryImages: (Array.isArray(p.galleryImages) && p.galleryImages.length > 0)
+            ? p.galleryImages
+            : KONDAVEEDU_PROJECT.galleryImages,
         }));
       }
     } catch (err) {

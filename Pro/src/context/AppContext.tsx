@@ -82,7 +82,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const saved = localStorage.getItem('sree_all_projects_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((p: any) => ({
+            ...KONDAVEEDU_PROJECT,
+            ...p,
+            location: p.location || KONDAVEEDU_PROJECT.location,
+            priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
+            keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
+              ? p.keyFeatures
+              : KONDAVEEDU_PROJECT.keyFeatures,
+          }));
+        }
       }
     } catch (e) {}
     return [KONDAVEEDU_PROJECT];
