@@ -56,28 +56,31 @@ const LOCAL_STORAGE_KEY_VISITS = 'sree_realestate_visits_v1';
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [settings, setSettings] = useState<AdminSettings>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_SETTINGS);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      parsed.contactPhone = '+91 90309 03364';
-      parsed.whatsappPhone = '+91 89788 15621';
-      parsed.officeAddress = 'Annapurna Nagar 6/2, Door No. 130-6-185, Gorantla, Guntur, Andhra Pradesh – 522034';
-      return parsed;
-    }
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_SETTINGS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        parsed.contactPhone = '+91 90309 03364';
+        parsed.whatsappPhone = '+91 89788 15621';
+        parsed.officeAddress = 'Annapurna Nagar 6/2, Door No. 130-6-185, Gorantla, Guntur, Andhra Pradesh – 522034';
+        return parsed;
+      }
+    } catch (e) {}
     return INITIAL_SETTINGS;
   });
 
   const [founder, setFounder] = useState<FounderInfo>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_FOUNDER);
-    return saved ? JSON.parse(saved) : INITIAL_FOUNDER;
+    return INITIAL_FOUNDER;
   });
 
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
-    const saved = localStorage.getItem('sree_all_projects_v1');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-    }
+    try {
+      const saved = localStorage.getItem('sree_all_projects_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
     return [KONDAVEEDU_PROJECT];
   });
 
@@ -96,23 +99,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [upcomingProjects] = useState<Project[]>(INITIAL_UPCOMING_PROJECTS);
 
   const [plots, setPlots] = useState<Plot[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_PLOTS);
-    return saved ? JSON.parse(saved) : INITIAL_PLOTS;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_PLOTS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_PLOTS;
   });
 
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_INQUIRIES);
-    return saved ? JSON.parse(saved) : INITIAL_INQUIRIES;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_INQUIRIES);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_INQUIRIES;
   });
 
   const [siteVisits, setSiteVisits] = useState<SiteVisit[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEY_VISITS);
-    return saved ? JSON.parse(saved) : INITIAL_SITE_VISITS;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_VISITS);
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return INITIAL_SITE_VISITS;
   });
 
   const [activeTab, setActiveTab] = useState<ActiveTab>('USER_HOME');
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('sree_admin_auth') === 'true';
+    try { return localStorage.getItem('sree_admin_auth') === 'true'; } catch (e) { return false; }
   });
 
   // URL listener for #admin or /admin
