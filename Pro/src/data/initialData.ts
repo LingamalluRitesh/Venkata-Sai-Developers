@@ -43,7 +43,7 @@ export const KONDAVEEDU_PROJECT: Project = {
     '150 Meters from Historical Kondaveedu Ghat Road',
     '100% Spot Registration & Clear Titles',
     '30ft Blacktop Internal Avenues',
-    'Electrical & Water Supply Line Connections',
+    'Solar Electricity & Abundant Ground Water Resources Available',
     'Grand Entrance Arch with 24/7 Security Gate',
     'Avenue Plantation',
     'High Land Value Appreciation Zone'
