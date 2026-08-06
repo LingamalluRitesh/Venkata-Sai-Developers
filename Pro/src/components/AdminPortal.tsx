@@ -116,18 +116,19 @@ export const AdminPortal: React.FC = () => {
 
   const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
 
-  // Upload image file directly to ImgBB Free Cloud Host to get a permanent public URL
+  // Upload image file directly to Free Permanent Cloud Server to get a public URL
   const uploadFileToCloud = async (file: File): Promise<string> => {
     try {
       const formData = new FormData();
-      formData.append('image', file);
-      const res = await fetch('https://api.imgbb.com/1/upload?key=3b7f64be348e3cf340be998782a201c1', {
+      formData.append('reqtype', 'fileupload');
+      formData.append('fileToUpload', file);
+      const res = await fetch('https://catbox.moe/user/api.php', {
         method: 'POST',
         body: formData,
       });
-      const data = await res.json();
-      if (data && data.data && data.data.url) {
-        return data.data.url;
+      const url = await res.text();
+      if (url && url.trim().startsWith('http')) {
+        return url.trim();
       }
     } catch (e) {
       console.warn('Cloud upload failed:', e);

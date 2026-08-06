@@ -53,9 +53,8 @@ const LOCAL_STORAGE_KEY_PLOTS = 'sree_realestate_plots_v1';
 const LOCAL_STORAGE_KEY_INQUIRIES = 'sree_realestate_inquiries_v1';
 const LOCAL_STORAGE_KEY_VISITS = 'sree_realestate_visits_v1';
 
-// Immediately wipe stale keys that caused QuotaExceededError crashes
+// Immediately wipe old stale project key that caused QuotaExceededError crash
 try { localStorage.removeItem('sree_realestate_project_v1'); } catch (_) {}
-try { localStorage.removeItem('sree_all_projects_v1'); } catch (_) {}
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
