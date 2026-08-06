@@ -79,7 +79,7 @@ export const KondaveeduVenture: React.FC = () => {
 
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/90 backdrop-blur-md text-white text-xs sm:text-sm font-extrabold uppercase tracking-wider mb-4 shadow-lg border border-blue-400/40">
             <MapPin className="w-4 h-4 text-white" />
-            200 Meters Away From Kondaveedu Ghat Road
+            150 Meters Away From Kondaveedu Ghat Road
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight drop-shadow-lg">

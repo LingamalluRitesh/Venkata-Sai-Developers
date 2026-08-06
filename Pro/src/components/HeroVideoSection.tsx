@@ -5,7 +5,7 @@ import { WhatsAppIcon, PhoneCallIcon } from './Icons';
 
 const TYPING_QUOTES = [
   "Investing in the land will make your future better.",
-  "200 meters from historical Kondaveedu Ghat Road.",
+  "150 meters from historical Kondaveedu Ghat Road.",
   "High land appreciation in Guntur's tourism corridor.",
   "Secure your children's future with prime villa plots."
 ];
@@ -96,7 +96,7 @@ export const HeroVideoSection: React.FC = () => {
         {/* Distance Highlight Badge */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600/30 backdrop-blur-md border border-blue-400/40 text-blue-300 text-xs sm:text-sm font-bold tracking-wide uppercase mb-6 shadow-lg">
           <MapPin className="w-4 h-4 text-blue-400 animate-bounce" />
-          <span>Just 200 Meters Away From Historical Kondaveedu Ghat Road</span>
+          <span>Just 150 Meters Away From Historical Kondaveedu Ghat Road</span>
         </div>
 
         {/* Dynamic Typing Animation Quote Header */}
@@ -157,7 +157,7 @@ export const HeroVideoSection: React.FC = () => {
         {/* Quick Highlights Bar */}
         <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 w-full max-w-4xl pt-8 border-t border-white/15">
           <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-            <span className="block text-2xl font-black text-white">200m</span>
+            <span className="block text-2xl font-black text-white">150m</span>
             <span className="text-xs text-slate-300 font-medium">To Kondaveedu Ghat Road</span>
           </div>
           <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
