@@ -16,15 +16,15 @@ export const INITIAL_FOUNDER = {
   name: 'Ratnala Venkata Punnarao',
   title: 'Founder & Managing Director',
   image: '/founder.jpg',
-  experienceYears: 18,
-  projectsDelivered: 28,
-  happyFamilies: 1200,
-  bio: 'Ratnala Venkata Punnarao is a visionary real estate developer and leader with over 18 years of pioneering excellence in Andhra Pradesh real estate. Under his dynamic leadership, Venkata Sai Developers has transformed land investments into wealth-generating landmarks for over 1,200 families.',
+  experienceYears: 10,
+  projectsDelivered: 6,
+  happyFamilies: 500,
+  bio: 'Ratnala Venkata Punnarao is a visionary real estate developer and leader with over 10 years of pioneering excellence in Andhra Pradesh real estate. Under his dynamic leadership, Venkata Sai Developers has transformed land investments into wealth-generating landmarks for over 500 families.',
   visionMessage: 'At Venkata Sai Developers, our motto "Fulfill Your Dreams" is not just a slogan — it is our core commitment. Every plot layout we design near iconic locations like Kondaveedu Ghat Road is crafted with 100% legal clearance, spot registration, and world-class infrastructure so your investment yields high returns for generations.',
   coreValues: [
     'Uncompromising Integrity & 100% Legal Title Transparency',
     'Prime Strategic Locations with Rapid Land Value Appreciation',
-    'Clear Title Blueprints & On-Time Infrastructure Delivery',
+    '100% Spot Registration & Clear Titles',
     'Customer-Centric Relations & Lifelong Support'
   ]
 };
@@ -37,7 +37,7 @@ export const KONDAVEEDU_PROJECT: Project = {
   isUpcoming: false,
   location: 'Kondaveedu, Edlapadu Mandal, Palnadu District, AP, India',
   distanceFromGhatRoadMeters: 150,
-  priceRangeSqYd: 'Around ₹10,000 per Sq.Yd (Negotiable)',
+  priceRangeSqYd: '₹10,000 per Sq.Yd (Negotiable)',
   description: 'A magnificent master-planned gated villa plot layout strategically situated merely 150 meters from the famous Kondaveedu Ghat Road. Surrounded by scenic hill vistas, rich historical heritage of Kondaveedu Fort, and rapid upcoming tourism & highway infrastructure.',
   keyFeatures: [
     '150 Meters from Historical Kondaveedu Ghat Road',

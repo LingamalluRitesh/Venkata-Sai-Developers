@@ -947,19 +947,28 @@ export const AdminPortal: React.FC = () => {
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       className="hidden"
                       onChange={(e) => {
-                        if (targetGalleryVenture.galleryImages.length >= MAX_GALLERY_PHOTOS) {
-                          alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture. Please remove an existing photo before adding a new one.`);
+                        const selectedFiles = Array.from(e.target.files || []);
+                        if (selectedFiles.length === 0) return;
+
+                        let currentGallery = [...(targetGalleryVenture?.galleryImages || [])];
+                        if (currentGallery.length >= MAX_GALLERY_PHOTOS) {
+                          alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture.`);
                           return;
                         }
-                        if (e.target.files?.[0]) {
-                          handleFileUpload(e.target.files[0], (dataUrl) => {
-                            const updated = [...targetGalleryVenture.galleryImages, dataUrl];
-                            updateProject(targetGalleryVenture.id, { galleryImages: updated });
-                            showToast('Photo uploaded from device to gallery!');
+
+                        let processedCount = 0;
+                        selectedFiles.forEach((file) => {
+                          if (currentGallery.length >= MAX_GALLERY_PHOTOS) return;
+                          handleFileUpload(file, (dataUrl) => {
+                            currentGallery = [...currentGallery, dataUrl];
+                            processedCount++;
+                            updateProject(targetGalleryVenture.id, { galleryImages: currentGallery });
+                            showToast(`${processedCount} photo(s) uploaded & compressed!`);
                           });
-                        }
+                        });
                       }}
                     />
                   </label>

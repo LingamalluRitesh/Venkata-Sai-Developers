@@ -62,8 +62,8 @@ export class NeonService {
         category: r.category || 'VILLA_PLOTS',
         isUpcoming: r.is_upcoming || false,
         location: r.location || '',
-        distanceFromGhatRoadMeters: r.distance_from_ghat_road_meters || 200,
-        priceRangeSqYd: r.price_range_sqyd || '',
+        distanceFromGhatRoadMeters: r.distance_from_ghat_road_meters || 150,
+        priceRangeSqYd: r.price_range_sqyd || '₹10,000 per Sq.Yd (Negotiable)',
         description: r.description || '',
         keyFeatures: [
           '200 meters to Kondaveedu Ghat Road',
