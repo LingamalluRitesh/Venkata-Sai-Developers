@@ -61,7 +61,7 @@ export const UpcomingProjects: React.FC = () => {
                   <div className="mt-4 pt-4 border-t border-slate-100">
                     <span className="text-[11px] font-bold uppercase text-slate-400 block mb-2">Key Highlights</span>
                     <ul className="space-y-1.5">
-                      {project.keyFeatures.map((feat, idx) => (
+                      {(project.keyFeatures || []).map((feat, idx) => (
                         <li key={idx} className="flex items-center gap-2 text-xs text-slate-700 font-medium">
                           <CheckCircle className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                           <span>{feat}</span>

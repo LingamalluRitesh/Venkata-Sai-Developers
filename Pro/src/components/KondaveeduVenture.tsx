@@ -160,7 +160,7 @@ export const KondaveeduVenture: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
               }`}
             >
-              1. Project Images & Photo Gallery ({activeProject.galleryImages.length})
+              1. Project Images & Photo Gallery ({(activeProject.galleryImages || []).length})
             </button>
             <button
               onClick={() => setActiveTabSub('ADVANTAGES')}
@@ -189,7 +189,7 @@ export const KondaveeduVenture: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {activeProject.galleryImages.map((imgUrl, index) => (
+              {(activeProject.galleryImages || []).map((imgUrl, index) => (
                 <div
                   key={index}
                   onClick={() => setActiveGalleryImage(imgUrl)}
@@ -318,7 +318,7 @@ export const KondaveeduVenture: React.FC = () => {
                 Project Amenities & Layout Developments
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                {activeProject.keyFeatures.map((feat, idx) => (
+                {(activeProject.keyFeatures || []).map((feat, idx) => (
                   <div key={idx} className="flex items-start gap-3 p-3.5 bg-slate-50 rounded-2xl border border-slate-100">
                     <CheckCircle2 className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
                     <span className="text-xs font-semibold text-slate-800">{feat}</span>

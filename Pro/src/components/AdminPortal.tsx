@@ -184,7 +184,8 @@ export const AdminPortal: React.FC = () => {
   const MAX_GALLERY_PHOTOS = 20;
 
   const handleAddGalleryImage = () => {
-    if (targetGalleryVenture.galleryImages.length >= MAX_GALLERY_PHOTOS) {
+    const currentImages = targetGalleryVenture.galleryImages || [];
+    if (currentImages.length >= MAX_GALLERY_PHOTOS) {
       alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture. Please remove an existing photo before adding a new one.`);
       return;
     }
@@ -192,18 +193,19 @@ export const AdminPortal: React.FC = () => {
       alert('Please enter an Image URL or use the Browse File button.');
       return;
     }
-    const updatedGallery = [...targetGalleryVenture.galleryImages, newGalleryUrl.trim()];
+    const updatedGallery = [...currentImages, newGalleryUrl.trim()];
     updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
     setNewGalleryUrl('');
     showToast('Photo added to gallery successfully!');
   };
 
   const handleRemoveGalleryImage = (indexToRemove: number) => {
-    if (targetGalleryVenture.galleryImages.length <= 1) {
+    const currentImages = targetGalleryVenture.galleryImages || [];
+    if (currentImages.length <= 1) {
       alert('Venture gallery must have at least one photo.');
       return;
     }
-    const updatedGallery = targetGalleryVenture.galleryImages.filter((_, idx) => idx !== indexToRemove);
+    const updatedGallery = currentImages.filter((_, idx) => idx !== indexToRemove);
     updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
     showToast('Photo removed from gallery.');
   };
@@ -730,7 +732,7 @@ export const AdminPortal: React.FC = () => {
                   <div className="text-xs text-slate-600 space-y-1 bg-slate-50 p-3 rounded-2xl border border-slate-100">
                     <p>📍 <strong>Location:</strong> {proj.location}</p>
                     <p>💰 <strong>Price Range:</strong> {proj.priceRangeSqYd}</p>
-                    <p>🖼️ <strong>Gallery Photos:</strong> {proj.galleryImages.length} Photos</p>
+                    <p>🖼️ <strong>Gallery Photos:</strong> {(proj.galleryImages || []).length} Photos</p>
                     {proj.brochureUrl && (
                       <p>📄 <strong>Brochure:</strong> <a href={proj.brochureUrl} target="_blank" rel="noreferrer" className="text-blue-600 underline font-bold">PDF Link Available</a></p>
                     )}
@@ -1052,12 +1054,12 @@ export const AdminPortal: React.FC = () => {
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-bold text-slate-700 uppercase block">
-                  Current Photos ({targetGalleryVenture.galleryImages.length} / {MAX_GALLERY_PHOTOS} Max Allowed) — Click red button to remove photo
+                  Current Photos ({(targetGalleryVenture.galleryImages || []).length} / {MAX_GALLERY_PHOTOS} Max Allowed) — Click red button to remove photo
                 </span>
-                {targetGalleryVenture.galleryImages.length > 0 && (
+                {(targetGalleryVenture.galleryImages || []).length > 0 && (
                   <button
                     onClick={() => {
-                      if (window.confirm(`Remove ALL ${targetGalleryVenture.galleryImages.length} photos from the gallery? This cannot be undone.`)) {
+                      if (window.confirm(`Remove ALL ${(targetGalleryVenture.galleryImages || []).length} photos from the gallery? This cannot be undone.`)) {
                         updateProject(targetGalleryVenture.id, { galleryImages: [] });
                         try {
                           const stored = JSON.parse(localStorage.getItem('sree_all_projects_v1') || '[]');
@@ -1077,7 +1079,7 @@ export const AdminPortal: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                {targetGalleryVenture.galleryImages.map((url, idx) => (
+                {(targetGalleryVenture.galleryImages || []).map((url, idx) => (
                   <div key={idx} className="relative group rounded-2xl overflow-hidden border border-slate-200 h-44 shadow-xs">
                     <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
                     

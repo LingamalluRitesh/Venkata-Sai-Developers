@@ -36,7 +36,11 @@ export class CloudDbService {
       if (!res.ok) return null;
       const json = await res.json();
       if (json && json.data && Array.isArray(json.data.projects) && json.data.projects.length > 0) {
-        return json.data.projects;
+        return json.data.projects.map((p: any) => ({
+          ...p,
+          galleryImages: Array.isArray(p.galleryImages) ? p.galleryImages : [],
+          keyFeatures: Array.isArray(p.keyFeatures) ? p.keyFeatures : [],
+        }));
       }
     } catch (err) {
       console.warn('Cloud DB fetch failed:', err);
