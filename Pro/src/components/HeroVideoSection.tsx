@@ -169,7 +169,7 @@ export const HeroVideoSection: React.FC = () => {
             <span className="text-xs text-slate-300 font-medium">Est. 5-Yr Land Appreciation</span>
           </div>
           <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/10 text-left">
-            <span className="block text-2xl font-black text-emerald-400">48</span>
+            <span className="block text-2xl font-black text-emerald-400">26</span>
             <span className="text-xs text-slate-300 font-medium">Premium Plots Available</span>
           </div>
         </div>

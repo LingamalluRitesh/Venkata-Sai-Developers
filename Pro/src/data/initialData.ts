@@ -60,7 +60,7 @@ export const KONDAVEEDU_PROJECT: Project = {
     'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
     'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'
   ],
-  plotsCount: 48,
+  plotsCount: 26,
   availablePlotsCount: 22,
 };
 
