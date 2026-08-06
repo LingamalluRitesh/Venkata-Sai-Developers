@@ -213,15 +213,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadCloudProjects();
   }, []);
 
-  // Save projects with cloud URLs locally & sync live to Cloud DB for all devices
+  // Save projects with CDN URLs locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
-      const cleaned = allProjects.map(p => ({
-        ...p,
-        galleryImages: (p.galleryImages || []).filter(img => !img.startsWith('data:'))
-      }));
-      safeSetItem('sree_all_projects_v1', JSON.stringify(cleaned));
-      CloudDbService.syncProjectsToCloud(cleaned);
+      safeSetItem('sree_all_projects_v1', JSON.stringify(allProjects));
+      CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
 

@@ -116,19 +116,22 @@ export const AdminPortal: React.FC = () => {
 
   const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
 
-  // Upload image file directly to Free Permanent Cloud Server to get a public URL
+  // Upload image file directly to Uploadcare High-Speed CDN to get a permanent public URL
   const uploadFileToCloud = async (file: File): Promise<string> => {
     try {
       const formData = new FormData();
-      formData.append('reqtype', 'fileupload');
-      formData.append('fileToUpload', file);
-      const res = await fetch('https://catbox.moe/user/api.php', {
+      formData.append('UPLOADCARE_PUB_KEY', 'demopublickey');
+      formData.append('UPLOADCARE_STORE', '1');
+      formData.append('file', file);
+
+      const res = await fetch('https://upload.uploadcare.com/base/', {
         method: 'POST',
         body: formData,
       });
-      const url = await res.text();
-      if (url && url.trim().startsWith('http')) {
-        return url.trim();
+
+      const data = await res.json();
+      if (data && data.file) {
+        return `https://ucarecdn.com/${data.file}/${encodeURIComponent(file.name || 'photo.png')}`;
       }
     } catch (e) {
       console.warn('Cloud upload failed:', e);
