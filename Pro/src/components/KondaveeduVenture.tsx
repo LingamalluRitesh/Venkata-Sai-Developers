@@ -137,7 +137,7 @@ export const KondaveeduVenture: React.FC = () => {
             </div>
             <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-left shadow-lg">
               <span className="text-[11px] text-slate-300 font-bold block uppercase">Distance</span>
-              <span className="text-sm font-extrabold text-blue-400 mt-1 block">Just 200 Meters</span>
+              <span className="text-sm font-extrabold text-blue-400 mt-1 block">Just 150 Meters</span>
             </div>
             <div className="bg-slate-900/80 backdrop-blur-md p-4 rounded-2xl border border-white/20 text-left shadow-lg">
               <span className="text-[11px] text-slate-300 font-bold block uppercase">Price Range</span>
@@ -245,15 +245,15 @@ export const KondaveeduVenture: React.FC = () => {
                   Historical Heritage Advantage
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-extrabold leading-tight">
-                  Located Just 200 Meters Away From Kondaveedu Ghat Road
+                  Located Just 150 Meters Away From Kondaveedu Ghat Road
                 </h3>
                 <p className="mt-3 text-slate-300 text-sm leading-relaxed">
-                  Kondaveedu Ghat Road is a famous scenic road constructed along the historic Kondaveedu Fort hills. Staying just 200 meters away gives your property instant connectivity to major tourism developments, clean mountain air, and massive future appreciation.
+                  Kondaveedu Ghat Road is a famous scenic road constructed along the historic Kondaveedu Fort hills. staying just 150 meters away gives your property instant connectivity to major tourism developments, clean mountain air, and massive future appreciation.
                 </p>
               </div>
 
               <div className="shrink-0 bg-white/10 backdrop-blur-md p-6 rounded-2xl border border-white/15 text-center min-w-[200px]">
-                <span className="block text-4xl font-black text-blue-400">200m</span>
+                <span className="block text-4xl font-black text-blue-400">150m</span>
                 <span className="text-xs font-bold text-slate-200 mt-1 block">Distance to Ghat Road</span>
               </div>
             </div>
