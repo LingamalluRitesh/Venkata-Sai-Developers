@@ -50,18 +50,14 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 const LOCAL_STORAGE_KEY_SETTINGS = 'sree_realestate_settings_v1';
 const LOCAL_STORAGE_KEY_FOUNDER = 'sree_realestate_founder_v1';
 const LOCAL_STORAGE_KEY_PLOTS = 'sree_realestate_plots_v1';
-const LOCAL_STORAGE_KEY_PROJECT = 'sree_realestate_project_v1';
 const LOCAL_STORAGE_KEY_INQUIRIES = 'sree_realestate_inquiries_v1';
 const LOCAL_STORAGE_KEY_VISITS = 'sree_realestate_visits_v1';
 
+// Immediately wipe stale keys that caused QuotaExceededError crashes
+try { localStorage.removeItem('sree_realestate_project_v1'); } catch (_) {}
+try { localStorage.removeItem('sree_all_projects_v1'); } catch (_) {}
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // On startup: remove the old large project key that fills localStorage with base64 images
-  // This prevents QuotaExceededError from crashing the app
-  React.useEffect(() => {
-    try {
-      localStorage.removeItem('sree_realestate_project_v1');
-    } catch (e) {}
-  }, []);
 
   const [settings, setSettings] = useState<AdminSettings>(() => {
     try {
@@ -211,8 +207,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       const stripped = allProjects.map(p => ({ ...p, galleryImages: [] }));
       safeSetItem('sree_all_projects_v1', JSON.stringify(stripped));
-      // Also clear the old project key that was causing quota crash
-      localStorage.removeItem(LOCAL_STORAGE_KEY_PROJECT);
     } catch (e) {}
   }, [allProjects]);
 
