@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminSettings, Inquiry, Plot, PlotStatus, Project, SiteVisit, ActiveTab, FounderInfo } from '../types';
 import { INITIAL_INQUIRIES, INITIAL_PLOTS, INITIAL_SETTINGS, INITIAL_SITE_VISITS, INITIAL_UPCOMING_PROJECTS, KONDAVEEDU_PROJECT, INITIAL_FOUNDER } from '../data/initialData';
-import { NeonService } from '../lib/neonClient';
+
 
 interface AppContextType {
   settings: AdminSettings;
@@ -218,11 +218,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateKondaveeduProject = (updated: Partial<Project>) => {
     setAllProjects((prev) =>
       prev.map((p, idx) => {
-        if (idx === 0) {
-          const newProj = { ...p, ...updated };
-          NeonService.syncProjectToNeon(newProj);
-          return newProj;
-        }
+        if (idx === 0) return { ...p, ...updated };
         return p;
       })
     );
@@ -234,18 +230,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newProj: Project = { ...newProjData, id };
     setAllProjects((prev) => [...prev, newProj]);
     setActiveProjectState(newProj);
-    NeonService.syncProjectToNeon(newProj);
     showToast(`New Venture "${newProj.title}" created successfully!`);
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
     setAllProjects((prev) =>
       prev.map((p) => {
-        if (p.id === id) {
-          const newProj = { ...p, ...updated };
-          NeonService.syncProjectToNeon(newProj);
-          return newProj;
-        }
+        if (p.id === id) return { ...p, ...updated };
         return p;
       })
     );
@@ -296,18 +287,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setInquiries((prev) => [newInquiry, ...prev]);
-    await NeonService.syncInquiryToNeon(newInquiry);
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 
-  const updateInquiryStatus = async (id: string, status: Inquiry['status']) => {
+  const updateInquiryStatus = (id: string, status: Inquiry['status']) => {
     setInquiries((prev) =>
       prev.map((inq) => {
-        if (inq.id === id) {
-          const updated = { ...inq, status };
-          NeonService.syncInquiryToNeon(updated);
-          return updated;
-        }
+        if (inq.id === id) return { ...inq, status };
         return inq;
       })
     );
@@ -322,18 +308,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     setSiteVisits((prev) => [newVisit, ...prev]);
-    await NeonService.syncSiteVisitToNeon(newVisit);
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 
-  const updateSiteVisitStatus = async (id: string, status: SiteVisit['status']) => {
+  const updateSiteVisitStatus = (id: string, status: SiteVisit['status']) => {
     setSiteVisits((prev) =>
       prev.map((v) => {
-        if (v.id === id) {
-          const updated = { ...v, status };
-          NeonService.syncSiteVisitToNeon(updated);
-          return updated;
-        }
+        if (v.id === id) return { ...v, status };
         return v;
       })
     );

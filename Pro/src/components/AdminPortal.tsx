@@ -196,7 +196,7 @@ export const AdminPortal: React.FC = () => {
                   Admin Control Portal
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold rounded-full">
-                  ⚡ Render PostgreSQL Database Connected
+                  ✅ Data Saved Locally & Securely
                 </span>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black mt-2 tracking-tight text-white drop-shadow-md">
