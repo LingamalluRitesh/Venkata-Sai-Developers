@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminSettings, Inquiry, Plot, PlotStatus, Project, SiteVisit, ActiveTab, FounderInfo } from '../types';
 import { INITIAL_INQUIRIES, INITIAL_PLOTS, INITIAL_SETTINGS, INITIAL_SITE_VISITS, INITIAL_UPCOMING_PROJECTS, KONDAVEEDU_PROJECT, INITIAL_FOUNDER } from '../data/initialData';
+import { CloudDbService } from '../lib/cloudDb';
 
 
 interface AppContextType {
@@ -201,7 +202,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
-  // Save projects with cloud URLs (http/https/relative) while stripping heavy base64 strings
+  // Fetch live projects and gallery images from Cloud DB on load & poll every 5s for instant multi-device sync
+  useEffect(() => {
+    async function loadCloudProjects() {
+      const dbProjects = await CloudDbService.fetchProjectsFromCloud();
+      if (dbProjects && dbProjects.length > 0) {
+        setAllProjects(dbProjects);
+      }
+    }
+    loadCloudProjects();
+    const interval = setInterval(loadCloudProjects, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Save projects with cloud URLs locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
       const cleaned = allProjects.map(p => ({
@@ -209,6 +223,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         galleryImages: (p.galleryImages || []).filter(img => !img.startsWith('data:'))
       }));
       safeSetItem('sree_all_projects_v1', JSON.stringify(cleaned));
+      CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
 
