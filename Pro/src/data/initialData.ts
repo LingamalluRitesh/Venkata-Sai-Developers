@@ -44,8 +44,12 @@ export const KONDAVEEDU_PROJECT: Project = {
     '100% Spot Registration & Clear Titles',
     '30ft Blacktop Internal Avenues',
     'Solar Electricity & Abundant Ground Water Resources Available',
+    'Open Drainage System',
     'Grand Entrance Arch with 24/7 Security Gate',
     'Avenue Plantation',
+    'Outer Ring Road Just 8 km from the Layout',
+    'ISKCON Golden Temple — 8 km from the Layout',
+    'Reddy Rajulu Museum — 4 km from the Layout',
     'High Land Value Appreciation Zone'
   ],
   heroImage: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
