@@ -202,7 +202,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
-  // Fetch live projects and gallery images from Cloud DB on load & poll every 5s for instant multi-device sync
+  // Fetch live projects and gallery images from Cloud DB on page mount
   useEffect(() => {
     async function loadCloudProjects() {
       const dbProjects = await CloudDbService.fetchProjectsFromCloud();
@@ -211,8 +211,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
     loadCloudProjects();
-    const interval = setInterval(loadCloudProjects, 5000);
-    return () => clearInterval(interval);
   }, []);
 
   // Save projects with cloud URLs locally & sync live to Cloud DB for all devices
@@ -223,7 +221,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         galleryImages: (p.galleryImages || []).filter(img => !img.startsWith('data:'))
       }));
       safeSetItem('sree_all_projects_v1', JSON.stringify(cleaned));
-      CloudDbService.syncProjectsToCloud(allProjects);
+      CloudDbService.syncProjectsToCloud(cleaned);
     } catch (e) {}
   }, [allProjects]);
 
