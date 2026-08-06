@@ -1,14 +1,13 @@
 import { neon } from '@neondatabase/serverless';
 import { Inquiry, Project, SiteVisit } from '../types';
 
-const LIVE_NEON_FALLBACK_URL = "postgresql://venkata_sai_db_user:3n83Do8WceScv3ssTD1AN4JaB6HAc7F5@dpg-d9q4drflk1mc73eietk0-a.oregon-postgres.render.com/venkata_sai_db";
+const RENDER_POSTGRES_DB_URL = "postgresql://venkata_sai_db_user:3n83Do8WceScv3ssTD1AN4JaB6HAc7F5@dpg-d9q4drflk1mc73eietk0-a.oregon-postgres.render.com/venkata_sai_db";
 
 export class NeonService {
-  // Reads connection URL from env variables OR defaults to live Neon connection string for universal multi-device sync
   private static getDbUrl(): string {
-    const envUrl = (import.meta as any).env?.VITE_NEON_DATABASE_URL || (import.meta as any).env?.VITE_DATABASE_URL || '';
-    if (envUrl && envUrl.startsWith('postgres')) return envUrl.trim();
-    return LIVE_NEON_FALLBACK_URL;
+    const envUrl = (import.meta as any).env?.VITE_DATABASE_URL || (import.meta as any).env?.VITE_RENDER_DATABASE_URL || '';
+    if (envUrl && envUrl.includes('render.com')) return envUrl.trim();
+    return RENDER_POSTGRES_DB_URL;
   }
 
   public static isConfigured(): boolean {
