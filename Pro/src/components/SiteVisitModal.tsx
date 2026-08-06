@@ -73,7 +73,7 @@ export const SiteVisitModal: React.FC = () => {
           </div>
           <h3 className="text-2xl font-extrabold">Schedule Kondaveedu Site Visit</h3>
           <p className="text-xs text-slate-300 mt-1">
-            Experience the 200m proximity to Kondaveedu Ghat Road in person.
+            Experience the 150m proximity to Kondaveedu Ghat Road in person.
           </p>
         </div>
 

@@ -27,7 +27,7 @@ export const Footer: React.FC = () => {
             </p>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-[11px] font-bold">
               <MapPin className="w-3 h-3 text-emerald-400" />
-              200m From Kondaveedu Ghat Road
+              150m From Kondaveedu Ghat Road
             </div>
           </div>
 
@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
               </li>
               <li>
                 <button onClick={() => setActiveTab('KONDAVEEDU_VENTURE')} className="hover:text-emerald-400 transition-colors">
-                  Kondaveedu Villa Plots (200m Ghat Road)
+                  Kondaveedu Villa Plots (150m Ghat Road)
                 </button>
               </li>
               <li>
