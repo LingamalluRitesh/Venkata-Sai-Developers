@@ -88,21 +88,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const activeProject = allProjects.find((p) => p.id === activeProjectState.id) || kondaveeduProject;
 
   useEffect(() => {
-    localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
+    try {
+      localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
+    } catch (err) {}
   }, [allProjects]);
-
-  // Fetch live projects and photo galleries from Neon DB when website loads & poll every 4s for instant multi-device sync
-  useEffect(() => {
-    async function loadCloudProjects() {
-      const dbProjects = await NeonService.fetchProjectsFromNeon();
-      if (dbProjects && dbProjects.length > 0) {
-        setAllProjects(dbProjects);
-      }
-    }
-    loadCloudProjects();
-    const interval = setInterval(loadCloudProjects, 4000);
-    return () => clearInterval(interval);
-  }, []);
 
   const [upcomingProjects] = useState<Project[]>(INITIAL_UPCOMING_PROJECTS);
 
