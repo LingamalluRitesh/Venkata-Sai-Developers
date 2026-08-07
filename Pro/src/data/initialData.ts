@@ -52,13 +52,14 @@ export const KONDAVEEDU_PROJECT: Project = {
     'Reddy Rajulu Museum — 4 km from the Layout',
     'High Land Value Appreciation Zone'
   ],
-  heroImage: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80',
+  heroImage: '/kondaveedu_1.jpeg',
   galleryImages: [
-    '/kondaveedu_2.png',
-    '/kondaveedu_3.png',
-    'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=800&q=80'
+    '/kondaveedu_1.jpeg',
+    '/kondaveedu_2.jpeg',
+    '/kondaveedu_3.jpeg',
+    '/kondaveedu_4.jpeg',
+    '/kondaveedu_5.jpeg',
+    '/kondaveedu_6.jpeg'
   ],
   plotsCount: 26,
   availablePlotsCount: 22,

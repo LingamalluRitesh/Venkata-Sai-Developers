@@ -1,7 +1,7 @@
 import { Project } from '../types';
 import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
-const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fd6d6-d429-7a16-be15-ade1053b9fe1';
+const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
 
 export class CloudDbService {
   // Sync all projects and gallery image URLs to Live Cloud Database
