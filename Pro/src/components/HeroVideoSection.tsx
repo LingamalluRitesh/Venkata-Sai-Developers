@@ -109,11 +109,6 @@ export const HeroVideoSection: React.FC = () => {
           </h1>
         </div>
 
-        {/* Subtitle */}
-        <p className="max-w-3xl text-sm sm:text-base md:text-lg text-slate-200 font-normal leading-relaxed mb-10 drop-shadow-xs">
-          Own a piece of paradise in Kondaveedu with Venkata Sai Developers. Premium villa plots featuring blacktop roads, underground utilities, and 24/7 security, surrounded by historic green hills.
-        </p>
-
         {/* Standardized Equal-Size Action Buttons Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 w-full max-w-4xl mx-auto">
           
@@ -152,6 +147,13 @@ export const HeroVideoSection: React.FC = () => {
             <span className="truncate">Call Office</span>
           </a>
 
+        </div>
+
+        {/* Repositioned Subtitle Glass Card */}
+        <div className="mt-8 max-w-3xl px-6 py-4 rounded-2xl bg-black/40 backdrop-blur-md border border-white/10 shadow-xl">
+          <p className="text-xs sm:text-sm md:text-base text-slate-200 font-medium leading-relaxed drop-shadow-xs">
+            Own a piece of paradise in Kondaveedu with Venkata Sai Developers — Premium villa plots featuring 30ft blacktop avenues, open drainage, solar electricity, and abundant groundwater, surrounded by historic green hills.
+          </p>
         </div>
 
         {/* Quick Highlights Bar */}
