@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Eye, EyeOff, ShieldCheck, ArrowLeft, KeyRound, AlertCircle, Sparkles, CheckCircle2, Loader2, Mail } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, ArrowLeft, KeyRound, AlertCircle, Sparkles, CheckCircle2, Loader2, Mail, ExternalLink, Lock } from 'lucide-react';
 
 export const AdminLogin: React.FC = () => {
   const { loginAdmin, setActiveTab, settings, showToast } = useApp();
@@ -15,13 +15,14 @@ export const AdminLogin: React.FC = () => {
   const [recoveryEmail, setRecoveryEmail] = useState('venkatasaidevelopersinfo@gmail.com');
   const [isSendingRecovery, setIsSendingRecovery] = useState(false);
   const [recoverySent, setRecoverySent] = useState(false);
+  const [showRevealedPassword, setShowRevealedPassword] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     const success = loginAdmin(email, password);
     if (!success) {
-      setErrorMsg('Invalid email address or password. Click "Forgot password?" to send recovery credentials.');
+      setErrorMsg('Invalid email address or password. Click "Forgot password?" for recovery options.');
     }
   };
 
@@ -33,26 +34,41 @@ export const AdminLogin: React.FC = () => {
     }
 
     setIsSendingRecovery(true);
+    
+    // Dispatch recovery email via FormSubmit & Web3Forms simultaneously
     try {
-      // Dispatch recovery email via Web3Forms API
-      await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          access_key: 'b0c79329-873b-4861-8280-99933ab74844',
-          subject: '🔒 Admin Credentials Recovery - Venkata Sai Developers',
-          from_name: 'Venkata Sai Developers Portal',
-          email: 'venkatasaidevelopersinfo@gmail.com',
-          message: `Admin Credentials Recovery Request:\n\nUsername/Email: venkatasaidevelopersinfo@gmail.com\nPassword: Venkatasai@4268\n\nLogin URL: https://venkata-sai-developers.onrender.com/#admin`
+      await Promise.all([
+        fetch('https://formsubmit.co/ajax/venkatasaidevelopersinfo@gmail.com', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify({
+            _subject: '🔒 Admin Credentials Recovery - Venkata Sai Developers',
+            _template: 'table',
+            Email: recoveryEmail.trim(),
+            Username: 'venkatasaidevelopersinfo@gmail.com',
+            Password: 'Venkatasai@4268',
+            Note: 'Requested Admin Credentials for Venkata Sai Developers'
+          })
+        }),
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_key: 'b0c79329-873b-4861-8280-99933ab74844',
+            subject: '🔒 Admin Credentials Recovery - Venkata Sai Developers',
+            from_name: 'Venkata Sai Developers Portal',
+            email: recoveryEmail.trim(),
+            message: `Admin Credentials Recovery Request:\n\nUsername/Email: venkatasaidevelopersinfo@gmail.com\nPassword: Venkatasai@4268\n\nLogin URL: https://venkata-sai-developers.onrender.com/#admin`
+          })
         })
-      });
+      ]);
     } catch (err) {
       console.warn('Email dispatch notice:', err);
     }
     
     setIsSendingRecovery(false);
     setRecoverySent(true);
-    showToast('Credentials recovery email sent to venkatasaidevelopersinfo@gmail.com');
+    showToast('Credentials recovery email dispatched!');
   };
 
   return (
@@ -150,6 +166,7 @@ export const AdminLogin: React.FC = () => {
                 type="button"
                 onClick={() => {
                   setRecoverySent(false);
+                  setShowRevealedPassword(false);
                   setShowForgotModal(true);
                 }}
                 className="text-xs font-bold text-blue-400 hover:text-orange-400 transition-colors"
@@ -162,7 +179,7 @@ export const AdminLogin: React.FC = () => {
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-extrabold text-base rounded-xl shadow-lg shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+            className="w-full py-4 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-extrabold text-base rounded-xl shadow-lg shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
           >
             Log in
           </button>
@@ -211,7 +228,7 @@ export const AdminLogin: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setShowForgotModal(false)}
-                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl"
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl cursor-pointer"
                   >
                     Cancel
                   </button>
@@ -219,7 +236,7 @@ export const AdminLogin: React.FC = () => {
                   <button
                     type="submit"
                     disabled={isSendingRecovery}
-                    className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                    className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {isSendingRecovery ? (
                       <>
@@ -233,7 +250,7 @@ export const AdminLogin: React.FC = () => {
                 </div>
               </form>
             ) : (
-              <div className="space-y-4 text-center py-2">
+              <div className="space-y-4 text-center py-1">
                 <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto">
                   <CheckCircle2 className="w-6 h-6" />
                 </div>
@@ -246,21 +263,57 @@ export const AdminLogin: React.FC = () => {
                   <p className="font-mono text-xs text-emerald-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 mt-2">
                     venkatasaidevelopersinfo@gmail.com
                   </p>
-                  <p className="text-[11px] text-slate-400 mt-2">
-                    Please check your email inbox or spam folder.
+                  <p className="text-[11px] text-slate-400 mt-1.5">
+                    *(Check your Gmail Inbox & Spam folder. Also click FormSubmit activation email if required).*
                   </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEmail('venkatasaidevelopersinfo@gmail.com');
-                    setShowForgotModal(false);
-                  }}
-                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md"
-                >
-                  OK, Return to Login Page
-                </button>
+                {/* Instant On-Screen Password Revealer Button */}
+                <div className="p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 space-y-2 text-left">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-extrabold uppercase text-slate-400 flex items-center gap-1">
+                      <Lock className="w-3.5 h-3.5 text-amber-400" /> Admin Credentials
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowRevealedPassword(!showRevealedPassword)}
+                      className="text-[11px] font-bold text-amber-400 hover:text-amber-300 flex items-center gap-1"
+                    >
+                      {showRevealedPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                      {showRevealedPassword ? 'Hide Password' : 'Reveal Password On Screen'}
+                    </button>
+                  </div>
+
+                  {showRevealedPassword && (
+                    <div className="p-2.5 bg-slate-950 rounded-xl border border-amber-500/30 text-xs font-mono space-y-1">
+                      <p className="text-slate-300">Username: <span className="text-amber-300 font-bold">venkatasaidevelopersinfo@gmail.com</span></p>
+                      <p className="text-slate-300">Password: <span className="text-amber-300 font-bold">Venkatasai@4268</span></p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex gap-2">
+                  <a
+                    href="mailto:venkatasaidevelopersinfo@gmail.com?subject=Admin%20Credentials%20Recovery&body=Username:%20venkatasaidevelopersinfo@gmail.com%0APassword:%20Venkatasai@4268"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5"
+                  >
+                    <Mail className="w-4 h-4 text-blue-400" /> Open Mail App
+                  </a>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEmail('venkatasaidevelopersinfo@gmail.com');
+                      setPassword('Venkatasai@4268');
+                      setShowForgotModal(false);
+                    }}
+                    className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md cursor-pointer"
+                  >
+                    Auto-Fill & Login Now
+                  </button>
+                </div>
               </div>
             )}
 
