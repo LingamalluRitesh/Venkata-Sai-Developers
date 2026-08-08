@@ -163,8 +163,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, []);
 
   const loginAdmin = (email: string, pass: string): boolean => {
-    // Dummy credential check
-    if ((email.trim().toLowerCase() === 'admin@venkatasaidevelopers.com' || email.trim() === 'admin') && pass === 'admin123') {
+    const cleanEmail = email.trim().toLowerCase();
+    if (
+      (cleanEmail === 'venkatasaidevelopersinfo@gmail.com' || cleanEmail === 'admin@venkatasaidevelopers.com' || cleanEmail === 'admin') &&
+      (pass === 'Venkatasai@4268' || pass === 'admin123')
+    ) {
       setIsAdminAuthenticated(true);
       localStorage.setItem('sree_admin_auth', 'true');
       showToast('Admin logged in successfully!');

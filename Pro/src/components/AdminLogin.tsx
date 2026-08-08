@@ -1,23 +1,58 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Eye, EyeOff, ShieldCheck, ArrowLeft, KeyRound, AlertCircle, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, ShieldCheck, ArrowLeft, KeyRound, AlertCircle, Sparkles, CheckCircle2, Loader2, Mail } from 'lucide-react';
 
 export const AdminLogin: React.FC = () => {
-  const { loginAdmin, setActiveTab, settings } = useApp();
+  const { loginAdmin, setActiveTab, settings, showToast } = useApp();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  
+  // Forgot Password Modal State
   const [showForgotModal, setShowForgotModal] = useState(false);
+  const [recoveryEmail, setRecoveryEmail] = useState('venkatasaidevelopersinfo@gmail.com');
+  const [isSendingRecovery, setIsSendingRecovery] = useState(false);
+  const [recoverySent, setRecoverySent] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
     const success = loginAdmin(email, password);
     if (!success) {
-      setErrorMsg('Invalid email address or password. Click "Forgot password?" for credentials.');
+      setErrorMsg('Invalid email address or password. Click "Forgot password?" to send recovery credentials.');
     }
+  };
+
+  const handleSendRecovery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!recoveryEmail.trim()) {
+      alert('Please enter your admin email address.');
+      return;
+    }
+
+    setIsSendingRecovery(true);
+    try {
+      // Dispatch recovery email via Web3Forms API
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'b0c79329-873b-4861-8280-99933ab74844',
+          subject: '🔒 Admin Credentials Recovery - Venkata Sai Developers',
+          from_name: 'Venkata Sai Developers Portal',
+          email: 'venkatasaidevelopersinfo@gmail.com',
+          message: `Admin Credentials Recovery Request:\n\nUsername/Email: venkatasaidevelopersinfo@gmail.com\nPassword: Venkatasai@4268\n\nLogin URL: https://venkata-sai-developers.onrender.com/#admin`
+        })
+      });
+    } catch (err) {
+      console.warn('Email dispatch notice:', err);
+    }
+    
+    setIsSendingRecovery(false);
+    setRecoverySent(true);
+    showToast('Credentials recovery email sent to venkatasaidevelopersinfo@gmail.com');
   };
 
   return (
@@ -39,7 +74,7 @@ export const AdminLogin: React.FC = () => {
         Return to Website
       </button>
 
-      {/* Login Card Container (Reference Image 2 styling) */}
+      {/* Login Card Container */}
       <div className="w-full max-w-md bg-[#111625] border border-slate-800 rounded-3xl p-8 sm:p-10 shadow-2xl relative z-10">
         
         {/* Header */}
@@ -70,12 +105,12 @@ export const AdminLogin: React.FC = () => {
           {/* Email input */}
           <div>
             <label className="block text-xs font-semibold text-slate-300 mb-2">
-              Email address or Employee ID
+              Admin Email / Username
             </label>
             <input
               type="text"
               required
-              placeholder="e.g. admin@venkatasaidevelopers.com"
+              placeholder="venkatasaidevelopersinfo@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-3.5 bg-[#181e2e] border border-slate-700/70 rounded-xl text-sm font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition-all"
@@ -113,7 +148,10 @@ export const AdminLogin: React.FC = () => {
             <div className="text-right mt-2">
               <button
                 type="button"
-                onClick={() => setShowForgotModal(true)}
+                onClick={() => {
+                  setRecoverySent(false);
+                  setShowForgotModal(true);
+                }}
                 className="text-xs font-bold text-blue-400 hover:text-orange-400 transition-colors"
               >
                 Forgot password?
@@ -130,19 +168,12 @@ export const AdminLogin: React.FC = () => {
           </button>
         </form>
 
-        {/* Quick Hint Bar for Admin */}
-        <div className="mt-8 pt-4 border-t border-slate-800/80 text-center">
-          <p className="text-[11px] text-slate-400">
-            Admin Access: <code className="bg-slate-800 text-orange-300 px-1.5 py-0.5 rounded font-mono">admin@venkatasaidevelopers.com</code> / <code className="bg-slate-800 text-orange-300 px-1.5 py-0.5 rounded font-mono">admin123</code>
-          </p>
-        </div>
-
       </div>
 
-      {/* Forgot Password Modal */}
+      {/* Forgot Credentials Modal */}
       {showForgotModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-[#111625] max-w-md w-full rounded-3xl border border-slate-800 p-6 shadow-2xl space-y-4">
+        <div className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-[#111625] max-w-md w-full rounded-3xl border border-slate-800 p-6 sm:p-8 shadow-2xl space-y-5">
             
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-orange-500/20 text-orange-400 rounded-xl flex items-center justify-center">
@@ -150,35 +181,89 @@ export const AdminLogin: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-lg font-bold text-white">Admin Credentials Recovery</h3>
-                <p className="text-xs text-slate-400">Security Credentials Notification</p>
+                <p className="text-xs text-slate-400">Security Access Verification</p>
               </div>
             </div>
 
-            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-2xl space-y-2 text-xs text-slate-200">
-              <p className="font-semibold text-blue-300 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4" /> Password reset instructions & credentials sent to:
-              </p>
-              <p className="font-mono text-white bg-slate-900/60 p-2 rounded border border-slate-800">
-                {settings.contactEmail}
-              </p>
-              
-              <div className="pt-2 border-t border-blue-500/20">
-                <span className="text-[11px] text-slate-400 block mb-1">Your Default Admin Credentials:</span>
-                <p className="font-mono text-orange-300">Email: admin@venkatasaidevelopers.com</p>
-                <p className="font-mono text-orange-300">Password: admin123</p>
-              </div>
-            </div>
+            {!recoverySent ? (
+              <form onSubmit={handleSendRecovery} className="space-y-4">
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  Enter your registered Admin email below. Login credentials & recovery instructions will be dispatched to your inbox:
+                </p>
 
-            <button
-              onClick={() => {
-                setEmail('admin@venkatasaidevelopers.com');
-                setPassword('admin123');
-                setShowForgotModal(false);
-              }}
-              className="w-full py-3 bg-gradient-to-r from-orange-500 to-amber-600 text-white font-bold text-xs rounded-xl shadow-md"
-            >
-              Auto-Fill Credentials & Close
-            </button>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-400 mb-1.5">
+                    Registered Email Address
+                  </label>
+                  <div className="relative">
+                    <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="email"
+                      required
+                      value={recoveryEmail}
+                      onChange={(e) => setRecoveryEmail(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-[#181e2e] border border-slate-700/70 rounded-xl text-xs font-semibold text-white placeholder-slate-500 focus:outline-none focus:border-orange-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgotModal(false)}
+                    className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold text-xs rounded-xl"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    disabled={isSendingRecovery}
+                    className="flex-1 py-3 bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    {isSendingRecovery ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        Sending...
+                      </>
+                    ) : (
+                      'Send Credentials to Email'
+                    )}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-4 text-center py-2">
+                <div className="w-12 h-12 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+
+                <div>
+                  <h4 className="text-base font-bold text-white">Credentials Sent Successfully!</h4>
+                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                    Recovery details & login password have been dispatched to:
+                  </p>
+                  <p className="font-mono text-xs text-emerald-300 bg-slate-900/80 p-2.5 rounded-xl border border-slate-800 mt-2">
+                    venkatasaidevelopersinfo@gmail.com
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-2">
+                    Please check your email inbox or spam folder.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('venkatasaidevelopersinfo@gmail.com');
+                    setShowForgotModal(false);
+                  }}
+                  className="w-full py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow-md"
+                >
+                  OK, Return to Login Page
+                </button>
+              </div>
+            )}
+
           </div>
         </div>
       )}

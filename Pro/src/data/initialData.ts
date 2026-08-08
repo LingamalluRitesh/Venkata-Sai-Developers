@@ -6,7 +6,7 @@ export const INITIAL_SETTINGS: AdminSettings = {
   logoUrl: '/logo.jpg',
   contactPhone: '+91 90309 03364',
   whatsappPhone: '+91 89788 15621',
-  contactEmail: 'sales@venkatasaidevelopers.com',
+  contactEmail: 'venkatasaidevelopersinfo@gmail.com',
   officeAddress: 'Annapurna Nagar 6/2, Door No. 130-6-185, Gorantla, Guntur, Andhra Pradesh – 522034',
   neonDatabaseUrl: '',
   isNeonConnected: false,
