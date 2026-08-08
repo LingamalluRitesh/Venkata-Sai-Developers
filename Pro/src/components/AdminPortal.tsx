@@ -35,8 +35,10 @@ export const AdminPortal: React.FC = () => {
     addPlot, 
     inquiries, 
     updateInquiryStatus, 
+    deleteInquiry,
     siteVisits, 
     updateSiteVisitStatus, 
+    deleteSiteVisit,
     setActiveTab,
     showToast
   } = useApp();
@@ -420,11 +422,11 @@ export const AdminPortal: React.FC = () => {
                               {inq.status}
                             </span>
                           </td>
-                          <td className="p-3 text-right space-x-1">
+                          <td className="p-3 text-right space-x-1 whitespace-nowrap">
                             {inq.status === 'PENDING' && (
                               <button
                                 onClick={() => updateInquiryStatus(inq.id, 'CONTACTED')}
-                                className="px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700"
+                                className="px-2.5 py-1 bg-blue-600 text-white text-[11px] font-bold rounded-lg hover:bg-blue-700 cursor-pointer"
                               >
                                 Mark Contacted
                               </button>
@@ -432,11 +434,23 @@ export const AdminPortal: React.FC = () => {
                             {inq.status !== 'RESOLVED' && (
                               <button
                                 onClick={() => updateInquiryStatus(inq.id, 'RESOLVED')}
-                                className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-lg hover:bg-emerald-700"
+                                className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-lg hover:bg-emerald-700 cursor-pointer"
                               >
                                 Resolve
                               </button>
                             )}
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Are you sure you want to delete inquiry from "${inq.name}"?`)) {
+                                  deleteInquiry(inq.id);
+                                }
+                              }}
+                              className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center gap-1 cursor-pointer"
+                              title="Delete Invalid Inquiry"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}
@@ -514,15 +528,27 @@ export const AdminPortal: React.FC = () => {
                               {visit.status}
                             </span>
                           </td>
-                          <td className="p-3 text-right space-x-1">
+                          <td className="p-3 text-right space-x-1 whitespace-nowrap">
                             {visit.status === 'SCHEDULED' && (
                               <button
                                 onClick={() => updateSiteVisitStatus(visit.id, 'COMPLETED')}
-                                className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-lg hover:bg-emerald-700"
+                                className="px-2.5 py-1 bg-emerald-600 text-white text-[11px] font-bold rounded-lg hover:bg-emerald-700 cursor-pointer"
                               >
                                 Mark Completed
                               </button>
                             )}
+                            <button
+                              onClick={() => {
+                                if (window.confirm(`Are you sure you want to delete scheduled visit for "${visit.name}"?`)) {
+                                  deleteSiteVisit(visit.id);
+                                }
+                              }}
+                              className="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-bold rounded-lg transition-colors inline-flex items-center gap-1 cursor-pointer"
+                              title="Delete Invalid Visit"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              Delete
+                            </button>
                           </td>
                         </tr>
                       ))}

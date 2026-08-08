@@ -27,9 +27,11 @@ interface AppContextType {
   inquiries: Inquiry[];
   addInquiry: (inquiry: Omit<Inquiry, 'id' | 'createdAt' | 'status'>) => Promise<void>;
   updateInquiryStatus: (id: string, status: Inquiry['status']) => void;
+  deleteInquiry: (id: string) => void;
   siteVisits: SiteVisit[];
   addSiteVisit: (visit: Omit<SiteVisit, 'id' | 'createdAt' | 'status'>) => Promise<void>;
   updateSiteVisitStatus: (id: string, status: SiteVisit['status']) => void;
+  deleteSiteVisit: (id: string) => void;
   activeTab: ActiveTab;
   setActiveTab: (tab: ActiveTab) => void;
   
@@ -356,6 +358,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Site visit status updated.');
   };
 
+  const deleteInquiry = (id: string) => {
+    const updatedInquiries = inquiries.filter((inq) => inq.id !== id);
+    setInquiries(updatedInquiries);
+    CloudDbService.syncVisitsToCloud(siteVisits, updatedInquiries);
+    showToast('Customer enquiry deleted successfully!');
+  };
+
+  const deleteSiteVisit = (id: string) => {
+    const updatedVisits = siteVisits.filter((v) => v.id !== id);
+    setSiteVisits(updatedVisits);
+    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
+    showToast('Scheduled site visit deleted successfully!');
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -381,9 +397,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         inquiries,
         addInquiry,
         updateInquiryStatus,
+        deleteInquiry,
         siteVisits,
         addSiteVisit,
         updateSiteVisitStatus,
+        deleteSiteVisit,
         activeTab,
         setActiveTab,
         isInquiryModalOpen,
