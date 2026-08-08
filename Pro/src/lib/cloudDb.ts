@@ -41,10 +41,17 @@ export class CloudDbService {
     return null;
   }
 
-  // Sync projects without overwriting siteVisits or inquiries
+  // Sync projects SAFELY — NEVER overwrite siteVisits if cloud fetch fails
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
+      
+      // CRITICAL GUARD: If current cloud data failed to fetch, do not overwrite to prevent wiping siteVisits
+      if (!currentData || !Array.isArray(currentData.siteVisits)) {
+        console.warn('Skipping projects cloud sync to preserve existing siteVisits.');
+        return false;
+      }
+
       const cleanedProjects = projects.map((p) => ({
         ...KONDAVEEDU_PROJECT,
         ...p,
@@ -62,8 +69,8 @@ export class CloudDbService {
         },
         body: JSON.stringify({ 
           projects: cleanedProjects,
-          siteVisits: currentData?.siteVisits || [],
-          inquiries: currentData?.inquiries || []
+          siteVisits: currentData.siteVisits,
+          inquiries: currentData.inquiries || []
         }),
       });
 
@@ -74,12 +81,20 @@ export class CloudDbService {
     }
   }
 
-  // Add a new Site Visit directly to Cloud DB (merging safely)
+  // Add a new Site Visit directly to Cloud DB (guaranteed preservation of visits)
   public static async addSiteVisitToCloud(newVisit: SiteVisit): Promise<SiteVisit[]> {
     try {
       const currentData = await this.fetchCloudData();
-      const existingVisits = currentData?.siteVisits || [];
+      const existingVisits = (currentData && Array.isArray(currentData.siteVisits)) ? currentData.siteVisits : [];
       const updatedVisits = [newVisit, ...existingVisits.filter((v) => v.id !== newVisit.id)];
+
+      const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
+        ? currentData.projects 
+        : [KONDAVEEDU_PROJECT];
+
+      const inquiries = (currentData && Array.isArray(currentData.inquiries)) 
+        ? currentData.inquiries 
+        : [];
 
       await fetch(CLOUD_DB_ENDPOINT, {
         method: 'PUT',
@@ -88,9 +103,9 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+          projects,
           siteVisits: updatedVisits,
-          inquiries: currentData?.inquiries || []
+          inquiries
         }),
       });
       return updatedVisits;
