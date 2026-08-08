@@ -319,9 +319,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'PENDING',
       createdAt: new Date().toISOString(),
     };
-    const updatedInquiries = [newInquiry, ...inquiries];
+    const updatedInquiries = await CloudDbService.addInquiryToCloud(newInquiry);
     setInquiries(updatedInquiries);
-    CloudDbService.syncVisitsToCloud(siteVisits, updatedInquiries);
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 

@@ -41,12 +41,12 @@ export class CloudDbService {
     return null;
   }
 
-  // Sync projects SAFELY — NEVER overwrite siteVisits if cloud fetch fails
+  // Sync projects SAFELY — NEVER overwrite siteVisits or inquiries if cloud fetch fails
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
       
-      // CRITICAL GUARD: If current cloud data failed to fetch, do not overwrite to prevent wiping siteVisits
+      // CRITICAL GUARD: If current cloud data failed to fetch, do not overwrite to prevent wiping siteVisits/inquiries
       if (!currentData || !Array.isArray(currentData.siteVisits)) {
         console.warn('Skipping projects cloud sync to preserve existing siteVisits.');
         return false;
@@ -81,7 +81,7 @@ export class CloudDbService {
     }
   }
 
-  // Add a new Site Visit directly to Cloud DB (guaranteed preservation of visits)
+  // Add a new Site Visit directly to Cloud DB (guaranteed preservation & multi-channel alert)
   public static async addSiteVisitToCloud(newVisit: SiteVisit): Promise<SiteVisit[]> {
     try {
       const currentData = await this.fetchCloudData();
@@ -108,6 +108,22 @@ export class CloudDbService {
           inquiries
         }),
       });
+
+      // Dispatch Web3Forms Email Alert
+      try {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_key: 'b0c79329-873b-4861-8280-99933ab74844',
+            subject: `🚗 NEW SITE VISIT: ${newVisit.name} (${newVisit.visitDate})`,
+            from_name: 'Venkata Sai Developers Web Portal',
+            email: 'venkatasaidevelopersinfo@gmail.com',
+            message: `CUSTOMER SITE VISIT BOOKED:\n\nName: ${newVisit.name}\nPhone: ${newVisit.phone}\nDate: ${newVisit.visitDate}\nTime: ${newVisit.timeSlot}\nPlot: ${newVisit.preferredPlotNumber || 'General'}\nPickup: ${newVisit.pickupRequested ? 'YES' : 'NO'}\nAddress: ${newVisit.pickupAddress || 'N/A'}`
+          })
+        }).catch(() => {});
+      } catch (e) {}
+
       return updatedVisits;
     } catch (err) {
       console.warn('Add site visit to cloud failed:', err);
@@ -115,7 +131,57 @@ export class CloudDbService {
     }
   }
 
-  // Update site visits array in Cloud DB
+  // Add a new Inquiry directly to Cloud DB (guaranteed preservation & multi-channel alert)
+  public static async addInquiryToCloud(newInquiry: Inquiry): Promise<Inquiry[]> {
+    try {
+      const currentData = await this.fetchCloudData();
+      const existingInquiries = (currentData && Array.isArray(currentData.inquiries)) ? currentData.inquiries : [];
+      const updatedInquiries = [newInquiry, ...existingInquiries.filter((i) => i.id !== newInquiry.id)];
+
+      const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
+        ? currentData.projects 
+        : [KONDAVEEDU_PROJECT];
+
+      const siteVisits = (currentData && Array.isArray(currentData.siteVisits)) 
+        ? currentData.siteVisits 
+        : [];
+
+      await fetch(CLOUD_DB_ENDPOINT, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          projects,
+          siteVisits,
+          inquiries: updatedInquiries
+        }),
+      });
+
+      // Dispatch Web3Forms Email Alert
+      try {
+        fetch('https://api.web3forms.com/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            access_key: 'b0c79329-873b-4861-8280-99933ab74844',
+            subject: `📩 NEW PROPERTY ENQUIRY: ${newInquiry.name}`,
+            from_name: 'Venkata Sai Developers Web Portal',
+            email: 'venkatasaidevelopersinfo@gmail.com',
+            message: `NEW PROPERTY ENQUIRY RECEIVED:\n\nName: ${newInquiry.name}\nPhone: ${newInquiry.phone}\nEmail: ${newInquiry.email || 'N/A'}\nProject: ${newInquiry.projectName}\nPlot: ${newInquiry.plotNumber || 'General'}\nMessage: ${newInquiry.message}`
+          })
+        }).catch(() => {});
+      } catch (e) {}
+
+      return updatedInquiries;
+    } catch (err) {
+      console.warn('Add inquiry to cloud failed:', err);
+      return [newInquiry];
+    }
+  }
+
+  // Sync site visits or inquiries status updates to Cloud DB
   public static async syncVisitsToCloud(siteVisits: SiteVisit[], inquiries?: Inquiry[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
