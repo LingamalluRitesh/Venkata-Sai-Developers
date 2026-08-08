@@ -1,0 +1,32 @@
+name = "go-nashville-number-debug-console"
+category = "Software"
+subcategory = "Languages"
+tags = ["go", "rust", "cargo", "music-theory", "cli", "parser"]
+
+languages = ["go", "rust", "markdown"]
+difficulty = "frontier"
+expert_time_estimate_hours = 6
+difficulty_explanation = "Requires implementing a Go Nashville Number System (NNS) harmonic analysis parser and CLI debugger handling slash chords, borrowed chords, secondary dominants, and why query explanations, validated by a vendored Rust Cargo static checker."
+solution_explanation = "The reference solution implements /app/main.go in Go to parse scripted NNS sessions, perform diatonic transposition, resolve slash/borrowed/secondary dominant chords, and output formatted harmonic trace logs."
+verification_explanation = "A vendored Rust Cargo binary statically analyzes the Go source AST for required parser structs (Chord, KeyContext, HarmonicTrace), checks anti-cheating rules against hardcoded answers, and verifies harmonic trace correctness."
+relevant_experience = "Go CLI development, Rust static analysis, domain-specific parser design, music theory algorithms."
+artifacts = [
+    "/app/nns-debug",
+    "/app/main.go",
+    "/app/output/harmonic_trace.txt"
+]
+
+[verifier]
+timeout_sec = 1800
+environment_mode = "separate"
+
+[agent]
+timeout_sec = 5400
+
+[environment]
+network_mode = "no-network"
+build_timeout_sec = 900
+cpus = 2
+memory_mb = 8192
+storage_mb = 10240
+

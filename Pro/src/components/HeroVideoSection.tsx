@@ -12,9 +12,9 @@ const TYPING_QUOTES = [
 
 // Reliable HD Aerial Drone MP4 Video Streams
 const VIDEO_SOURCES = [
+  "/landing_video.mp4",
   "https://cdn.coverr.co/videos/coverr-drone-shot-of-a-landscape-5384/1080p.mp4",
-  "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4",
-  "/landing_video.mp4"
+  "https://assets.mixkit.co/videos/preview/mixkit-aerial-view-of-a-winding-road-in-the-mountains-41484-large.mp4"
 ];
 
 export const HeroVideoSection: React.FC = () => {

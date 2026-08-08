@@ -1,0 +1,9 @@
+.git
+.gitignore
+jobs/
+logs/
+output/
+__pycache__/
+.pytest_cache/
+solution/
+tests/
