@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AdminSettings, Inquiry, Plot, PlotStatus, Project, SiteVisit, ActiveTab, FounderInfo } from '../types';
 import { INITIAL_INQUIRIES, INITIAL_PLOTS, INITIAL_SETTINGS, INITIAL_SITE_VISITS, INITIAL_UPCOMING_PROJECTS, KONDAVEEDU_PROJECT, INITIAL_FOUNDER } from '../data/initialData';
-import { CloudDbService } from '../lib/cloudDb';
+import { CloudDbService, mergeVisitsById, mergeInquiriesById } from '../lib/cloudDb';
 
 
 interface AppContextType {
@@ -221,8 +221,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const data = await CloudDbService.fetchCloudData();
       if (data) {
         if (data.projects && data.projects.length > 0) setAllProjects(data.projects);
-        if (Array.isArray(data.siteVisits)) setSiteVisits(data.siteVisits);
-        if (Array.isArray(data.inquiries)) setInquiries(data.inquiries);
+        if (Array.isArray(data.siteVisits)) setSiteVisits((prev) => mergeVisitsById(prev, data.siteVisits));
+        if (Array.isArray(data.inquiries)) setInquiries((prev) => mergeInquiriesById(prev, data.inquiries));
       }
     }
     
@@ -319,8 +319,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'PENDING',
       createdAt: new Date().toISOString(),
     };
-    const updatedInquiries = await CloudDbService.addInquiryToCloud(newInquiry);
-    setInquiries(updatedInquiries);
+    const updatedInquiries = await CloudDbService.addInquiryToCloud(newInquiry, inquiries);
+    setInquiries((prev) => mergeInquiriesById(prev, updatedInquiries));
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 
@@ -341,8 +341,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'SCHEDULED',
       createdAt: new Date().toISOString(),
     };
-    const updatedVisits = await CloudDbService.addSiteVisitToCloud(newVisit);
-    setSiteVisits(updatedVisits);
+    const updatedVisits = await CloudDbService.addSiteVisitToCloud(newVisit, siteVisits);
+    setSiteVisits((prev) => mergeVisitsById(prev, updatedVisits));
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 

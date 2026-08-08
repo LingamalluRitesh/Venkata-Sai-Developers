@@ -3,6 +3,25 @@ import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
 const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
 
+// Safe lead merging utilities — NEVER delete or drop existing leads
+export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[]): SiteVisit[] => {
+  const map = new Map<string, SiteVisit>();
+  (existing || []).forEach((v) => { if (v && v.id) map.set(v.id, v); });
+  (incoming || []).forEach((v) => { if (v && v.id) map.set(v.id, v); });
+  return Array.from(map.values()).sort((a, b) => 
+    new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+  );
+};
+
+export const mergeInquiriesById = (existing: Inquiry[], incoming: Inquiry[]): Inquiry[] => {
+  const map = new Map<string, Inquiry>();
+  (existing || []).forEach((i) => { if (i && i.id) map.set(i.id, i); });
+  (incoming || []).forEach((i) => { if (i && i.id) map.set(i.id, i); });
+  return Array.from(map.values()).sort((a, b) => 
+    new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
+  );
+};
+
 export class CloudDbService {
   // Fetch full cloud database object { projects, siteVisits, inquiries }
   public static async fetchCloudData(): Promise<{ projects: Project[]; siteVisits: SiteVisit[]; inquiries: Inquiry[] } | null> {
@@ -81,12 +100,14 @@ export class CloudDbService {
     }
   }
 
-  // Add a new Site Visit directly to Cloud DB (guaranteed preservation & multi-channel alert)
-  public static async addSiteVisitToCloud(newVisit: SiteVisit): Promise<SiteVisit[]> {
+  // Add a new Site Visit directly to Cloud DB (merging safely with zero data loss)
+  public static async addSiteVisitToCloud(newVisit: SiteVisit, localVisits: SiteVisit[] = []): Promise<SiteVisit[]> {
     try {
       const currentData = await this.fetchCloudData();
       const existingVisits = (currentData && Array.isArray(currentData.siteVisits)) ? currentData.siteVisits : [];
-      const updatedVisits = [newVisit, ...existingVisits.filter((v) => v.id !== newVisit.id)];
+      
+      // MERGE ALL VISITS (Cloud + Local + New Visit) by unique ID — NEVER DELETE PREVIOUS VISITS
+      const updatedVisits = mergeVisitsById(mergeVisitsById(existingVisits, localVisits), [newVisit]);
 
       const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
         ? currentData.projects 
@@ -109,7 +130,7 @@ export class CloudDbService {
         }),
       });
 
-      // Dispatch Web3Forms Email Alert
+      // Dispatch Web3Forms Email Alert to venkatasaidevelopersinfo@gmail.com
       try {
         fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -127,16 +148,18 @@ export class CloudDbService {
       return updatedVisits;
     } catch (err) {
       console.warn('Add site visit to cloud failed:', err);
-      return [newVisit];
+      return mergeVisitsById(localVisits, [newVisit]);
     }
   }
 
-  // Add a new Inquiry directly to Cloud DB (guaranteed preservation & multi-channel alert)
-  public static async addInquiryToCloud(newInquiry: Inquiry): Promise<Inquiry[]> {
+  // Add a new Inquiry directly to Cloud DB (merging safely with zero data loss)
+  public static async addInquiryToCloud(newInquiry: Inquiry, localInquiries: Inquiry[] = []): Promise<Inquiry[]> {
     try {
       const currentData = await this.fetchCloudData();
       const existingInquiries = (currentData && Array.isArray(currentData.inquiries)) ? currentData.inquiries : [];
-      const updatedInquiries = [newInquiry, ...existingInquiries.filter((i) => i.id !== newInquiry.id)];
+      
+      // MERGE ALL INQUIRIES (Cloud + Local + New Inquiry) by unique ID — NEVER DELETE PREVIOUS INQUIRIES
+      const updatedInquiries = mergeInquiriesById(mergeInquiriesById(existingInquiries, localInquiries), [newInquiry]);
 
       const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
         ? currentData.projects 
@@ -159,7 +182,7 @@ export class CloudDbService {
         }),
       });
 
-      // Dispatch Web3Forms Email Alert
+      // Dispatch Web3Forms Email Alert to venkatasaidevelopersinfo@gmail.com
       try {
         fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -177,7 +200,7 @@ export class CloudDbService {
       return updatedInquiries;
     } catch (err) {
       console.warn('Add inquiry to cloud failed:', err);
-      return [newInquiry];
+      return mergeInquiriesById(localInquiries, [newInquiry]);
     }
   }
 
@@ -193,8 +216,8 @@ export class CloudDbService {
         },
         body: JSON.stringify({ 
           projects: currentData?.projects || [KONDAVEEDU_PROJECT],
-          siteVisits,
-          inquiries: inquiries || currentData?.inquiries || []
+          siteVisits: mergeVisitsById(currentData?.siteVisits || [], siteVisits),
+          inquiries: mergeInquiriesById(currentData?.inquiries || [], inquiries || [])
         }),
       });
       return res.ok;
