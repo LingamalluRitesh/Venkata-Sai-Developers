@@ -134,8 +134,8 @@ export const AdminPortal: React.FC = () => {
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1000;
-          const MAX_HEIGHT = 700;
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 600;
           let width = img.width;
           let height = img.height;
 
@@ -154,7 +154,7 @@ export const AdminPortal: React.FC = () => {
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
-          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          const compressed = canvas.toDataURL('image/jpeg', 0.70);
           resolve(compressed);
         };
         img.onerror = () => resolve('');

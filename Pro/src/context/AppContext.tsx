@@ -236,7 +236,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     async function loadCloudData() {
       const data = await CloudDbService.fetchCloudData();
       if (data) {
-        if (data.projects && data.projects.length > 0) setAllProjects(data.projects);
+        if (data.projects && data.projects.length > 0) {
+          setAllProjects((prev) => {
+            return data.projects.map((cloudProj) => {
+              const localProj = prev.find((lp) => lp.id === cloudProj.id);
+              if (!localProj) return cloudProj;
+              const localGallery = Array.isArray(localProj.galleryImages) ? localProj.galleryImages : [];
+              const cloudGallery = Array.isArray(cloudProj.galleryImages) ? cloudProj.galleryImages : [];
+              const mergedGallery = Array.from(new Set([...localGallery, ...cloudGallery]));
+              return {
+                ...cloudProj,
+                heroImage: localProj.heroImage || cloudProj.heroImage,
+                galleryImages: mergedGallery.length > 0 ? mergedGallery : cloudProj.galleryImages,
+              };
+            });
+          });
+        }
         if (Array.isArray(data.siteVisits)) setSiteVisits((prev) => mergeVisitsById(prev, data.siteVisits, deletedLeadIds));
         if (Array.isArray(data.inquiries)) setInquiries((prev) => mergeInquiriesById(prev, data.inquiries, deletedLeadIds));
       }
