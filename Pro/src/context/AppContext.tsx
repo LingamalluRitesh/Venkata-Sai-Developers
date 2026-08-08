@@ -215,7 +215,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
-  // Fetch live projects, siteVisits, and inquiries from Cloud DB on page mount
+  // Fetch live projects, siteVisits, and inquiries from Cloud DB on mount & poll every 10s
   useEffect(() => {
     async function loadCloudData() {
       const data = await CloudDbService.fetchCloudData();
@@ -225,14 +225,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(data.inquiries)) setInquiries(data.inquiries);
       }
     }
+    
     loadCloudData();
+    const interval = setInterval(loadCloudData, 10000);
+    return () => clearInterval(interval);
   }, []);
 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
       safeSetItem('sree_all_projects_v1', JSON.stringify(allProjects));
-      CloudDbService.syncProjectsToCloud(allProjects, siteVisits, inquiries);
+      CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
 
@@ -339,9 +342,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'SCHEDULED',
       createdAt: new Date().toISOString(),
     };
-    const updatedVisits = [newVisit, ...siteVisits];
+    const updatedVisits = await CloudDbService.addSiteVisitToCloud(newVisit);
     setSiteVisits(updatedVisits);
-    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 
@@ -351,7 +353,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return v;
     });
     setSiteVisits(updatedVisits);
-    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
+    CloudDbService.syncVisitsToCloud(updatedVisits);
     showToast('Site visit status updated.');
   };
 

@@ -4,76 +4,6 @@ import { KONDAVEEDU_PROJECT } from '../data/initialData';
 const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
 
 export class CloudDbService {
-  // Sync all projects and gallery image URLs to Live Cloud Database
-  public static async syncProjectsToCloud(projects: Project[], siteVisits?: SiteVisit[], inquiries?: Inquiry[]): Promise<boolean> {
-    try {
-      const cleanedProjects = projects.map((p) => ({
-        ...KONDAVEEDU_PROJECT,
-        ...p,
-        location: p.location || KONDAVEEDU_PROJECT.location,
-        priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
-        keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0) ? p.keyFeatures : KONDAVEEDU_PROJECT.keyFeatures,
-        galleryImages: (p.galleryImages || []).filter((img) => !img.startsWith('data:')),
-      }));
-
-      // Read existing data first if siteVisits/inquiries not passed
-      let currentVisits = siteVisits;
-      let currentInquiries = inquiries;
-
-      if (!currentVisits || !currentInquiries) {
-        const currentData = await this.fetchCloudData();
-        if (currentData) {
-          if (!currentVisits) currentVisits = currentData.siteVisits || [];
-          if (!currentInquiries) currentInquiries = currentData.inquiries || [];
-        }
-      }
-
-      const res = await fetch(CLOUD_DB_ENDPOINT, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ 
-          projects: cleanedProjects,
-          siteVisits: currentVisits || [],
-          inquiries: currentInquiries || []
-        }),
-      });
-
-      return res.ok;
-    } catch (err) {
-      console.warn('Cloud DB sync failed:', err);
-      return false;
-    }
-  }
-
-  // Sync site visits to Live Cloud Database so Admin sees customer bookings from all devices
-  public static async syncVisitsToCloud(siteVisits: SiteVisit[], inquiries?: Inquiry[]): Promise<boolean> {
-    try {
-      const cloudData = await this.fetchCloudData();
-      const projects = cloudData?.projects || [KONDAVEEDU_PROJECT];
-      const inqs = inquiries || cloudData?.inquiries || [];
-
-      const res = await fetch(CLOUD_DB_ENDPOINT, {
-        method: 'PUT',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify({ 
-          projects,
-          siteVisits,
-          inquiries: inqs
-        }),
-      });
-      return res.ok;
-    } catch (err) {
-      console.warn('Sync visits to cloud failed:', err);
-      return false;
-    }
-  }
-
   // Fetch full cloud database object { projects, siteVisits, inquiries }
   public static async fetchCloudData(): Promise<{ projects: Project[]; siteVisits: SiteVisit[]; inquiries: Inquiry[] } | null> {
     try {
@@ -109,6 +39,88 @@ export class CloudDbService {
       console.warn('Cloud DB fetch failed:', err);
     }
     return null;
+  }
+
+  // Sync projects without overwriting siteVisits or inquiries
+  public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
+    try {
+      const currentData = await this.fetchCloudData();
+      const cleanedProjects = projects.map((p) => ({
+        ...KONDAVEEDU_PROJECT,
+        ...p,
+        location: p.location || KONDAVEEDU_PROJECT.location,
+        priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
+        keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0) ? p.keyFeatures : KONDAVEEDU_PROJECT.keyFeatures,
+        galleryImages: (p.galleryImages || []).filter((img) => !img.startsWith('data:')),
+      }));
+
+      const res = await fetch(CLOUD_DB_ENDPOINT, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          projects: cleanedProjects,
+          siteVisits: currentData?.siteVisits || [],
+          inquiries: currentData?.inquiries || []
+        }),
+      });
+
+      return res.ok;
+    } catch (err) {
+      console.warn('Cloud DB sync projects failed:', err);
+      return false;
+    }
+  }
+
+  // Add a new Site Visit directly to Cloud DB (merging safely)
+  public static async addSiteVisitToCloud(newVisit: SiteVisit): Promise<SiteVisit[]> {
+    try {
+      const currentData = await this.fetchCloudData();
+      const existingVisits = currentData?.siteVisits || [];
+      const updatedVisits = [newVisit, ...existingVisits.filter((v) => v.id !== newVisit.id)];
+
+      await fetch(CLOUD_DB_ENDPOINT, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+          siteVisits: updatedVisits,
+          inquiries: currentData?.inquiries || []
+        }),
+      });
+      return updatedVisits;
+    } catch (err) {
+      console.warn('Add site visit to cloud failed:', err);
+      return [newVisit];
+    }
+  }
+
+  // Update site visits array in Cloud DB
+  public static async syncVisitsToCloud(siteVisits: SiteVisit[], inquiries?: Inquiry[]): Promise<boolean> {
+    try {
+      const currentData = await this.fetchCloudData();
+      const res = await fetch(CLOUD_DB_ENDPOINT, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+          siteVisits,
+          inquiries: inquiries || currentData?.inquiries || []
+        }),
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('Sync visits to cloud failed:', err);
+      return false;
+    }
   }
 
   // Helper for backward compatibility
