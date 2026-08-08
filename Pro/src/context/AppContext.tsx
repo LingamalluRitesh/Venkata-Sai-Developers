@@ -358,17 +358,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Site visit status updated.');
   };
 
-  const deleteInquiry = (id: string) => {
+  const deleteInquiry = async (id: string) => {
     const updatedInquiries = inquiries.filter((inq) => inq.id !== id);
     setInquiries(updatedInquiries);
-    CloudDbService.syncVisitsToCloud(siteVisits, updatedInquiries);
+    await CloudDbService.overwriteVisitsAndInquiriesInCloud(siteVisits, updatedInquiries);
     showToast('Customer enquiry deleted successfully!');
   };
 
-  const deleteSiteVisit = (id: string) => {
+  const deleteSiteVisit = async (id: string) => {
     const updatedVisits = siteVisits.filter((v) => v.id !== id);
     setSiteVisits(updatedVisits);
-    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
+    await CloudDbService.overwriteVisitsAndInquiriesInCloud(updatedVisits, inquiries);
     showToast('Scheduled site visit deleted successfully!');
   };
 

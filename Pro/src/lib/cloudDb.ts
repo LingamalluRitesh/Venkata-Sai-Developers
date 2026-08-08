@@ -3,7 +3,7 @@ import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
 const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
 
-// Safe lead merging utilities — NEVER delete or drop existing leads
+// Safe lead merging utilities — NEVER delete or drop existing leads during append operations
 export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[]): SiteVisit[] => {
   const map = new Map<string, SiteVisit>();
   (existing || []).forEach((v) => { if (v && v.id) map.set(v.id, v); });
@@ -201,6 +201,29 @@ export class CloudDbService {
     } catch (err) {
       console.warn('Add inquiry to cloud failed:', err);
       return mergeInquiriesById(localInquiries, [newInquiry]);
+    }
+  }
+
+  // Explicitly overwrite siteVisits and inquiries in Cloud DB (used when Admin deletes an invalid lead)
+  public static async overwriteVisitsAndInquiriesInCloud(siteVisits: SiteVisit[], inquiries: Inquiry[]): Promise<boolean> {
+    try {
+      const currentData = await this.fetchCloudData();
+      const res = await fetch(CLOUD_DB_ENDPOINT, {
+        method: 'PUT',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ 
+          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+          siteVisits,
+          inquiries
+        }),
+      });
+      return res.ok;
+    } catch (err) {
+      console.warn('Overwrite visits and inquiries in cloud failed:', err);
+      return false;
     }
   }
 
