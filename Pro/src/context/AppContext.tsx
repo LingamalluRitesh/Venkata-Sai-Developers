@@ -215,22 +215,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
-  // Fetch live projects and gallery images from Cloud DB on page mount
+  // Fetch live projects, siteVisits, and inquiries from Cloud DB on page mount
   useEffect(() => {
-    async function loadCloudProjects() {
-      const dbProjects = await CloudDbService.fetchProjectsFromCloud();
-      if (dbProjects && dbProjects.length > 0) {
-        setAllProjects(dbProjects);
+    async function loadCloudData() {
+      const data = await CloudDbService.fetchCloudData();
+      if (data) {
+        if (data.projects && data.projects.length > 0) setAllProjects(data.projects);
+        if (Array.isArray(data.siteVisits)) setSiteVisits(data.siteVisits);
+        if (Array.isArray(data.inquiries)) setInquiries(data.inquiries);
       }
     }
-    loadCloudProjects();
+    loadCloudData();
   }, []);
 
-  // Save projects with CDN URLs locally & sync live to Cloud DB for all devices
+  // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
       safeSetItem('sree_all_projects_v1', JSON.stringify(allProjects));
-      CloudDbService.syncProjectsToCloud(allProjects);
+      CloudDbService.syncProjectsToCloud(allProjects, siteVisits, inquiries);
     } catch (e) {}
   }, [allProjects]);
 
@@ -314,17 +316,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'PENDING',
       createdAt: new Date().toISOString(),
     };
-    setInquiries((prev) => [newInquiry, ...prev]);
+    const updatedInquiries = [newInquiry, ...inquiries];
+    setInquiries(updatedInquiries);
+    CloudDbService.syncVisitsToCloud(siteVisits, updatedInquiries);
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 
   const updateInquiryStatus = (id: string, status: Inquiry['status']) => {
-    setInquiries((prev) =>
-      prev.map((inq) => {
-        if (inq.id === id) return { ...inq, status };
-        return inq;
-      })
-    );
+    const updatedInquiries = inquiries.map((inq) => {
+      if (inq.id === id) return { ...inq, status };
+      return inq;
+    });
+    setInquiries(updatedInquiries);
+    CloudDbService.syncVisitsToCloud(siteVisits, updatedInquiries);
     showToast('Inquiry status updated.');
   };
 
@@ -335,17 +339,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       status: 'SCHEDULED',
       createdAt: new Date().toISOString(),
     };
-    setSiteVisits((prev) => [newVisit, ...prev]);
+    const updatedVisits = [newVisit, ...siteVisits];
+    setSiteVisits(updatedVisits);
+    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 
   const updateSiteVisitStatus = (id: string, status: SiteVisit['status']) => {
-    setSiteVisits((prev) =>
-      prev.map((v) => {
-        if (v.id === id) return { ...v, status };
-        return v;
-      })
-    );
+    const updatedVisits = siteVisits.map((v) => {
+      if (v.id === id) return { ...v, status };
+      return v;
+    });
+    setSiteVisits(updatedVisits);
+    CloudDbService.syncVisitsToCloud(updatedVisits, inquiries);
     showToast('Site visit status updated.');
   };
 

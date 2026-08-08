@@ -152,19 +152,7 @@ export const INITIAL_INQUIRIES: Inquiry[] = [
   }
 ];
 
-export const INITIAL_SITE_VISITS: SiteVisit[] = [
-  {
-    id: 'visit-1',
-    name: 'Venkat Rao',
-    phone: '+91 99887 66554',
-    visitDate: '2026-08-08',
-    timeSlot: '10:30 AM - 12:00 PM',
-    pickupRequested: true,
-    preferredPlotNumber: 'A-101',
-    status: 'SCHEDULED',
-    createdAt: new Date(Date.now() - 3600000 * 12).toISOString()
-  }
-];
+export const INITIAL_SITE_VISITS: SiteVisit[] = [];
 
 export const LAND_APPRECIATION_FORECAST: LandAppreciationPoint[] = [
   { year: 2024, estimatedPriceSqYd: 10500, roiPercentage: 0, developmentMilestone: 'Ghat Road Infrastructure Approval & Initial Survey' },
