@@ -4,7 +4,7 @@ import { X, Calendar, Clock, Car, CheckCircle, Sparkles, MapPin } from 'lucide-r
 import confetti from 'canvas-confetti';
 
 export const SiteVisitModal: React.FC = () => {
-  const { isSiteVisitModalOpen, setIsSiteVisitModalOpen, addSiteVisit, plots, selectedPlotForModal } = useApp();
+  const { isSiteVisitModalOpen, setIsSiteVisitModalOpen, addSiteVisit, selectedPlotForModal } = useApp();
 
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -16,7 +16,6 @@ export const SiteVisitModal: React.FC = () => {
   const [timeSlot, setTimeSlot] = useState('10:00 AM - 12:00 PM');
   const [pickupRequested, setPickupRequested] = useState(false);
   const [pickupAddress, setPickupAddress] = useState('');
-  const [preferredPlot, setPreferredPlot] = useState(selectedPlotForModal?.plotNumber || 'Any Villa Plot');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isSiteVisitModalOpen) return null;
@@ -32,6 +31,8 @@ export const SiteVisitModal: React.FC = () => {
 
     setIsSubmitting(true);
 
+    const chosenPlot = selectedPlotForModal ? `Plot ${selectedPlotForModal.plotNumber}` : 'General Site Visit';
+
     const visitData = {
       name,
       phone,
@@ -39,7 +40,7 @@ export const SiteVisitModal: React.FC = () => {
       timeSlot,
       pickupRequested,
       pickupAddress: pickupRequested ? pickupAddress : '',
-      preferredPlotNumber: preferredPlot,
+      preferredPlotNumber: chosenPlot,
     };
 
     // 1. Save to Cloud DB & App State
@@ -55,7 +56,7 @@ export const SiteVisitModal: React.FC = () => {
           subject: `🚗 NEW SITE VISIT BOOKING: ${name} (${visitDate})`,
           from_name: 'Venkata Sai Developers Web Portal',
           email: 'venkatasaidevelopersinfo@gmail.com',
-          message: `NEW SITE VISIT BOOKED ON WEBSITE:\n\nCustomer Name: ${name}\nPhone Number: ${phone}\nPreferred Date: ${visitDate}\nTime Slot: ${timeSlot}\nPreferred Plot: ${preferredPlot}\nFree AC Cab Pickup Requested: ${pickupRequested ? 'YES' : 'NO'}\nPickup Address: ${pickupRequested ? pickupAddress : 'N/A'}\n\nSubmitted at: ${new Date().toLocaleString()}`
+          message: `NEW SITE VISIT BOOKED ON WEBSITE:\n\nCustomer Name: ${name}\nPhone Number: ${phone}\nPreferred Date: ${visitDate}\nTime Slot: ${timeSlot}\nPlot Interest: ${chosenPlot}\nFree AC Cab Pickup Requested: ${pickupRequested ? 'YES' : 'NO'}\nPickup Address: ${pickupRequested ? pickupAddress : 'N/A'}\n\nSubmitted at: ${new Date().toLocaleString()}`
         })
       });
     } catch (err) {
@@ -156,24 +157,6 @@ export const SiteVisitModal: React.FC = () => {
                 <option value="04:30 PM - 06:00 PM">04:30 PM - 06:00 PM</option>
               </select>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
-              Preferred Villa Plot
-            </label>
-            <select
-              value={preferredPlot}
-              onChange={(e) => setPreferredPlot(e.target.value)}
-              className="w-full px-3 py-2.5 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="Any Villa Plot">Any Villa Plot (General Tour)</option>
-              {plots.map((p) => (
-                <option key={p.id} value={p.plotNumber}>
-                  Plot {p.plotNumber} ({p.sizeSqYd} Sq.Yd - {p.facing})
-                </option>
-              ))}
-            </select>
           </div>
 
           {/* Pickup Request Toggle & Address Input */}
