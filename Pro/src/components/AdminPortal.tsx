@@ -118,44 +118,24 @@ export const AdminPortal: React.FC = () => {
 
   const [isUploadingToCloud, setIsUploadingToCloud] = useState(false);
 
-  // Upload image file directly to Uploadcare High-Speed CDN to get a permanent public URL
-  const uploadFileToCloud = async (file: File): Promise<string> => {
-    try {
-      const formData = new FormData();
-      formData.append('UPLOADCARE_PUB_KEY', 'demopublickey');
-      formData.append('UPLOADCARE_STORE', '1');
-      formData.append('file', file);
-
-      const res = await fetch('https://upload.uploadcare.com/base/', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const data = await res.json();
-      if (data && data.file) {
-        return `https://ucarecdn.com/${data.file}/${encodeURIComponent(file.name || 'photo.png')}`;
+  // Converts & compresses image file into permanent Data URL (never expires, never auto-deletes)
+  const processImageFile = (file: File): Promise<string> => {
+    return new Promise((resolve) => {
+      if (!file || !file.type.startsWith('image/')) {
+        resolve('');
+        return;
       }
-    } catch (e) {
-      console.warn('Cloud upload failed:', e);
-    }
-    return '';
-  };
-
-  // File Upload Helper (converts & compresses image file to crisp Data URL)
-  const handleFileUpload = (file: File, callback: (dataUrl: string) => void) => {
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      alert('Please select a valid image file (PNG, JPG, JPEG, WEBP).');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      if (event.target?.result) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        if (!event.target?.result) {
+          resolve('');
+          return;
+        }
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 800;
+          const MAX_WIDTH = 1000;
+          const MAX_HEIGHT = 700;
           let width = img.width;
           let height = img.height;
 
@@ -174,13 +154,21 @@ export const AdminPortal: React.FC = () => {
           canvas.height = height;
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
-          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.85);
-          callback(compressedDataUrl);
+          const compressed = canvas.toDataURL('image/jpeg', 0.82);
+          resolve(compressed);
         };
+        img.onerror = () => resolve('');
         img.src = event.target.result as string;
-      }
-    };
-    reader.readAsDataURL(file);
+      };
+      reader.onerror = () => resolve('');
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleFileUpload = (file: File, callback: (dataUrl: string) => void) => {
+    processImageFile(file).then((url) => {
+      if (url) callback(url);
+    });
   };
 
   const MAX_GALLERY_PHOTOS = 20;
@@ -1030,19 +1018,9 @@ export const AdminPortal: React.FC = () => {
                         const uploadedUrls: string[] = [];
                         for (const file of selectedFiles) {
                           if (currentGallery.length + uploadedUrls.length >= MAX_GALLERY_PHOTOS) break;
-                          
-                          // Upload to cloud server
-                          const cloudUrl = await uploadFileToCloud(file);
-                          if (cloudUrl) {
-                            uploadedUrls.push(cloudUrl);
-                          } else {
-                            // Local fallback if cloud network fails
-                            await new Promise<void>((resolve) => {
-                              handleFileUpload(file, (dataUrl) => {
-                                uploadedUrls.push(dataUrl);
-                                resolve();
-                              });
-                            });
+                          const compressedUrl = await processImageFile(file);
+                          if (compressedUrl) {
+                            uploadedUrls.push(compressedUrl);
                           }
                         }
 
