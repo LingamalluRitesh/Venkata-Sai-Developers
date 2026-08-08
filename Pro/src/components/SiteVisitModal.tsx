@@ -31,7 +31,8 @@ export const SiteVisitModal: React.FC = () => {
     }
 
     setIsSubmitting(true);
-    await addSiteVisit({
+
+    const visitData = {
       name,
       phone,
       visitDate,
@@ -39,7 +40,27 @@ export const SiteVisitModal: React.FC = () => {
       pickupRequested,
       pickupAddress: pickupRequested ? pickupAddress : '',
       preferredPlotNumber: preferredPlot,
-    });
+    };
+
+    // 1. Save to Cloud DB & App State
+    await addSiteVisit(visitData);
+
+    // 2. Dispatch instant email alert to admin email (venkatasaidevelopersinfo@gmail.com)
+    try {
+      await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: 'b0c79329-873b-4861-8280-99933ab74844',
+          subject: `🚗 NEW SITE VISIT BOOKING: ${name} (${visitDate})`,
+          from_name: 'Venkata Sai Developers Web Portal',
+          email: 'venkatasaidevelopersinfo@gmail.com',
+          message: `NEW SITE VISIT BOOKED ON WEBSITE:\n\nCustomer Name: ${name}\nPhone Number: ${phone}\nPreferred Date: ${visitDate}\nTime Slot: ${timeSlot}\nPreferred Plot: ${preferredPlot}\nFree AC Cab Pickup Requested: ${pickupRequested ? 'YES' : 'NO'}\nPickup Address: ${pickupRequested ? pickupAddress : 'N/A'}\n\nSubmitted at: ${new Date().toLocaleString()}`
+        })
+      });
+    } catch (err) {
+      console.warn('Site visit email dispatch notice:', err);
+    }
 
     confetti({
       particleCount: 80,
@@ -194,7 +215,7 @@ export const SiteVisitModal: React.FC = () => {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2"
+            className="w-full py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm rounded-xl shadow-md transition-all flex items-center justify-center gap-2 cursor-pointer"
           >
             <CheckCircle className="w-4 h-4" />
             {isSubmitting ? 'Confirming Visit...' : 'Confirm Free Site Visit Booking'}
