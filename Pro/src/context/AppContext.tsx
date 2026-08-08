@@ -55,6 +55,7 @@ const LOCAL_STORAGE_KEY_FOUNDER = 'sree_realestate_founder_v1';
 const LOCAL_STORAGE_KEY_PLOTS = 'sree_realestate_plots_v1';
 const LOCAL_STORAGE_KEY_INQUIRIES = 'sree_realestate_inquiries_v1';
 const LOCAL_STORAGE_KEY_VISITS = 'sree_realestate_visits_v1';
+const LOCAL_STORAGE_KEY_DELETED_IDS = 'sree_realestate_deleted_ids_v1';
 
 // Immediately wipe old stale project key that caused QuotaExceededError crash
 try { localStorage.removeItem('sree_realestate_project_v1'); } catch (_) {}
@@ -122,10 +123,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return INITIAL_PLOTS;
   });
 
+  const [deletedLeadIds, setDeletedLeadIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEY_DELETED_IDS);
+      if (saved && Array.isArray(JSON.parse(saved))) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
   const [inquiries, setInquiries] = useState<Inquiry[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY_INQUIRIES);
-      if (saved) return JSON.parse(saved);
+      const delSaved = localStorage.getItem(LOCAL_STORAGE_KEY_DELETED_IDS);
+      const delSet = new Set(delSaved ? JSON.parse(delSaved) : []);
+      if (saved) return (JSON.parse(saved) as Inquiry[]).filter((i) => !delSet.has(i.id));
     } catch (e) {}
     return INITIAL_INQUIRIES;
   });
@@ -133,7 +144,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [siteVisits, setSiteVisits] = useState<SiteVisit[]>(() => {
     try {
       const saved = localStorage.getItem(LOCAL_STORAGE_KEY_VISITS);
-      if (saved) return JSON.parse(saved);
+      const delSaved = localStorage.getItem(LOCAL_STORAGE_KEY_DELETED_IDS);
+      const delSet = new Set(delSaved ? JSON.parse(delSaved) : []);
+      if (saved) return (JSON.parse(saved) as SiteVisit[]).filter((v) => !delSet.has(v.id));
     } catch (e) {}
     return INITIAL_SITE_VISITS;
   });
@@ -211,6 +224,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_SETTINGS, JSON.stringify(settings)); }, [settings]);
   useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_FOUNDER, JSON.stringify(founder)); }, [founder]);
+  useEffect(() => { safeSetItem(LOCAL_STORAGE_KEY_DELETED_IDS, JSON.stringify(deletedLeadIds)); }, [deletedLeadIds]);
 
   const updateFounder = (updated: Partial<FounderInfo>) => {
     setFounder((prev) => ({ ...prev, ...updated }));
@@ -223,15 +237,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const data = await CloudDbService.fetchCloudData();
       if (data) {
         if (data.projects && data.projects.length > 0) setAllProjects(data.projects);
-        if (Array.isArray(data.siteVisits)) setSiteVisits((prev) => mergeVisitsById(prev, data.siteVisits));
-        if (Array.isArray(data.inquiries)) setInquiries((prev) => mergeInquiriesById(prev, data.inquiries));
+        if (Array.isArray(data.siteVisits)) setSiteVisits((prev) => mergeVisitsById(prev, data.siteVisits, deletedLeadIds));
+        if (Array.isArray(data.inquiries)) setInquiries((prev) => mergeInquiriesById(prev, data.inquiries, deletedLeadIds));
       }
     }
     
     loadCloudData();
     const interval = setInterval(loadCloudData, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [deletedLeadIds]);
 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
@@ -322,7 +336,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     const updatedInquiries = await CloudDbService.addInquiryToCloud(newInquiry, inquiries);
-    setInquiries((prev) => mergeInquiriesById(prev, updatedInquiries));
+    setInquiries((prev) => mergeInquiriesById(prev, updatedInquiries, deletedLeadIds));
     showToast('Inquiry submitted successfully! Our representative will contact you shortly.');
   };
 
@@ -344,7 +358,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       createdAt: new Date().toISOString(),
     };
     const updatedVisits = await CloudDbService.addSiteVisitToCloud(newVisit, siteVisits);
-    setSiteVisits((prev) => mergeVisitsById(prev, updatedVisits));
+    setSiteVisits((prev) => mergeVisitsById(prev, updatedVisits, deletedLeadIds));
     showToast(`Site visit scheduled for ${newVisit.visitDate}! Check booking details.`);
   };
 
@@ -359,17 +373,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const deleteInquiry = async (id: string) => {
+    const newDeletedIds = [...deletedLeadIds, id];
+    setDeletedLeadIds(newDeletedIds);
     const updatedInquiries = inquiries.filter((inq) => inq.id !== id);
     setInquiries(updatedInquiries);
-    await CloudDbService.overwriteVisitsAndInquiriesInCloud(siteVisits, updatedInquiries);
-    showToast('Customer enquiry deleted successfully!');
+    const cleanVisits = siteVisits.filter((v) => !newDeletedIds.includes(v.id));
+    await CloudDbService.overwriteVisitsAndInquiriesInCloud(cleanVisits, updatedInquiries);
+    showToast('Customer enquiry deleted permanently!');
   };
 
   const deleteSiteVisit = async (id: string) => {
+    const newDeletedIds = [...deletedLeadIds, id];
+    setDeletedLeadIds(newDeletedIds);
     const updatedVisits = siteVisits.filter((v) => v.id !== id);
     setSiteVisits(updatedVisits);
-    await CloudDbService.overwriteVisitsAndInquiriesInCloud(updatedVisits, inquiries);
-    showToast('Scheduled site visit deleted successfully!');
+    const cleanInquiries = inquiries.filter((i) => !newDeletedIds.includes(i.id));
+    await CloudDbService.overwriteVisitsAndInquiriesInCloud(updatedVisits, cleanInquiries);
+    showToast('Scheduled site visit deleted permanently!');
   };
 
   return (

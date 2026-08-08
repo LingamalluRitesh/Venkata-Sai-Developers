@@ -3,20 +3,22 @@ import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
 const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
 
-// Safe lead merging utilities — NEVER delete or drop existing leads during append operations
-export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[]): SiteVisit[] => {
+// Safe lead merging utilities — NEVER re-add leads that were explicitly deleted by Admin
+export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[], deletedIds: string[] = []): SiteVisit[] => {
+  const deletedSet = new Set(deletedIds);
   const map = new Map<string, SiteVisit>();
-  (existing || []).forEach((v) => { if (v && v.id) map.set(v.id, v); });
-  (incoming || []).forEach((v) => { if (v && v.id) map.set(v.id, v); });
+  (existing || []).forEach((v) => { if (v && v.id && !deletedSet.has(v.id)) map.set(v.id, v); });
+  (incoming || []).forEach((v) => { if (v && v.id && !deletedSet.has(v.id)) map.set(v.id, v); });
   return Array.from(map.values()).sort((a, b) => 
     new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
   );
 };
 
-export const mergeInquiriesById = (existing: Inquiry[], incoming: Inquiry[]): Inquiry[] => {
+export const mergeInquiriesById = (existing: Inquiry[], incoming: Inquiry[], deletedIds: string[] = []): Inquiry[] => {
+  const deletedSet = new Set(deletedIds);
   const map = new Map<string, Inquiry>();
-  (existing || []).forEach((i) => { if (i && i.id) map.set(i.id, i); });
-  (incoming || []).forEach((i) => { if (i && i.id) map.set(i.id, i); });
+  (existing || []).forEach((i) => { if (i && i.id && !deletedSet.has(i.id)) map.set(i.id, i); });
+  (incoming || []).forEach((i) => { if (i && i.id && !deletedSet.has(i.id)) map.set(i.id, i); });
   return Array.from(map.values()).sort((a, b) => 
     new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
   );
