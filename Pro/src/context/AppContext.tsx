@@ -273,7 +273,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
-      safeSetItem('sree_all_projects_v1', JSON.stringify(allProjects));
+      safeSetItem('sree_all_projects_v7', JSON.stringify(allProjects));
       CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
@@ -308,7 +308,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const updateProject = (id: string, updated: Partial<Project>) => {
     setAllProjects((prev) =>
       prev.map((p) => {
-        if (p.id === id) return { ...p, ...updated };
+        if (p.id === id) {
+          const newP = { ...p, ...updated };
+          if (activeProjectState.id === id) {
+            setActiveProjectState(newP);
+          }
+          return newP;
+        }
         return p;
       })
     );

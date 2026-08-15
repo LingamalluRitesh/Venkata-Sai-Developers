@@ -62,16 +62,11 @@ export class CloudDbService {
     return null;
   }
 
-  // Sync projects SAFELY — NEVER overwrite siteVisits or inquiries if cloud fetch fails
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
-      
-      // CRITICAL GUARD: If current cloud data failed to fetch, do not overwrite to prevent wiping siteVisits/inquiries
-      if (!currentData || !Array.isArray(currentData.siteVisits)) {
-        console.warn('Skipping projects cloud sync to preserve existing siteVisits.');
-        return false;
-      }
+      const existingVisits = (currentData && Array.isArray(currentData.siteVisits)) ? currentData.siteVisits : [];
+      const existingInquiries = (currentData && Array.isArray(currentData.inquiries)) ? currentData.inquiries : [];
 
       const cleanedProjects = projects.map((p) => ({
         ...KONDAVEEDU_PROJECT,
@@ -90,11 +85,10 @@ export class CloudDbService {
         },
         body: JSON.stringify({ 
           projects: cleanedProjects,
-          siteVisits: currentData.siteVisits,
-          inquiries: currentData.inquiries || []
+          siteVisits: existingVisits,
+          inquiries: existingInquiries
         }),
       });
-
       return res.ok;
     } catch (err) {
       console.warn('Cloud DB sync projects failed:', err);
