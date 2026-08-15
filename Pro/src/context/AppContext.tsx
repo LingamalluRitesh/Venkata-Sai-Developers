@@ -82,7 +82,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
     try {
-      const saved = localStorage.getItem('sree_all_projects_v1');
+      const saved = localStorage.getItem('sree_all_projects_v7');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -94,6 +94,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
               ? p.keyFeatures
               : KONDAVEEDU_PROJECT.keyFeatures,
+            galleryImages: Array.from(new Set([
+              ...(KONDAVEEDU_PROJECT.galleryImages || []),
+              ...(Array.isArray(p.galleryImages) ? p.galleryImages : [])
+            ])),
           }));
         }
       }
@@ -109,7 +113,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('sree_all_projects_v1', JSON.stringify(allProjects));
+      localStorage.setItem('sree_all_projects_v7', JSON.stringify(allProjects));
     } catch (err) {}
   }, [allProjects]);
 
@@ -243,11 +247,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
               if (!localProj) return cloudProj;
               const localGallery = Array.isArray(localProj.galleryImages) ? localProj.galleryImages : [];
               const cloudGallery = Array.isArray(cloudProj.galleryImages) ? cloudProj.galleryImages : [];
-              const mergedGallery = Array.from(new Set([...localGallery, ...cloudGallery]));
+              const mergedGallery = Array.from(new Set([
+                ...(KONDAVEEDU_PROJECT.galleryImages || []),
+                ...localGallery,
+                ...cloudGallery
+              ]));
               return {
                 ...cloudProj,
                 heroImage: localProj.heroImage || cloudProj.heroImage,
-                galleryImages: mergedGallery.length > 0 ? mergedGallery : cloudProj.galleryImages,
+                galleryImages: mergedGallery,
               };
             });
           });

@@ -171,7 +171,7 @@ export const AdminPortal: React.FC = () => {
     });
   };
 
-  const MAX_GALLERY_PHOTOS = 20;
+  const MAX_GALLERY_PHOTOS = 100;
 
   const handleAddGalleryImage = () => {
     const currentImages = targetGalleryVenture.galleryImages || [];

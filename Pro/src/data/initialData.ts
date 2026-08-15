@@ -59,7 +59,8 @@ export const KONDAVEEDU_PROJECT: Project = {
     '/kondaveedu_3.jpeg',
     '/kondaveedu_4.jpeg',
     '/kondaveedu_5.jpeg',
-    '/kondaveedu_6.jpeg'
+    '/kondaveedu_6.jpeg',
+    '/kondaveedu_7.jpeg'
   ],
   plotsCount: 26,
   availablePlotsCount: 22,
