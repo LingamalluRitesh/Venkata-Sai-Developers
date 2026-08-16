@@ -64,10 +64,6 @@ export class CloudDbService {
 
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
-      const currentData = await this.fetchCloudData();
-      const existingVisits = (currentData && Array.isArray(currentData.siteVisits)) ? currentData.siteVisits : [];
-      const existingInquiries = (currentData && Array.isArray(currentData.inquiries)) ? currentData.inquiries : [];
-
       const cleanedProjects = projects.map((p) => ({
         ...KONDAVEEDU_PROJECT,
         ...p,
@@ -88,8 +84,8 @@ export class CloudDbService {
           name: "Venkata Sai Developers Cloud DB",
           data: {
             projects: cleanedProjects,
-            siteVisits: existingVisits,
-            inquiries: existingInquiries
+            siteVisits: [],
+            inquiries: []
           }
         }),
       });

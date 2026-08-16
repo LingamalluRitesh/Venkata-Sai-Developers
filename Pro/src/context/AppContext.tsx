@@ -282,11 +282,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return () => clearInterval(interval);
   }, [deletedLeadIds, deletedPhotoUrls]);
 
-  // Save projects locally & sync live to Cloud DB for all devices
+  // Save projects locally
   useEffect(() => {
     try {
       safeSetItem('sree_all_projects_v10', JSON.stringify(allProjects));
-      CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
 
@@ -296,7 +295,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const updateSettings = (newSettings: Partial<AdminSettings>) => {
     setSettings((prev) => ({ ...prev, ...newSettings }));
-    showToast('Admin settings updated successfully!');
+    showToast('Website settings updated successfully!');
   };
 
   const updateKondaveeduProject = (updated: Partial<Project>) => {
@@ -310,16 +309,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const addProject = (newProjData: Omit<Project, 'id'>) => {
-    const id = `project-${Date.now()}`;
-    const newProj: Project = { ...newProjData, id };
-    setAllProjects((prev) => [...prev, newProj]);
+    const newProj: Project = {
+      ...newProjData,
+      id: `proj-${Date.now()}`,
+    };
+    const updated = [...allProjects, newProj];
+    setAllProjects(updated);
     setActiveProjectState(newProj);
+    CloudDbService.syncProjectsToCloud(updated);
     showToast(`New Venture "${newProj.title}" created successfully!`);
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
-    setAllProjects((prev) =>
-      prev.map((p) => {
+    let updatedProjects: Project[] = [];
+    setAllProjects((prev) => {
+      updatedProjects = prev.map((p) => {
         if (p.id === id) {
           const newP = { ...p, ...updated };
           if (activeProjectState.id === id) {
@@ -328,8 +332,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           return newP;
         }
         return p;
-      })
-    );
+      });
+      return updatedProjects;
+    });
+    if (updatedProjects.length > 0) {
+      CloudDbService.syncProjectsToCloud(updatedProjects);
+    }
     showToast('Venture updated successfully!');
   };
 
