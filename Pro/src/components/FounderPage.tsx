@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
-import { Award, Users, Building, ShieldCheck, Quote, CheckCircle, Sparkles, Calendar, ArrowRight, User } from 'lucide-react';
+import { Award, Users, Building, ShieldCheck, Quote, CheckCircle, Sparkles, Calendar, ArrowRight } from 'lucide-react';
 
 export const FounderPage: React.FC = () => {
   const { founder, setIsSiteVisitModalOpen, setActiveTab } = useApp();
@@ -34,19 +34,11 @@ export const FounderPage: React.FC = () => {
             {/* Founder Photo & Quick Badge */}
             <div className="lg:col-span-5 relative flex flex-col items-center">
               <div className="relative w-full max-w-md aspect-square rounded-3xl overflow-hidden shadow-2xl border-4 border-white bg-slate-100 group">
-                {founder.image ? (
-                  <img
-                    src={founder.image}
-                    alt={founder.name}
-                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-slate-900 via-blue-950 to-slate-950 flex flex-col items-center justify-center p-6 text-white text-center">
-                    <div className="w-20 h-20 rounded-full bg-blue-600/30 border-2 border-blue-400/50 flex items-center justify-center mb-4">
-                      <User className="w-10 h-10 text-blue-300" />
-                    </div>
-                  </div>
-                )}
+                <img
+                  src={founder.image}
+                  alt={founder.name}
+                  className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-700"
+                />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent opacity-80" />
                 <div className="absolute bottom-6 left-6 right-6 text-white">
                   <span className="text-xs text-blue-400 font-bold uppercase tracking-wider block">Founder & Managing Director</span>

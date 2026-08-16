@@ -42,18 +42,16 @@ export const KondaveeduVenture: React.FC = () => {
       {/* Top Banner Hero */}
       <div className="relative w-full min-h-[500px] sm:min-h-[560px] flex items-center justify-center overflow-hidden bg-slate-950 py-16">
         
-        {/* Real Estate Background Image (Only if uploaded by Admin) */}
-        {(activeProject.heroImage || (activeProject.galleryImages && activeProject.galleryImages.length > 0)) && (
-          <img
-            src={activeProject.heroImage || activeProject.galleryImages[0]}
-            alt={activeProject.title}
-            className="absolute inset-0 w-full h-full object-cover object-center scale-105 filter brightness-100 saturate-125"
-          />
-        )}
+        {/* Real Estate Landscape Scenery Background Image */}
+        <img
+          src={activeProject.heroImage || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&w=1920&q=80"}
+          alt={activeProject.title}
+          className="absolute inset-0 w-full h-full object-cover object-center scale-105 filter brightness-100 saturate-125"
+        />
         
         {/* Subtle Vignette Gradient Overlay so scenery is vivid & text is super legible */}
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/80 to-slate-950/70" />
-        <div className="absolute inset-0 bg-blue-950/40 mix-blend-overlay" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/95 via-slate-950/50 to-slate-950/50" />
+        <div className="absolute inset-0 bg-blue-900/10 mix-blend-overlay" />
 
         {/* Hero Content Container */}
         <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center flex flex-col items-center">

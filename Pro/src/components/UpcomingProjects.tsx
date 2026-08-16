@@ -33,17 +33,11 @@ export const UpcomingProjects: React.FC = () => {
               <div>
                 {/* Hero Image & Starting Soon Badge */}
                 <div className="relative h-56 overflow-hidden">
-                  {project.heroImage ? (
-                    <img
-                      src={project.heroImage}
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 flex items-center justify-center p-6 text-white text-center">
-                      <Sparkles className="w-10 h-10 text-amber-400 opacity-80" />
-                    </div>
-                  )}
+                  <img
+                    src={project.heroImage}
+                    alt={project.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                   <div className="absolute top-4 right-4 bg-amber-500 text-slate-950 font-black text-xs px-3 py-1.5 rounded-full uppercase tracking-wider shadow-md">
                     Starting Soon
                   </div>

@@ -3,7 +3,7 @@ import { AdminSettings, LandAppreciationPoint, Plot, Project, Inquiry, SiteVisit
 export const INITIAL_SETTINGS: AdminSettings = {
   ventureName: 'Venkata Sai Developers',
   tagline: 'Fulfill Your Dreams — Crafting Premium Villa Plots & Eco Living Spaces',
-  logoUrl: '',
+  logoUrl: '/logo.jpg',
   contactPhone: '+91 90309 03364',
   whatsappPhone: '+91 89788 15621',
   contactEmail: 'venkatasaidevelopersinfo@gmail.com',
@@ -15,7 +15,7 @@ export const INITIAL_SETTINGS: AdminSettings = {
 export const INITIAL_FOUNDER = {
   name: 'Ratnala Venkata Punnarao',
   title: 'Founder & Managing Director',
-  image: '',
+  image: '/founder.jpg',
   experienceYears: 10,
   projectsDelivered: 6,
   happyFamilies: 500,
@@ -52,7 +52,7 @@ export const KONDAVEEDU_PROJECT: Project = {
     'Reddy Rajulu Museum — 4 km from the Layout',
     'High Land Value Appreciation Zone'
   ],
-  heroImage: '',
+  heroImage: '/kondaveedu_1.jpeg',
   galleryImages: [],
   plotsCount: 26,
   availablePlotsCount: 22,
@@ -69,7 +69,7 @@ export const INITIAL_UPCOMING_PROJECTS: Project[] = [
     priceRangeSqYd: 'Starting Soon',
     description: 'Bespoke architect-designed duplex villas blending contemporary elegance with lush green landscapes.',
     keyFeatures: ['Solar Powered', 'Private Infinity Terrace', 'Clubhouse Access', 'Smart Home Security'],
-    heroImage: '',
+    heroImage: 'https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80',
     galleryImages: []
   },
   {
@@ -82,7 +82,7 @@ export const INITIAL_UPCOMING_PROJECTS: Project[] = [
     priceRangeSqYd: 'Starting Soon',
     description: 'High-rise residential tower featuring 2, 3 & 4 BHK luxury residences with panoramic views of Kondaveedu Ghat Road.',
     keyFeatures: ['Sky Lounge', 'Olympic Size Pool', 'Gym & Spa', 'Basement Parking'],
-    heroImage: '',
+    heroImage: 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=800&q=80',
     galleryImages: []
   },
   {
@@ -95,7 +95,7 @@ export const INITIAL_UPCOMING_PROJECTS: Project[] = [
     priceRangeSqYd: 'Starting Soon',
     description: 'Strategic commercial plots with maximum frontage on the bustling tourism corridor near Kondaveedu Fort.',
     keyFeatures: ['60 Feet Main Highway Frontage', 'Approved for Resorts & Hospitality', 'Heavy Footfall Area'],
-    heroImage: '',
+    heroImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=800&q=80',
     galleryImages: []
   }
 ];
