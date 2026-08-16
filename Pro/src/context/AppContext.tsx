@@ -94,10 +94,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
               ? p.keyFeatures
               : KONDAVEEDU_PROJECT.keyFeatures,
-            galleryImages: Array.from(new Set([
-              ...(KONDAVEEDU_PROJECT.galleryImages || []),
-              ...(Array.isArray(p.galleryImages) ? p.galleryImages : [])
-            ])),
+            galleryImages: (Array.isArray(p.galleryImages) && p.galleryImages.length > 0)
+              ? p.galleryImages
+              : KONDAVEEDU_PROJECT.galleryImages,
           }));
         }
       }
@@ -245,17 +244,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return data.projects.map((cloudProj) => {
               const localProj = prev.find((lp) => lp.id === cloudProj.id);
               if (!localProj) return cloudProj;
-              const localGallery = Array.isArray(localProj.galleryImages) ? localProj.galleryImages : [];
-              const cloudGallery = Array.isArray(cloudProj.galleryImages) ? cloudProj.galleryImages : [];
-              const mergedGallery = Array.from(new Set([
-                ...(KONDAVEEDU_PROJECT.galleryImages || []),
-                ...localGallery,
-                ...cloudGallery
-              ]));
+              const cloudGallery = Array.isArray(cloudProj.galleryImages) && cloudProj.galleryImages.length > 0
+                ? cloudProj.galleryImages
+                : (localProj.galleryImages || KONDAVEEDU_PROJECT.galleryImages);
               return {
                 ...cloudProj,
                 heroImage: localProj.heroImage || cloudProj.heroImage,
-                galleryImages: mergedGallery,
+                galleryImages: cloudGallery,
               };
             });
           });
