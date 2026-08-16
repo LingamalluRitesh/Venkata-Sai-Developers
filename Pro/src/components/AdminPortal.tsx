@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Plot, PlotStatus, FacingDirection, Project } from '../types';
+import { CloudStorageService } from '../lib/cloudStorage';
 import { 
   Users, 
   Layers, 
@@ -180,14 +181,19 @@ export const AdminPortal: React.FC = () => {
       alert(`Maximum ${MAX_GALLERY_PHOTOS} photos allowed per venture. Please remove an existing photo before adding a new one.`);
       return;
     }
-    if (!newGalleryUrl.trim()) {
-      alert('Please enter an Image URL or use the Browse File button.');
+    const trimmed = newGalleryUrl.trim();
+    if (!trimmed) {
+      alert('Please enter an Image URL or use the Browse & Upload to Cloud button.');
       return;
     }
-    const updatedGallery = [...currentImages, newGalleryUrl.trim()];
+    if (trimmed.startsWith('data:image/')) {
+      alert('Raw Base64 data strings cannot be stored directly. Please use the "Browse & Upload to Cloud" button to host your image file on persistent cloud storage.');
+      return;
+    }
+    const updatedGallery = [...currentImages, trimmed];
     updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
     setNewGalleryUrl('');
-    showToast('Photo added to gallery successfully!');
+    showToast('✅ Photo URL added to gallery successfully!');
   };
 
   const handleRemoveGalleryImage = (indexToRemove: number) => {
@@ -1021,14 +1027,23 @@ export const AdminPortal: React.FC = () => {
                         }
 
                         setIsUploadingToCloud(true);
-                        showToast('Uploading photo(s) to Cloud Server...');
+                        showToast(`Uploading ${selectedFiles.length} photo(s) to Persistent Cloud Storage...`);
 
                         const uploadedUrls: string[] = [];
+                        let failedCount = 0;
+
                         for (const file of selectedFiles) {
                           if (currentGallery.length + uploadedUrls.length >= MAX_GALLERY_PHOTOS) break;
-                          const compressedUrl = await processImageFile(file);
-                          if (compressedUrl) {
-                            uploadedUrls.push(compressedUrl);
+                          try {
+                            const publicHttpsUrl = await CloudStorageService.uploadImage(file);
+                            if (publicHttpsUrl && publicHttpsUrl.startsWith('https://')) {
+                              uploadedUrls.push(publicHttpsUrl);
+                            } else {
+                              failedCount++;
+                            }
+                          } catch (err: any) {
+                            console.error('Image upload failed:', err);
+                            failedCount++;
                           }
                         }
 
@@ -1036,10 +1051,15 @@ export const AdminPortal: React.FC = () => {
                         if (uploadedUrls.length > 0) {
                           const updatedGallery = [...currentGallery, ...uploadedUrls];
                           updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
-                          showToast(`✅ ${uploadedUrls.length} photo(s) uploaded to Cloud Server! Live for all devices.`);
+                          if (failedCount > 0) {
+                            showToast(`⚠️ ${uploadedUrls.length} photo(s) uploaded! (${failedCount} failed). Live for all devices.`);
+                          } else {
+                            showToast(`✅ ${uploadedUrls.length} photo(s) uploaded to Cloud Storage! Live for all devices.`);
+                          }
                         } else {
-                          showToast('Upload failed. Please try again or paste an Image URL.');
+                          showToast('❌ Image upload failed. Please verify network and try again.');
                         }
+                        e.target.value = '';
                       }}
                     />
                   </label>

@@ -53,7 +53,15 @@ export const KONDAVEEDU_PROJECT: Project = {
     'High Land Value Appreciation Zone'
   ],
   heroImage: '/kondaveedu_1.jpeg',
-  galleryImages: [],
+  galleryImages: [
+    '/kondaveedu_1.jpeg',
+    '/kondaveedu_2.jpeg',
+    '/kondaveedu_3.jpeg',
+    '/kondaveedu_4.jpeg',
+    '/kondaveedu_5.jpeg',
+    '/kondaveedu_6.jpeg',
+    '/kondaveedu_7.jpeg'
+  ],
   plotsCount: 26,
   availablePlotsCount: 22,
 };

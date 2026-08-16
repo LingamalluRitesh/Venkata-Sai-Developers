@@ -83,7 +83,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
     try {
-      const saved = localStorage.getItem('sree_all_projects_v9');
+      const saved = localStorage.getItem('sree_all_projects_v10');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -92,10 +92,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             ...p,
             location: p.location || KONDAVEEDU_PROJECT.location,
             priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
-            keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
-              ? p.keyFeatures
-              : KONDAVEEDU_PROJECT.keyFeatures,
-            galleryImages: Array.isArray(p.galleryImages) ? p.galleryImages : [],
+            galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
+              .filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/')),
           }));
         }
       }
@@ -111,7 +109,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('sree_all_projects_v9', JSON.stringify(allProjects));
+      localStorage.setItem('sree_all_projects_v10', JSON.stringify(allProjects));
     } catch (err) {}
   }, [allProjects]);
 
@@ -258,9 +256,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return data.projects.map((cloudProj) => {
               const localProj = prev.find((lp) => lp.id === cloudProj.id);
               if (!localProj) return cloudProj;
-              const rawCloudGallery = Array.isArray(cloudProj.galleryImages)
+              const rawCloudGallery = (Array.isArray(cloudProj.galleryImages)
                 ? cloudProj.galleryImages
-                : [];
+                : []).filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/'));
               
               const cleanGallery = rawCloudGallery.filter((url) => !deletedPhotoSet.has(url));
 
@@ -285,7 +283,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
-      safeSetItem('sree_all_projects_v9', JSON.stringify(allProjects));
+      safeSetItem('sree_all_projects_v10', JSON.stringify(allProjects));
       CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);

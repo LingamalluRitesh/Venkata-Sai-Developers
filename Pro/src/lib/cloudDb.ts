@@ -45,7 +45,8 @@ export class CloudDbService {
             keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
               ? p.keyFeatures
               : KONDAVEEDU_PROJECT.keyFeatures,
-            galleryImages: Array.isArray(p.galleryImages) ? p.galleryImages : [],
+            galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
+              .filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/')),
           }));
         }
 
@@ -73,7 +74,8 @@ export class CloudDbService {
         location: p.location || KONDAVEEDU_PROJECT.location,
         priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
         keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0) ? p.keyFeatures : KONDAVEEDU_PROJECT.keyFeatures,
-        galleryImages: Array.isArray(p.galleryImages) ? p.galleryImages : [],
+        galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
+          .filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/')),
       }));
 
       const res = await fetch(CLOUD_DB_ENDPOINT, {
