@@ -19,6 +19,7 @@ interface AppContextType {
   setActiveProject: (project: Project) => void;
   addProject: (newProj: Omit<Project, 'id'>) => void;
   updateProject: (id: string, updated: Partial<Project>) => void;
+  deletePhotoFromGallery: (projectId: string, photoUrl: string) => void;
   deleteProject: (id: string) => void;
   upcomingProjects: Project[];
   plots: Plot[];
@@ -234,23 +235,41 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Founder profile details updated!');
   };
 
+  const [deletedPhotoUrls, setDeletedPhotoUrls] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('sree_realestate_deleted_photos_v1');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [];
+  });
+
+  useEffect(() => {
+    try {
+      safeSetItem('sree_realestate_deleted_photos_v1', JSON.stringify(deletedPhotoUrls));
+    } catch (e) {}
+  }, [deletedPhotoUrls]);
+
   // Fetch live projects, siteVisits, and inquiries from Cloud DB on mount & poll every 10s
   useEffect(() => {
     async function loadCloudData() {
       const data = await CloudDbService.fetchCloudData();
       if (data) {
         if (data.projects && data.projects.length > 0) {
+          const deletedPhotoSet = new Set(deletedPhotoUrls);
           setAllProjects((prev) => {
             return data.projects.map((cloudProj) => {
               const localProj = prev.find((lp) => lp.id === cloudProj.id);
               if (!localProj) return cloudProj;
-              const cloudGallery = Array.isArray(cloudProj.galleryImages) && cloudProj.galleryImages.length > 0
+              const rawCloudGallery = Array.isArray(cloudProj.galleryImages) && cloudProj.galleryImages.length > 0
                 ? cloudProj.galleryImages
                 : (localProj.galleryImages || KONDAVEEDU_PROJECT.galleryImages);
+              
+              const cleanGallery = rawCloudGallery.filter((url) => !deletedPhotoSet.has(url));
+
               return {
                 ...cloudProj,
                 heroImage: localProj.heroImage || cloudProj.heroImage,
-                galleryImages: cloudGallery,
+                galleryImages: cleanGallery,
               };
             });
           });
@@ -263,7 +282,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     loadCloudData();
     const interval = setInterval(loadCloudData, 10000);
     return () => clearInterval(interval);
-  }, [deletedLeadIds]);
+  }, [deletedLeadIds, deletedPhotoUrls]);
 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
@@ -314,6 +333,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       })
     );
     showToast('Venture updated successfully!');
+  };
+
+  const deletePhotoFromGallery = (projectId: string, photoUrl: string) => {
+    setDeletedPhotoUrls((prev) => Array.from(new Set([...prev, photoUrl])));
+
+    const updatedProjects = allProjects.map((p) => {
+      if (p.id === projectId) {
+        const cleanGallery = (p.galleryImages || []).filter((img) => img !== photoUrl);
+        const newProj = { ...p, galleryImages: cleanGallery };
+        if (activeProjectState.id === projectId) {
+          setActiveProjectState(newProj);
+        }
+        return newProj;
+      }
+      return p;
+    });
+
+    setAllProjects(updatedProjects);
+    CloudDbService.syncProjectsToCloud(updatedProjects);
+    showToast('Photo permanently deleted!');
   };
 
   const deleteProject = (id: string) => {
@@ -433,6 +472,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setActiveProject: setActiveProjectState,
         addProject,
         updateProject,
+        deletePhotoFromGallery,
         deleteProject,
         upcomingProjects,
         plots,

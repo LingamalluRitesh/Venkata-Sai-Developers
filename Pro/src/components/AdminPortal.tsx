@@ -28,6 +28,7 @@ export const AdminPortal: React.FC = () => {
     setActiveProject,
     addProject,
     updateProject,
+    deletePhotoFromGallery,
     deleteProject,
     kondaveeduProject, 
     plots, 
@@ -195,9 +196,8 @@ export const AdminPortal: React.FC = () => {
       alert('Venture gallery must have at least one photo.');
       return;
     }
-    const updatedGallery = currentImages.filter((_, idx) => idx !== indexToRemove);
-    updateProject(targetGalleryVenture.id, { galleryImages: updatedGallery });
-    showToast('Photo removed from gallery.');
+    const photoToRemove = currentImages[indexToRemove];
+    deletePhotoFromGallery(targetGalleryVenture.id, photoToRemove);
   };
 
   return (
