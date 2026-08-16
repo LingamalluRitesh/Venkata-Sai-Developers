@@ -256,16 +256,18 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             return data.projects.map((cloudProj) => {
               const localProj = prev.find((lp) => lp.id === cloudProj.id);
               if (!localProj) return cloudProj;
+              const localGallery = Array.isArray(localProj.galleryImages) ? localProj.galleryImages : [];
               const rawCloudGallery = (Array.isArray(cloudProj.galleryImages)
                 ? cloudProj.galleryImages
                 : []).filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/'));
               
-              const cleanGallery = rawCloudGallery.filter((url) => !deletedPhotoSet.has(url));
+              const mergedGallery = Array.from(new Set([...localGallery, ...rawCloudGallery]))
+                .filter((url) => !deletedPhotoSet.has(url));
 
               return {
                 ...cloudProj,
                 heroImage: localProj.heroImage || cloudProj.heroImage,
-                galleryImages: cleanGallery,
+                galleryImages: mergedGallery,
               };
             });
           });
