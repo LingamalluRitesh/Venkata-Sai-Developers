@@ -13,7 +13,8 @@ import {
   Calendar,
   CheckCircle2,
   PhoneCall,
-  MessageSquare
+  MessageSquare,
+  Image as ImageIcon
 } from 'lucide-react';
 import { WhatsAppIcon, PhoneCallIcon } from './Icons';
 
@@ -185,29 +186,41 @@ export const KondaveeduVenture: React.FC = () => {
               <h3 className="text-xl font-bold text-slate-900">
                 {activeProject.title} Photo Gallery
               </h3>
-              <span className="text-xs text-slate-500 font-medium">Click any image to expand view</span>
+              {(activeProject.galleryImages || []).length > 0 && (
+                <span className="text-xs text-slate-500 font-medium">Click any image to expand view</span>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(activeProject.galleryImages || []).map((imgUrl, index) => (
-                <div
-                  key={index}
-                  onClick={() => setActiveGalleryImage(imgUrl)}
-                  className="group relative h-64 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all border border-slate-200"
-                >
-                  <img
-                    src={imgUrl}
-                    alt={`${activeProject.title} photo ${index + 1}`}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="px-4 py-2 bg-white/90 text-slate-900 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md">
-                      <Maximize2 className="w-4 h-4 text-blue-600" /> View Larger
-                    </span>
+            {(activeProject.galleryImages || []).length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {activeProject.galleryImages.map((imgUrl, index) => (
+                  <div
+                    key={index}
+                    onClick={() => setActiveGalleryImage(imgUrl)}
+                    className="group relative h-64 rounded-2xl overflow-hidden cursor-pointer shadow-sm hover:shadow-xl transition-all border border-slate-200"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt={`${activeProject.title} photo ${index + 1}`}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <span className="px-4 py-2 bg-white/90 text-slate-900 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md">
+                        <Maximize2 className="w-4 h-4 text-blue-600" /> View Larger
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-12 text-center bg-slate-50 border border-dashed border-slate-300 rounded-3xl space-y-3">
+                <ImageIcon className="w-12 h-12 text-slate-400 mx-auto" />
+                <h4 className="text-base font-bold text-slate-800">No Venture Photos Added Yet</h4>
+                <p className="text-xs text-slate-500 max-w-md mx-auto">
+                  Photos uploaded by the Admin in the Control Portal will automatically sync and display live here across all devices.
+                </p>
+              </div>
+            )}
 
             {/* Lightbox Modal */}
             {activeGalleryImage && (
