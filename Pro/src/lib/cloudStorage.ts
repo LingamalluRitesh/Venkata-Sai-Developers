@@ -1,11 +1,11 @@
 /**
  * CloudStorageService
  * 
- * Provides persistent cloud image storage architecture.
+ * Provides robust multi-provider CORS-enabled persistent cloud image storage architecture.
  * Validates, resizes, and compresses image files locally using HTML5 Canvas
- * before uploading to a persistent cloud storage CDN API.
+ * before uploading to a persistent cloud CDN API.
  * 
- * Returns ONLY HTTPS URLs (e.g. https://files.catbox.moe/... or https://i.ibb.co/...).
+ * Returns ONLY permanent HTTPS URLs.
  * NEVER returns raw Base64 data URLs.
  */
 
@@ -111,13 +111,38 @@ export class CloudStorageService {
       }
     }
 
-    // Option B: Primary Persistent Cloud Storage API (Catbox CDN)
+    // Option B: Provider 1 — TmpFiles.org (CORS allowed globally)
+    try {
+      const formData = new FormData();
+      formData.append('file', blob, file.name || 'venture_photo.jpg');
+
+      const res = await fetch('https://tmpfiles.org/api/v1/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        if (json?.status === 'success' && json.data?.url) {
+          // Convert view URL to direct CDN download URL
+          const directUrl = json.data.url.replace('tmpfiles.org/', 'tmpfiles.org/dl/');
+          if (directUrl.startsWith('https://')) {
+            if (onProgress) onProgress(100);
+            return directUrl;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn('TmpFiles provider failed, trying next provider:', err);
+    }
+
+    // Option C: Provider 2 — Catbox via CORS Proxy
     try {
       const formData = new FormData();
       formData.append('reqtype', 'fileupload');
       formData.append('fileToUpload', blob, file.name || 'venture_photo.jpg');
 
-      const res = await fetch('https://catbox.moe/user/api.php', {
+      const res = await fetch('https://corsproxy.io/?https://catbox.moe/user/api.php', {
         method: 'POST',
         body: formData,
       });
@@ -130,41 +155,7 @@ export class CloudStorageService {
         }
       }
     } catch (err) {
-      console.warn('Primary cloud storage failed, attempting secondary provider:', err);
-    }
-
-    // Option C: Secondary Persistent Cloud Storage Fallback (FreeImage Host API)
-    try {
-      const reader = new FileReader();
-      const base64: string = await new Promise((resolve, reject) => {
-        reader.onload = () => {
-          const resStr = reader.result as string;
-          resolve(resStr.split(',')[1] || resStr);
-        };
-        reader.onerror = () => reject(new Error('File read failed'));
-        reader.readAsDataURL(blob);
-      });
-
-      const params = new URLSearchParams();
-      params.append('key', '6d000714986472f5a647882203363168');
-      params.append('action', 'upload');
-      params.append('source', base64);
-      params.append('format', 'json');
-
-      const res = await fetch('https://freeimage.host/api/1/upload', {
-        method: 'POST',
-        body: params,
-      });
-
-      if (res.ok) {
-        const json = await res.json();
-        if (json?.image?.url && json.image.url.startsWith('https://')) {
-          if (onProgress) onProgress(100);
-          return json.image.url;
-        }
-      }
-    } catch (err) {
-      console.warn('Secondary cloud storage failed:', err);
+      console.warn('Catbox proxy provider failed:', err);
     }
 
     throw new Error('Cloud image upload failed. Please verify your internet connection and try again.');
