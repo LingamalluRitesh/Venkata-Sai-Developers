@@ -210,13 +210,21 @@ export const AdminPortal: React.FC = () => {
           
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="px-3 py-1 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-black text-[11px] rounded-full uppercase tracking-wider shadow-md">
                   Admin Control Portal
                 </span>
                 <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 text-[11px] font-bold rounded-full">
                   ⚡ Live Cloud Database Synced (All Devices)
                 </span>
+                <a
+                  href="https://venkatasaidevelopers.com/#admin"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="px-3 py-1 bg-blue-500/20 text-blue-300 hover:text-white border border-blue-400/30 text-[11px] font-bold rounded-full flex items-center gap-1 transition-colors"
+                >
+                  🌐 venkatasaidevelopers.com/#admin
+                </a>
               </div>
               <h1 className="text-2xl sm:text-4xl font-black mt-2 tracking-tight text-white drop-shadow-md">
                 Management Dashboard — {settings.ventureName}
