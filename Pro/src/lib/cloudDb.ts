@@ -1,7 +1,7 @@
 import { Project, SiteVisit, Inquiry } from '../types';
 import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
-const CLOUD_DB_ENDPOINT = 'https://jsonblob.com/api/jsonBlob/019fdd35-6266-7c3f-9f73-a1ebf3d9dc9d';
+const CLOUD_DB_ENDPOINT = 'https://api.restful-api.dev/objects/ff8081819ff5b11001a00b0297de2d5c';
 
 // Safe lead merging utilities — NEVER re-add leads that were explicitly deleted by Admin
 export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[], deletedIds: string[] = []): SiteVisit[] => {
@@ -32,7 +32,8 @@ export class CloudDbService {
         headers: { 'Accept': 'application/json' }
       });
       if (!res.ok) return null;
-      const json = await res.json();
+      const responseJson = await res.json();
+      const json = responseJson?.data || responseJson;
       if (json) {
         let projects: Project[] = [KONDAVEEDU_PROJECT];
         if (Array.isArray(json.projects) && json.projects.length > 0) {
@@ -84,9 +85,12 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects: cleanedProjects,
-          siteVisits: existingVisits,
-          inquiries: existingInquiries
+          name: "Venkata Sai Developers Cloud DB",
+          data: {
+            projects: cleanedProjects,
+            siteVisits: existingVisits,
+            inquiries: existingInquiries
+          }
         }),
       });
       return res.ok;
@@ -96,13 +100,11 @@ export class CloudDbService {
     }
   }
 
-  // Add a new Site Visit directly to Cloud DB (merging safely with zero data loss)
   public static async addSiteVisitToCloud(newVisit: SiteVisit, localVisits: SiteVisit[] = []): Promise<SiteVisit[]> {
     try {
       const currentData = await this.fetchCloudData();
       const existingVisits = (currentData && Array.isArray(currentData.siteVisits)) ? currentData.siteVisits : [];
       
-      // MERGE ALL VISITS (Cloud + Local + New Visit) by unique ID — NEVER DELETE PREVIOUS VISITS
       const updatedVisits = mergeVisitsById(mergeVisitsById(existingVisits, localVisits), [newVisit]);
 
       const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
@@ -120,13 +122,16 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects,
-          siteVisits: updatedVisits,
-          inquiries
+          name: "Venkata Sai Developers Cloud DB",
+          data: {
+            projects,
+            siteVisits: updatedVisits,
+            inquiries
+          }
         }),
       });
 
-      // Dispatch Web3Forms Email Alert to venkatasaidevelopersinfo@gmail.com
+      // Dispatch Web3Forms Email Alert
       try {
         fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -148,13 +153,11 @@ export class CloudDbService {
     }
   }
 
-  // Add a new Inquiry directly to Cloud DB (merging safely with zero data loss)
   public static async addInquiryToCloud(newInquiry: Inquiry, localInquiries: Inquiry[] = []): Promise<Inquiry[]> {
     try {
       const currentData = await this.fetchCloudData();
       const existingInquiries = (currentData && Array.isArray(currentData.inquiries)) ? currentData.inquiries : [];
       
-      // MERGE ALL INQUIRIES (Cloud + Local + New Inquiry) by unique ID — NEVER DELETE PREVIOUS INQUIRIES
       const updatedInquiries = mergeInquiriesById(mergeInquiriesById(existingInquiries, localInquiries), [newInquiry]);
 
       const projects = (currentData && Array.isArray(currentData.projects) && currentData.projects.length > 0) 
@@ -172,13 +175,16 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects,
-          siteVisits,
-          inquiries: updatedInquiries
+          name: "Venkata Sai Developers Cloud DB",
+          data: {
+            projects,
+            siteVisits,
+            inquiries: updatedInquiries
+          }
         }),
       });
 
-      // Dispatch Web3Forms Email Alert to venkatasaidevelopersinfo@gmail.com
+      // Dispatch Web3Forms Email Alert
       try {
         fetch('https://api.web3forms.com/submit', {
           method: 'POST',
@@ -200,7 +206,6 @@ export class CloudDbService {
     }
   }
 
-  // Explicitly overwrite siteVisits and inquiries in Cloud DB (used when Admin deletes an invalid lead)
   public static async overwriteVisitsAndInquiriesInCloud(siteVisits: SiteVisit[], inquiries: Inquiry[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
@@ -211,9 +216,12 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
-          siteVisits,
-          inquiries
+          name: "Venkata Sai Developers Cloud DB",
+          data: {
+            projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+            siteVisits,
+            inquiries
+          }
         }),
       });
       return res.ok;
@@ -223,7 +231,6 @@ export class CloudDbService {
     }
   }
 
-  // Sync site visits or inquiries status updates to Cloud DB
   public static async syncVisitsToCloud(siteVisits: SiteVisit[], inquiries?: Inquiry[]): Promise<boolean> {
     try {
       const currentData = await this.fetchCloudData();
@@ -234,9 +241,12 @@ export class CloudDbService {
           'Accept': 'application/json'
         },
         body: JSON.stringify({ 
-          projects: currentData?.projects || [KONDAVEEDU_PROJECT],
-          siteVisits: mergeVisitsById(currentData?.siteVisits || [], siteVisits),
-          inquiries: mergeInquiriesById(currentData?.inquiries || [], inquiries || [])
+          name: "Venkata Sai Developers Cloud DB",
+          data: {
+            projects: currentData?.projects || [KONDAVEEDU_PROJECT],
+            siteVisits: mergeVisitsById(currentData?.siteVisits || [], siteVisits),
+            inquiries: mergeInquiriesById(currentData?.inquiries || [], inquiries || [])
+          }
         }),
       });
       return res.ok;
@@ -246,7 +256,6 @@ export class CloudDbService {
     }
   }
 
-  // Helper for backward compatibility
   public static async fetchProjectsFromCloud(): Promise<Project[] | null> {
     const data = await this.fetchCloudData();
     return data ? data.projects : null;
