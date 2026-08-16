@@ -82,7 +82,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const [allProjects, setAllProjects] = useState<Project[]>(() => {
     try {
-      const saved = localStorage.getItem('sree_all_projects_v7');
+      const saved = localStorage.getItem('sree_all_projects_v8');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
@@ -113,7 +113,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   useEffect(() => {
     try {
-      localStorage.setItem('sree_all_projects_v7', JSON.stringify(allProjects));
+      localStorage.setItem('sree_all_projects_v8', JSON.stringify(allProjects));
     } catch (err) {}
   }, [allProjects]);
 
@@ -273,7 +273,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Save projects locally & sync live to Cloud DB for all devices
   useEffect(() => {
     try {
-      safeSetItem('sree_all_projects_v7', JSON.stringify(allProjects));
+      safeSetItem('sree_all_projects_v8', JSON.stringify(allProjects));
       CloudDbService.syncProjectsToCloud(allProjects);
     } catch (e) {}
   }, [allProjects]);
