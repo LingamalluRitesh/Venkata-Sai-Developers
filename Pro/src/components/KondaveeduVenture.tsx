@@ -203,6 +203,9 @@ export const KondaveeduVenture: React.FC = () => {
                       src={imgUrl}
                       alt={`${activeProject.title} photo ${index + 1}`}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        (e.target as HTMLElement).parentElement?.classList.add('hidden');
+                      }}
                     />
                     <div className="absolute inset-0 bg-slate-900/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <span className="px-4 py-2 bg-white/90 text-slate-900 font-bold text-xs rounded-full flex items-center gap-1.5 shadow-md">

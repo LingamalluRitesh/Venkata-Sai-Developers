@@ -1094,11 +1094,11 @@ export const AdminPortal: React.FC = () => {
                       if (window.confirm(`Remove ALL ${(targetGalleryVenture.galleryImages || []).length} photos from the gallery? This cannot be undone.`)) {
                         updateProject(targetGalleryVenture.id, { galleryImages: [] });
                         try {
-                          const stored = JSON.parse(localStorage.getItem('sree_all_projects_v1') || '[]');
+                          const stored = JSON.parse(localStorage.getItem('sree_all_projects_v10') || '[]');
                           const updated = stored.map((p: any) =>
                             p.id === targetGalleryVenture.id ? { ...p, galleryImages: [] } : p
                           );
-                          localStorage.setItem('sree_all_projects_v1', JSON.stringify(updated));
+                          localStorage.setItem('sree_all_projects_v10', JSON.stringify(updated));
                         } catch (e) {}
                         showToast('All gallery photos cleared from cache!');
                       }
