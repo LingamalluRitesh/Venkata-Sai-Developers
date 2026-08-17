@@ -2,6 +2,8 @@ import { Project, SiteVisit, Inquiry } from '../types';
 import { KONDAVEEDU_PROJECT } from '../data/initialData';
 
 const CLOUD_DB_ENDPOINT = 'https://api.restful-api.dev/objects/ff8081819ff5b11001a00b0297de2d5c';
+const SUPABASE_URL = 'https://igdrtqzmniigjrjnpsok.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZHJ0cXptbmlpZ2pyam5wc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjExNTMsImV4cCI6MjEwMjQ5NzE1M30.kKwKaN76S1rBZs2_f1G2gUGmII8WRXzaIIUjDI9WNzE';
 
 // Safe lead merging utilities — NEVER re-add leads that were explicitly deleted by Admin
 export const mergeVisitsById = (existing: SiteVisit[], incoming: SiteVisit[], deletedIds: string[] = []): SiteVisit[] => {
@@ -27,6 +29,45 @@ export const mergeInquiriesById = (existing: Inquiry[], incoming: Inquiry[], del
 export class CloudDbService {
   // Fetch full cloud database object { projects, siteVisits, inquiries }
   public static async fetchCloudData(): Promise<{ projects: Project[]; siteVisits: SiteVisit[]; inquiries: Inquiry[] } | null> {
+    // 1. Try Supabase
+    try {
+      const supaRes = await fetch(`${SUPABASE_URL}/rest/v1/app_data?id=eq.vsd_main&select=*`, {
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Accept': 'application/json'
+        }
+      });
+      if (supaRes.ok) {
+        const rows = await supaRes.json();
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].data) {
+          const json = rows[0].data;
+          let projects: Project[] = [KONDAVEEDU_PROJECT];
+          if (Array.isArray(json.projects) && json.projects.length > 0) {
+            projects = json.projects.map((p: any) => ({
+              ...KONDAVEEDU_PROJECT,
+              ...p,
+              location: p.location || KONDAVEEDU_PROJECT.location,
+              priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
+              keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0)
+                ? p.keyFeatures
+                : KONDAVEEDU_PROJECT.keyFeatures,
+              galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
+                .filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/')),
+            }));
+          }
+          return {
+            projects,
+            siteVisits: Array.isArray(json.siteVisits) ? json.siteVisits : [],
+            inquiries: Array.isArray(json.inquiries) ? json.inquiries : [],
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('Supabase fetch fallback to REST API:', e);
+    }
+
+    // 2. Fallback to REST API
     try {
       const res = await fetch(CLOUD_DB_ENDPOINT, {
         headers: { 'Accept': 'application/json' }
@@ -64,16 +105,43 @@ export class CloudDbService {
 
   public static async syncProjectsToCloud(projects: Project[]): Promise<boolean> {
     try {
+      // A project update must not erase enquiries and visits that were saved by
+      // another browser.  Fetching the current record first also makes the
+      // gallery update safe when multiple devices are viewing the deployed app.
+      const currentData = await this.fetchCloudData();
       const cleanedProjects = projects.map((p) => ({
         ...KONDAVEEDU_PROJECT,
         ...p,
         location: p.location || KONDAVEEDU_PROJECT.location,
         priceRangeSqYd: p.priceRangeSqYd || KONDAVEEDU_PROJECT.priceRangeSqYd,
         keyFeatures: (Array.isArray(p.keyFeatures) && p.keyFeatures.length > 0) ? p.keyFeatures : KONDAVEEDU_PROJECT.keyFeatures,
-        galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
+          galleryImages: (Array.isArray(p.galleryImages) ? p.galleryImages : [])
           .filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/')),
       }));
 
+      // 1. Sync to Supabase
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/app_data`, {
+          method: 'POST',
+          headers: {
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            id: 'vsd_main',
+            data: {
+              projects: cleanedProjects,
+              siteVisits: currentData?.siteVisits || [],
+              inquiries: currentData?.inquiries || []
+            },
+            updated_at: new Date().toISOString()
+          })
+        });
+      } catch (e) {}
+
+      // 2. Sync to REST API fallback
       const res = await fetch(CLOUD_DB_ENDPOINT, {
         method: 'PUT',
         headers: { 
@@ -84,8 +152,8 @@ export class CloudDbService {
           name: "Venkata Sai Developers Cloud DB",
           data: {
             projects: cleanedProjects,
-            siteVisits: [],
-            inquiries: []
+            siteVisits: currentData?.siteVisits || [],
+            inquiries: currentData?.inquiries || []
           }
         }),
       });

@@ -321,23 +321,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const updateProject = (id: string, updated: Partial<Project>) => {
-    let updatedProjects: Project[] = [];
-    setAllProjects((prev) => {
-      updatedProjects = prev.map((p) => {
-        if (p.id === id) {
-          const newP = { ...p, ...updated };
-          if (activeProjectState.id === id) {
-            setActiveProjectState(newP);
-          }
-          return newP;
-        }
-        return p;
-      });
-      return updatedProjects;
-    });
-    if (updatedProjects.length > 0) {
-      CloudDbService.syncProjectsToCloud(updatedProjects);
+    // Build the new value before setting React state.  Reading a value assigned
+    // inside a state updater is unreliable in newer React scheduling modes and
+    // was allowing the cloud write to be skipped entirely.
+    const updatedProjects = allProjects.map((p) => p.id === id ? { ...p, ...updated } : p);
+    const selectedProject = updatedProjects.find((p) => p.id === id);
+
+    setAllProjects(updatedProjects);
+    if (selectedProject && activeProjectState.id === id) {
+      setActiveProjectState(selectedProject);
     }
+
+    void CloudDbService.syncProjectsToCloud(updatedProjects).then((synced) => {
+      if (!synced) console.warn('Project update was saved locally but cloud sync failed.');
+    });
     showToast('Venture updated successfully!');
   };
 
