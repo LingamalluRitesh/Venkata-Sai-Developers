@@ -204,7 +204,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [selectedPlotForModal, setSelectedPlotForModal] = useState<Plot | null>(null);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => {
@@ -217,7 +216,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       localStorage.setItem(key, value);
     } catch (e) {
-      // localStorage quota exceeded — silently ignore, app still works in memory
       console.warn('localStorage quota exceeded for key:', key);
     }
   };
@@ -255,19 +253,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
           setAllProjects((prev) => {
             return data.projects.map((cloudProj) => {
               const localProj = prev.find((lp) => lp.id === cloudProj.id);
-              if (!localProj) return cloudProj;
-              const localGallery = Array.isArray(localProj.galleryImages) ? localProj.galleryImages : [];
               const rawCloudGallery = (Array.isArray(cloudProj.galleryImages)
                 ? cloudProj.galleryImages
                 : []).filter((url: any) => typeof url === 'string' && !url.startsWith('data:image/'));
               
-              const mergedGallery = Array.from(new Set([...localGallery, ...rawCloudGallery]))
-                .filter((url) => !deletedPhotoSet.has(url));
+              const cleanGallery = rawCloudGallery.filter((url) => !deletedPhotoSet.has(url));
 
               return {
                 ...cloudProj,
-                heroImage: localProj.heroImage || cloudProj.heroImage,
-                galleryImages: mergedGallery,
+                heroImage: (localProj && localProj.heroImage) ? localProj.heroImage : cloudProj.heroImage,
+                galleryImages: cleanGallery,
               };
             });
           });
@@ -285,7 +280,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Save projects locally
   useEffect(() => {
     try {
-      safeSetItem('sree_all_projects_v10', JSON.stringify(allProjects));
+      safeSetItem('sree_all_projects_v12', JSON.stringify(allProjects));
     } catch (e) {}
   }, [allProjects]);
 
