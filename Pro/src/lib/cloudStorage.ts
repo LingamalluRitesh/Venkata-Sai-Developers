@@ -87,9 +87,33 @@ export class CloudStorageService {
       blob = file; // Fallback to original file
     }
 
-    if (onProgress) onProgress(40);
+    // Option A: Provider 1 — Native Supabase Storage (100% Free, Permanent, Never Expires)
+    try {
+      const SUPABASE_URL = 'https://igdrtqzmniigjrjnpsok.supabase.co';
+      const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlnZHJ0cXptbmlpZ2pyam5wc29rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODY5MjExNTMsImV4cCI6MjEwMjQ5NzE1M30.kKwKaN76S1rBZs2_f1G2gUGmII8WRXzaIIUjDI9WNzE';
+      
+      const cleanFileName = `${Date.now()}_${(file.name || 'photo.jpg').replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      const res = await fetch(`${SUPABASE_URL}/storage/v1/object/photos/${cleanFileName}`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+          'Content-Type': blob.type || 'image/jpeg',
+          'x-upsert': 'true'
+        },
+        body: blob
+      });
 
-    // Option A: Custom ImgBB key if VITE_IMGBB_API_KEY is configured
+      if (res.ok) {
+        const publicUrl = `${SUPABASE_URL}/storage/v1/object/public/photos/${cleanFileName}`;
+        if (onProgress) onProgress(100);
+        return publicUrl;
+      }
+    } catch (err) {
+      console.warn('Supabase storage upload attempt fallback:', err);
+    }
+
+    // Option B: Custom ImgBB key if VITE_IMGBB_API_KEY is configured
     const envImgbbKey = import.meta.env.VITE_IMGBB_API_KEY;
     if (envImgbbKey) {
       try {
@@ -111,7 +135,7 @@ export class CloudStorageService {
       }
     }
 
-    // Option B: Provider 1 — Uploadcare Enterprise Image CDN (100% CORS-enabled)
+    // Option C: Provider 2 — Uploadcare Enterprise Image CDN (100% CORS-enabled)
     try {
       const pubKey = import.meta.env.VITE_UPLOADCARE_PUBLIC_KEY || 'demopublickey';
       const formData = new FormData();
