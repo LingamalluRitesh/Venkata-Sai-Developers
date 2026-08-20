@@ -3,4 +3,4 @@ Allow: /
 Disallow: /#admin
 Disallow: /admin
 
-Sitemap: https://venkatasaidevelopers.com/sitemap.xml
+Sitemap: https://www.venkatasaidevelopers.com/sitemap.xml
