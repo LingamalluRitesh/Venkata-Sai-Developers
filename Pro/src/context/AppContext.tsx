@@ -156,24 +156,35 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try { return localStorage.getItem('sree_admin_auth') === 'true'; } catch (e) { return false; }
   });
 
-  // URL listener for #admin or /admin
+  // Clean URL listener & router for SEO URLs (/about, /ventures, /plots, /founder, /admin, etc.)
   useEffect(() => {
-    const checkUrlForAdmin = () => {
+    const handleUrlRoute = () => {
       const hash = window.location.hash.toLowerCase();
-      const search = window.location.search.toLowerCase();
       const path = window.location.pathname.toLowerCase();
-      if (hash.includes('admin') || search.includes('admin') || path.includes('admin')) {
+      const combined = `${path} ${hash}`;
+
+      if (combined.includes('admin')) {
         setActiveTab('ADMIN_PORTAL');
+      } else if (combined.includes('founder') || combined.includes('about')) {
+        setActiveTab('FOUNDER_PAGE');
+      } else if (combined.includes('kondaveedu') || combined.includes('venture') || combined.includes('plots')) {
+        setActiveTab('KONDAVEEDU_VENTURE');
+      } else if (combined.includes('calculator') || combined.includes('roi')) {
+        setActiveTab('LAND_CALCULATOR');
+      } else if (combined.includes('upcoming') || combined.includes('projects')) {
+        setActiveTab('UPCOMING_PROJECTS');
+      } else if (path === '/' && !hash) {
+        setActiveTab('USER_HOME');
       }
     };
 
-    checkUrlForAdmin();
-    window.addEventListener('hashchange', checkUrlForAdmin);
-    window.addEventListener('popstate', checkUrlForAdmin);
+    handleUrlRoute();
+    window.addEventListener('hashchange', handleUrlRoute);
+    window.addEventListener('popstate', handleUrlRoute);
 
     return () => {
-      window.removeEventListener('hashchange', checkUrlForAdmin);
-      window.removeEventListener('popstate', checkUrlForAdmin);
+      window.removeEventListener('hashchange', handleUrlRoute);
+      window.removeEventListener('popstate', handleUrlRoute);
     };
   }, []);
 
